@@ -20,4 +20,8 @@ public class Branch {
     private Long id;
 
     private String name;
+
+    public Branch(String name) {
+        this.name = name;
+    }
 }
