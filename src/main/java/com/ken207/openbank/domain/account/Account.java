@@ -1,16 +1,33 @@
 package com.ken207.openbank.domain.account;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ken207.openbank.domain.Branch;
+import com.ken207.openbank.domain.Customer;
+import com.ken207.openbank.domain.Product;
+import com.ken207.openbank.domain.enums.AccoStcd;
+import com.ken207.openbank.domain.enums.ChnlDvcd;
+import com.ken207.openbank.domain.enums.TxtnDvcd;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
+import static javax.persistence.FetchType.LAZY;
+
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "dtype")
-@Getter @Setter
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "subjCd")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class Account {
-    private String accoIdno; //계좌식별번호
+    @Id @GeneratedValue
+    @Column(name = "account_id")
+    private String id; //계좌식별번호
     private String acno; //계좌번호
     private String custNo; //고객번호
     private String passwd; //비밀번호
@@ -35,14 +52,26 @@ public abstract class Account {
     @Enumerated(EnumType.STRING)
     private ChnlDvcd regChnlDvcd;
 
-    @Enumerated(EnumType.STRING)
-    private DataStatus delYn;
+    @JsonIgnore
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "accounts")
+    private Customer customer;
 
+    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "product_id")
     private Product product; //상품코드
-    private Branch newBrCd;
-    private Branch mngBrCd;
 
-    private DataLog dataLog;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "branch_id", insertable=false, updatable=false)
+    private Branch newBranch;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "branch_id", insertable=false, updatable=false)
+    private Branch mngBranch;
+
+    @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "account_log_id")
+    private List<AccountLog> dataLog = new ArrayList<>();
 
     /**
      * 신규
