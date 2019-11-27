@@ -19,11 +19,11 @@ public class CustomerApiConstroller {
     @Autowired private BranchRepository branchRepository;
     @Autowired private EmployeeRepository employeeRepository;
 
-    @PostMapping("/api/customer")
-    public CreateCustomerRes saveMemberV1(@RequestBody @Valid CreateCustomerReq createCustomerReq) {
+    @PostMapping(value = "/api/ibk/customer", consumes= "text/csv" )
+    public CreateCustomerRes createIbkCustomer(@RequestBody @Valid CreateCustomerReq createCustomerReq) {
 //public Customer(String name, String nation, Branch newBranch, Employee regEmployee) {
 
-        branchRepository.
+
         Customer customer = new Customer(createCustomerReq.getName(), createCustomerReq.get)
         Long id = customerService.join(member);
         return new CreateMemberResponse(id);
