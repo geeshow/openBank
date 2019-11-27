@@ -16,9 +16,9 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     @Transactional
-    public Long createCustomer(@RequestBody CreateCustomerDto c) {
-
+    public Long createCustomer(Customer customer) {
+        Customer result = customerRepository.save(customer);
+        return result.getId();
     }
-
 
 }

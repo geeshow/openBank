@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Branch {
 
-    @Id @GeneratedValue
+    @Id
     @Column(name = "branch_id")
-    private Long id;
+    private String id;
 
     private String name;
     private String businessNumber;
@@ -28,7 +28,8 @@ public class Branch {
     @Enumerated(EnumType.STRING)
     private BranchType branchType;
 
-    public Branch(String name, BranchType branchType) {
+    public Branch(String id, String name, BranchType branchType) {
+        this.id = id;
         this.name = name;
         this.branchType = branchType;
         this.newDate = LocalDateTime.now();

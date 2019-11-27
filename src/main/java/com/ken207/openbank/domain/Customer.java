@@ -25,25 +25,27 @@ public class Customer {
     private String nation;
     private LocalDateTime regDt;
 
-    @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "branch_id", insertable=false, updatable=false)
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(referencedColumnName = "branch_id", name="new_branch_id")
     private Branch newBranch;
 
-    @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "branch_id", insertable=false, updatable=false)
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(referencedColumnName = "branch_id", name="mng_branch_id")
     private Branch mngBranch;
 
-    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "employee_id")
     private Employee regEmployee;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Account> accounts = new ArrayList<>();
 
-    public Customer(String name, String nation, Branch newBranch, Employee regEmployee) {
+    public Customer(String name, String nation, Employee regEmployee) {
         this.name = name;
         this.nation = nation;
-        this.newBranch = newBranch;
+        this.regDt = LocalDateTime.now();
+        this.newBranch = regEmployee.getBelongBranch();
+        this.mngBranch = regEmployee.getBelongBranch();
         this.regEmployee = regEmployee;
     }
 }
