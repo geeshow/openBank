@@ -16,9 +16,15 @@ public class Product {
     @Id
     @GeneratedValue
     @Column(name = "product_id")
-    private String id;
+    private Long id;
 
     private String name;
     private String subjCd;
     private Double inrt;
+
+    public Product(String name, String subjCd, Double inrt) {
+        this.name = name;
+        this.subjCd = subjCd;
+        this.inrt = inrt;
+    }
 }
