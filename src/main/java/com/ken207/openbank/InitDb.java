@@ -3,7 +3,7 @@ package com.ken207.openbank;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.domain.Product;
-import com.ken207.openbank.domain.consts.ConstProduct;
+import com.ken207.openbank.consts.ConstProduct;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.domain.enums.EmployeeType;
 import lombok.RequiredArgsConstructor;

@@ -39,4 +39,11 @@ public class Customer {
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Account> accounts = new ArrayList<>();
+
+    public Customer(String name, String nation, Branch newBranch, Employee regEmployee) {
+        this.name = name;
+        this.nation = nation;
+        this.newBranch = newBranch;
+        this.regEmployee = regEmployee;
+    }
 }
