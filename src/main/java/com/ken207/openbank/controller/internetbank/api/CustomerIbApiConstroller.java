@@ -1,10 +1,10 @@
 package com.ken207.openbank.controller.internetbank.api;
 
+import com.ken207.openbank.annotation.OpenBankService;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.Customer;
 import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.repository.BranchRepository;
-import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
 import com.ken207.openbank.service.CustomerService;
 import lombok.Data;
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
 import javax.validation.Valid;
 
 @RestController
+@OpenBankService
 public class CustomerIbApiConstroller {
 
     @Autowired private CustomerService customerService;
