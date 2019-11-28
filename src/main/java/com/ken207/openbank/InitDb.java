@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -40,17 +42,18 @@ public class InitDb {
             em.persist(new Branch(ConstBranch.SEOUL_ID12, "서울지점", BranchType.지점));
             em.persist(new Branch(ConstBranch.BUSAN_ID11,"부산지점", BranchType.지점));
 
-            em.persist(new Employee("인터넷뱅킹", EmployeeType.인터넷뱅킹, new Branch(ConstBranch.INTERNET_ID20,"인터넷뱅킹", BranchType.인터넷)));
+            em.persist(new Employee("인터넷사용자", EmployeeType.인터넷뱅킹, new Branch(ConstBranch.INTERNET_ID20,"인터넷뱅킹", BranchType.인터넷)));
 
             em.persist(new Product("보통예금", ConstProduct.SUBJECT_RG, 1.5));
             em.persist(new Product("정기예금", ConstProduct.SUBJECT_FX, 2.5));
             em.persist(new Product("정기적금", ConstProduct.SUBJECT_IT, 3.5));
 
-            Employee internetEmployee = em.createQuery("select e from Employee e where e.employeeType=:employeeType", Employee.class)
-                    .setParameter("employeeType", EmployeeType.인터넷뱅킹)
-                    .getSingleResult();
+            List<Employee> employees = em.createQuery("select e from Employee e where e.employeeType=:employeeType", Employee.class)
+                    .setParameter("employeeType", EmployeeType.인터넷뱅킹).getResultList();
 
-            customerIbApiConstroller.setInternetBankEmployee(internetEmployee);
+            if ( employees.size() > 0 ) {
+                customerIbApiConstroller.setInternetBankEmployee(employees.get(0));
+            }
         }
     }
 
