@@ -1,34 +1,24 @@
-package com.ken207.openbank.controller.internetbank.api;
+package com.ken207.openbank.customer;
 
-import com.ken207.openbank.annotation.OpenBankService;
+import com.ken207.openbank.consts.ConstBranch;
 import com.ken207.openbank.domain.Branch;
-import com.ken207.openbank.domain.Customer;
 import com.ken207.openbank.domain.Employee;
-import com.ken207.openbank.domain.Product;
-import com.ken207.openbank.repository.BranchRepository;
+import com.ken207.openbank.domain.enums.BranchType;
+import com.ken207.openbank.domain.enums.EmployeeType;
 import com.ken207.openbank.repository.CustomerRepository;
-import com.ken207.openbank.repository.EmployeeRepository;
-import com.ken207.openbank.service.CustomerService;
 import lombok.Data;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
-import javax.xml.ws.Response;
-
 import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/api/ibk/customer", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
@@ -38,14 +28,14 @@ public class CustomerIbApiConstroller {
     //@Autowired private BranchRepository branchRepository;
     //@Autowired private EmployeeRepository employeeRepository;
 
-    private final CustomerRepository customerRepository;
+    @Autowired private CustomerRepository customerRepository;
+    @Autowired private ModelMapper modelMapper;
+//    public CustomerIbApiConstroller(CustomerRepository customerRepository) {
+//        this.customerRepository = customerRepository;
+//    }
 
-    public CustomerIbApiConstroller(CustomerRepository customerRepository) {
-        this.customerRepository = customerRepository;
-    }
-
-    private Branch internetBranch;
-    private Employee internetEmployee;
+    private Branch internetBranch = new Branch(ConstBranch.INTERNET_ID20,"인터넷뱅킹", BranchType.인터넷);
+    private Employee internetEmployee = new Employee("인터넷사용자", EmployeeType.인터넷뱅킹, internetBranch);
 
     public void setInternetBankEmployee(Employee employee) {
         this.internetBranch = employee.getBelongBranch();
@@ -53,11 +43,11 @@ public class CustomerIbApiConstroller {
     }
 
     @PostMapping
-    public ResponseEntity createIbkCustomer(@RequestBody Customer customer) {
+    public ResponseEntity createIbkCustomer(@RequestBody CustomerDto customerDto) {
+        Customer customer = new Customer(customerDto.getName(), customerDto.getNation(), internetEmployee);
         Customer newCustomer = this.customerRepository.save(customer);
         URI createdUri = linkTo(CustomerIbApiConstroller.class).slash(newCustomer.getId()).toUri();
         return ResponseEntity.created(createdUri).body(customer);
-
     }
 
 //    @OpenBankService

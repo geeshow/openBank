@@ -1,7 +1,7 @@
 package com.ken207.openbank.service;
 
 import com.ken207.openbank.domain.Branch;
-import com.ken207.openbank.domain.Customer;
+import com.ken207.openbank.customer.Customer;
 import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.domain.enums.EmployeeType;

@@ -1,7 +1,7 @@
 package com.ken207.openbank;
 
 import com.ken207.openbank.consts.ConstBranch;
-import com.ken207.openbank.controller.internetbank.api.CustomerIbApiConstroller;
+import com.ken207.openbank.customer.CustomerIbApiConstroller;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.domain.Product;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.util.List;
 

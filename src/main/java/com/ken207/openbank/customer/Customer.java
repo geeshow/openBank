@@ -1,5 +1,7 @@
-package com.ken207.openbank.domain;
+package com.ken207.openbank.customer;
 
+import com.ken207.openbank.domain.Branch;
+import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.domain.account.Account;
 import lombok.*;
 
@@ -11,7 +13,7 @@ import java.util.List;
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
-@Getter @Setter
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(of="id")
 public class Customer {
@@ -21,7 +23,7 @@ public class Customer {
     private Long id;
 
     private String name;
-    private String nation;
+    private String email;
     private LocalDateTime regDt;
 
     @ManyToOne(fetch = LAZY)
@@ -39,9 +41,9 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Account> accounts = new ArrayList<>();
 
-    public Customer(String name, String nation, Employee regEmployee) {
+    public Customer(String name, String email, Employee regEmployee) {
         this.name = name;
-        this.nation = nation;
+        this.email = email;
         this.regDt = LocalDateTime.now();
         this.newBranch = regEmployee.getBelongBranch();
         this.mngBranch = regEmployee.getBelongBranch();

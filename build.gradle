@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-hibernate5'
 	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+	implementation 'org.modelmapper:modelmapper:2.3.0'
 
 
 	compileOnly 'org.projectlombok:lombok'

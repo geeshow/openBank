@@ -2,7 +2,7 @@ package com.ken207.openbank.domain.account;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ken207.openbank.domain.Branch;
-import com.ken207.openbank.domain.Customer;
+import com.ken207.openbank.customer.Customer;
 import com.ken207.openbank.domain.Product;
 import com.ken207.openbank.domain.enums.AccoStcd;
 import com.ken207.openbank.domain.enums.ChnlDvcd;
@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
