@@ -8,6 +8,7 @@ import com.ken207.openbank.domain.enums.EmployeeType;
 import com.ken207.openbank.repository.CustomerRepository;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.internal.Errors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping(value = "/api/ibk/customer", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
-public class CustomerIbApiConstroller {
+public class CustomerIbkApiConstroller {
 
     //@Autowired private CustomerService customerService;
     //@Autowired private BranchRepository branchRepository;
@@ -30,9 +32,6 @@ public class CustomerIbApiConstroller {
 
     @Autowired private CustomerRepository customerRepository;
     @Autowired private ModelMapper modelMapper;
-//    public CustomerIbApiConstroller(CustomerRepository customerRepository) {
-//        this.customerRepository = customerRepository;
-//    }
 
     private Branch internetBranch = new Branch(ConstBranch.INTERNET_ID20,"인터넷뱅킹", BranchType.인터넷);
     private Employee internetEmployee = new Employee("인터넷사용자", EmployeeType.인터넷뱅킹, internetBranch);
@@ -43,10 +42,13 @@ public class CustomerIbApiConstroller {
     }
 
     @PostMapping
-    public ResponseEntity createIbkCustomer(@RequestBody CustomerDto customerDto) {
-        Customer customer = new Customer(customerDto.getName(), customerDto.getNation(), internetEmployee);
+    public ResponseEntity createIbkCustomer(@RequestBody @Valid CustomerDto customerDto, Errors errors) {
+        if ( errors.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
+        Customer customer = new Customer(customerDto.getName(), customerDto.getEmail(), internetEmployee);
         Customer newCustomer = this.customerRepository.save(customer);
-        URI createdUri = linkTo(CustomerIbApiConstroller.class).slash(newCustomer.getId()).toUri();
+        URI createdUri = linkTo(CustomerIbkApiConstroller.class).slash(newCustomer.getId()).toUri();
         return ResponseEntity.created(createdUri).body(customer);
     }
 

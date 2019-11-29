@@ -1,27 +1,21 @@
 package com.ken207.openbank.customer;
 
-import com.ken207.openbank.domain.Branch;
-import com.ken207.openbank.domain.Employee;
-import com.ken207.openbank.domain.account.Account;
 import lombok.*;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import javax.validation.constraints.NotEmpty;
 
-import static javax.persistence.FetchType.LAZY;
-
-@Data
-@Getter @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@Getter
 public class CustomerDto {
 
+    @NotEmpty
     private String name;
-    private String nation;
 
-    public CustomerDto(String name, String nation) {
+    @NotEmpty
+    private String email;
+
+    public CustomerDto(String name, String email) {
         this.name = name;
-        this.nation = nation;
+        this.email = email;
     }
 }

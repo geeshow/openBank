@@ -1,7 +1,7 @@
 package com.ken207.openbank;
 
 import com.ken207.openbank.consts.ConstBranch;
-import com.ken207.openbank.customer.CustomerIbApiConstroller;
+import com.ken207.openbank.customer.CustomerIbkApiConstroller;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.domain.Product;
@@ -34,7 +34,7 @@ public class InitDb {
     static class InitService {
 
         private final EntityManager em;
-        private final CustomerIbApiConstroller customerIbApiConstroller;
+        private final CustomerIbkApiConstroller customerIbkApiConstroller;
 
         public void dbInit() {
             em.persist(new Branch(ConstBranch.HEAD_ID10, "본점", BranchType.본점));
@@ -51,7 +51,7 @@ public class InitDb {
                     .setParameter("employeeType", EmployeeType.인터넷뱅킹).getResultList();
 
             if ( employees.size() > 0 ) {
-                customerIbApiConstroller.setInternetBankEmployee(employees.get(0));
+                customerIbkApiConstroller.setInternetBankEmployee(employees.get(0));
             }
         }
     }
