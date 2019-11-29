@@ -45,13 +45,13 @@ public class CustomerIbkApiConstroller {
     @PostMapping
     public ResponseEntity createIbkCustomer(@RequestBody @Valid CustomerDto customerDto, Errors errors) {
         if ( errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);
         }
 
         customerValidator.validate(customerDto, errors);
 
         if ( errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);
         }
 
         Customer customer = new Customer(customerDto.getName(), customerDto.getEmail(), internetEmployee);
