@@ -2,6 +2,7 @@ package com.ken207.openbank.customer;
 
 import lombok.*;
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
 @Builder
@@ -11,11 +12,9 @@ public class CustomerDto {
     @NotEmpty
     private String name;
 
-    @NotEmpty
+    @NotEmpty @Email
     private String email;
 
-    public CustomerDto(String name, String email) {
-        this.name = name;
-        this.email = email;
-    }
+    @NotEmpty
+    private String nation;
 }

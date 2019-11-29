@@ -1,6 +1,7 @@
 package com.ken207.openbank.controller.internetbank.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.consts.ConstBranch;
 import com.ken207.openbank.customer.CustomerDto;
 import com.ken207.openbank.domain.Branch;
@@ -40,11 +41,13 @@ public class CustomerIbkApiConstrollerTest {
     ObjectMapper objectMapper;
 
     @Test
+    @TestDescription("정상적으로 고객을 생성하는 테스트")
     public void createIbkCustomer() throws Exception {
         //given
         CustomerDto customerDto = CustomerDto.builder()
                 .name("박규태")
                 .email("test@korea.com")
+                .nation("KOR")
                 .build();
         //when
 
@@ -69,6 +72,7 @@ public class CustomerIbkApiConstrollerTest {
     }
 
     @Test
+    @TestDescription("빈값으로 고객 생성할때 에러가 발생하는 테스트")
     public void createIbkCustomerEmpty() throws Exception {
         //given
         CustomerDto customerDto = CustomerDto.builder().build();
@@ -85,4 +89,48 @@ public class CustomerIbkApiConstrollerTest {
         ;
     }
 
+    @Test
+    @TestDescription("잘못된 이메일을 입력 받을때 에러가 발생하는 테스트")
+    public void createIbkCustomerWrongEmail() throws Exception {
+        //given
+        CustomerDto customerDto = CustomerDto.builder()
+                .name("Park")
+                .email("park.com")
+                .nation("KR")
+                .build();
+
+        //when
+
+        //then
+        mockMvc.perform(post("/api/ibk/customer")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(customerDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+    }
+
+
+    @Test
+    @TestDescription("잘못된 국가 정보를 입력 받을때 에러가 발생하는 테스트")
+    public void createIbkCustomerWrongNation() throws Exception {
+        //given
+        CustomerDto customerDto = CustomerDto.builder()
+                .name("Park")
+                .email("park@asdf.com")
+                .nation("KR")
+                .build();
+
+        //when
+
+        //then
+        mockMvc.perform(post("/api/ibk/customer")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(customerDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+    }
 }

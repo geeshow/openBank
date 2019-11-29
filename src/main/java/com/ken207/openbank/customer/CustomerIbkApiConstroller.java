@@ -8,10 +8,10 @@ import com.ken207.openbank.domain.enums.EmployeeType;
 import com.ken207.openbank.repository.CustomerRepository;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.internal.Errors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +32,7 @@ public class CustomerIbkApiConstroller {
 
     @Autowired private CustomerRepository customerRepository;
     @Autowired private ModelMapper modelMapper;
+    @Autowired private CustomerValidator customerValidator;
 
     private Branch internetBranch = new Branch(ConstBranch.INTERNET_ID20,"인터넷뱅킹", BranchType.인터넷);
     private Employee internetEmployee = new Employee("인터넷사용자", EmployeeType.인터넷뱅킹, internetBranch);
@@ -46,6 +47,13 @@ public class CustomerIbkApiConstroller {
         if ( errors.hasErrors()) {
             return ResponseEntity.badRequest().build();
         }
+
+        customerValidator.validate(customerDto, errors);
+
+        if ( errors.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         Customer customer = new Customer(customerDto.getName(), customerDto.getEmail(), internetEmployee);
         Customer newCustomer = this.customerRepository.save(customer);
         URI createdUri = linkTo(CustomerIbkApiConstroller.class).slash(newCustomer.getId()).toUri();

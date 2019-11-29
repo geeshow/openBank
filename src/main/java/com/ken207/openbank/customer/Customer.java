@@ -24,6 +24,7 @@ public class Customer {
 
     private String name;
     private String email;
+    private String nation;
     private LocalDateTime regDt;
 
     @ManyToOne(fetch = LAZY)
