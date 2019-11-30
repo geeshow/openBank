@@ -42,9 +42,10 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Account> accounts = new ArrayList<>();
 
-    public Customer(String name, String email, Employee regEmployee) {
+    public Customer(String name, String email, String nation, Employee regEmployee) {
         this.name = name;
         this.email = email;
+        this.nation = nation;
         this.regDt = LocalDateTime.now();
         this.newBranch = regEmployee.getBelongBranch();
         this.mngBranch = regEmployee.getBelongBranch();

@@ -60,6 +60,8 @@ public class CustomerIbkApiConstrollerTest {
                     .content(objectMapper.writeValueAsString(customerDto)))
                 .andDo(print())
                 .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("id").exists())
                 .andExpect(jsonPath("name").exists())
                 .andExpect(jsonPath("email").exists())
@@ -69,8 +71,10 @@ public class CustomerIbkApiConstrollerTest {
                 .andExpect(jsonPath("regEmployee").exists())
                 .andExpect(jsonPath("email").value(email))
                 .andExpect(jsonPath("nation").value(nation))
-                .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.query-customers").exists())
+                .andExpect(jsonPath("_links.update-customer").exists())
+
         ;
     }
 

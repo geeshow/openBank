@@ -27,7 +27,7 @@ public class CustomerServiceTest {
     @Test
     public void 고객등록테스트() throws Exception {
         //given
-        Customer customer = new Customer("박규태", "한국",
+        Customer customer = new Customer("박규태", "test@korea.com", "KOR",
                 new Employee("임사원", EmployeeType.인터넷뱅킹,
                         new Branch("99", "서울지점", BranchType.인터넷)));
 

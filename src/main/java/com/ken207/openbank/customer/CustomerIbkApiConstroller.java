@@ -10,6 +10,7 @@ import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,10 +55,14 @@ public class CustomerIbkApiConstroller {
             return ResponseEntity.badRequest().body(errors);
         }
 
-        Customer customer = new Customer(customerDto.getName(), customerDto.getEmail(), internetEmployee);
+        Customer customer = new Customer(customerDto.getName(), customerDto.getEmail(), customerDto.getNation(), internetEmployee);
         Customer newCustomer = this.customerRepository.save(customer);
-        URI createdUri = linkTo(CustomerIbkApiConstroller.class).slash(newCustomer.getId()).toUri();
-        return ResponseEntity.created(createdUri).body(customer);
+        ControllerLinkBuilder selfLinkBuilder = linkTo(CustomerIbkApiConstroller.class).slash(newCustomer.getId());
+        URI createdUri = selfLinkBuilder.toUri();
+        CustomerResource customerResource = new CustomerResource(customer);
+        customerResource.add(linkTo(CustomerIbkApiConstroller.class).withRel(("query-customers")));
+        customerResource.add(selfLinkBuilder.withRel("update-customer"));
+        return ResponseEntity.created(createdUri).body(customerResource);
     }
 
 //    @OpenBankService
