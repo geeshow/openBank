@@ -44,10 +44,12 @@ public class CustomerIbkApiConstrollerTest {
     @TestDescription("정상적으로 고객을 생성하는 테스트")
     public void createIbkCustomer() throws Exception {
         //given
+        String email = "test@korea.com";
+        String nation = "KOR";
         CustomerDto customerDto = CustomerDto.builder()
                 .name("박규태")
-                .email("test@korea.com")
-                .nation("KOR")
+                .email(email)
+                .nation(nation)
                 .build();
         //when
 
@@ -65,7 +67,8 @@ public class CustomerIbkApiConstrollerTest {
                 .andExpect(jsonPath("newBranch").exists())
                 .andExpect(jsonPath("mngBranch").exists())
                 .andExpect(jsonPath("regEmployee").exists())
-                .andExpect(jsonPath("email").value("test@korea.com"))
+                .andExpect(jsonPath("email").value(email))
+                .andExpect(jsonPath("nation").value(nation))
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
         ;
