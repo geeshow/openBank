@@ -1,30 +1,28 @@
 package com.ken207.openbank.controller.internetbank.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ken207.openbank.common.RestDocsConfiguration;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.consts.ConstBranch;
 import com.ken207.openbank.customer.CustomerDto;
-import com.ken207.openbank.domain.Branch;
-import com.ken207.openbank.customer.Customer;
-import com.ken207.openbank.domain.Employee;
-import com.ken207.openbank.domain.enums.BranchType;
-import com.ken207.openbank.domain.enums.EmployeeType;
-import com.ken207.openbank.repository.CustomerRepository;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultHandler;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -32,6 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureRestDocs
+@Import(RestDocsConfiguration.class)
 public class CustomerIbkApiConstrollerTest {
 
     @Autowired
@@ -74,9 +74,42 @@ public class CustomerIbkApiConstrollerTest {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-customers").exists())
                 .andExpect(jsonPath("_links.update-customer").exists())
+                .andDo(document("create-customer",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("query-customers").description("link to query customers"),
+                                linkWithRel("update-customer").description("link to update an existing customer")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                        ),
+                        requestFields(
+                                fieldWithPath("name").description("Name of new customer"),
+                                fieldWithPath("email").description("Email of new customer"),
+                                fieldWithPath("nation").description("Nation of new customer")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION).description("Location header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        // TODO ResponseFields로 변경
+                        relaxedResponseFields(
+                                fieldWithPath("id").description("identifier of new customer"),
+                                fieldWithPath("name").description("name of new customer"),
+                                fieldWithPath("email").description("email of new customer"),
+                                fieldWithPath("nation").description("nation of new customer"),
+                                fieldWithPath("regDt").description("registration date of new customer"),
+                                fieldWithPath("newBranch").description("registration branch of new customer"),
+                                fieldWithPath("mngBranch").description("management branch of new customer"),
+                                fieldWithPath("regEmployee").description("registration employee of new customer")
+                        )
 
+                ))
         ;
     }
+
+
 
     @Test
     @TestDescription("빈값으로 고객 생성할때 에러가 발생하는 테스트")
