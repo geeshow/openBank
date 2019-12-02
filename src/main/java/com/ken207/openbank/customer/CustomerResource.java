@@ -7,11 +7,11 @@ import org.springframework.hateoas.ResourceSupport;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
-public class CustomerResource extends Resource<Customer> {
+public class CustomerResource extends Resource<CustomerCreateResponse> {
 
-    public CustomerResource(Customer customer, Link... links) {
-        super(customer, links);
-        add(linkTo(CustomerIbkApiConstroller.class).slash(customer.getId()).withSelfRel());
+    public CustomerResource(CustomerCreateResponse customerCreateResponse, Link... links) {
+        super(customerCreateResponse, links);
+        add(linkTo(CustomerIbkApiConstroller.class).slash(customerCreateResponse.getId()).withSelfRel());
     }
 
 }

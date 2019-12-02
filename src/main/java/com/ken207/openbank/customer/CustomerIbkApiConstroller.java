@@ -9,6 +9,7 @@ import com.ken207.openbank.repository.CustomerRepository;
 import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -44,24 +45,43 @@ public class CustomerIbkApiConstroller {
     }
 
     @PostMapping
-    public ResponseEntity createIbkCustomer(@RequestBody @Valid CustomerDto customerDto, Errors errors) {
-        if ( errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        customerValidator.validate(customerDto, errors);
+    public ResponseEntity createIbkCustomer(@RequestBody @Valid CustomerCreateRequest customerCreateRequest, Errors errors) {
 
         if ( errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors);
         }
 
-        Customer customer = new Customer(customerDto.getName(), customerDto.getEmail(), customerDto.getNation(), internetEmployee);
+        customerValidator.validate(customerCreateRequest, errors);
+
+        if ( errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(errors);
+        }
+
+        //DB 저장
+        Customer customer = new Customer(customerCreateRequest.getName(), customerCreateRequest.getEmail(), customerCreateRequest.getNation(), internetEmployee);
         Customer newCustomer = this.customerRepository.save(customer);
-        ControllerLinkBuilder selfLinkBuilder = linkTo(CustomerIbkApiConstroller.class).slash(newCustomer.getId());
-        URI createdUri = selfLinkBuilder.toUri();
-        CustomerResource customerResource = new CustomerResource(customer);
+
+        //응답 설정
+        CustomerCreateResponse customerCreateResponse = CustomerCreateResponse.builder()
+                .id(newCustomer.getId())
+                .name(newCustomer.getName())
+                .email(newCustomer.getEmail())
+                .nation(newCustomer.getNation())
+                .regBranchName(newCustomer.getRegBranch().getName())
+                .mngBranchName(newCustomer.getMngBranch().getName())
+                .regEmployeeName(newCustomer.getRegEmployee().getName())
+                .regDateTime(newCustomer.getRegDateTime())
+                .build();
+
+        //HATEOAS REST API
+        ControllerLinkBuilder selfLinkBuilder = linkTo(CustomerIbkApiConstroller.class).slash(customerCreateResponse.getId());
+
+        CustomerResource customerResource = new CustomerResource(customerCreateResponse);
         customerResource.add(linkTo(CustomerIbkApiConstroller.class).withRel(("query-customers")));
         customerResource.add(selfLinkBuilder.withRel("update-customer"));
+        customerResource.add(new Link("/docs/index.html#resources-customers-create").withRel("profile"));
+
+        URI createdUri = selfLinkBuilder.toUri();
         return ResponseEntity.created(createdUri).body(customerResource);
     }
 

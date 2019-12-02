@@ -3,7 +3,7 @@ package com.ken207.openbank.controller.internetbank.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ken207.openbank.common.RestDocsConfiguration;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.customer.CustomerDto;
+import com.ken207.openbank.customer.CustomerCreateRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +43,11 @@ public class CustomerIbkApiConstrollerTest {
     @TestDescription("정상적으로 고객을 생성하는 테스트")
     public void createIbkCustomer() throws Exception {
         //given
-        String email = "test@korea.com";
-        String nation = "KOR";
-        CustomerDto customerDto = CustomerDto.builder()
-                .name("박규태")
+        String email = "masterhong@gil.dong.com";
+        String nation = "KOREA";
+        String name = "홍길동";
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
+                .name(name)
                 .email(email)
                 .nation(nation)
                 .build();
@@ -56,7 +57,7 @@ public class CustomerIbkApiConstrollerTest {
         mockMvc.perform(post("/api/ibk/customer")
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(customerDto)))
+                    .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
@@ -64,20 +65,20 @@ public class CustomerIbkApiConstrollerTest {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(jsonPath("name").exists())
                 .andExpect(jsonPath("email").exists())
-                .andExpect(jsonPath("regDt").exists())
-                .andExpect(jsonPath("newBranch").exists())
-                .andExpect(jsonPath("mngBranch").exists())
-                .andExpect(jsonPath("regEmployee").exists())
+                .andExpect(jsonPath("nation").exists())
+                .andExpect(jsonPath("regDateTime").exists())
+                .andExpect(jsonPath("regBranchName").exists())
+                .andExpect(jsonPath("mngBranchName").exists())
+                .andExpect(jsonPath("regEmployeeName").exists())
                 .andExpect(jsonPath("email").value(email))
                 .andExpect(jsonPath("nation").value(nation))
-                .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.query-customers").exists())
-                .andExpect(jsonPath("_links.update-customer").exists())
+                .andExpect(jsonPath("name").value(name))
                 .andDo(document("create-customer",
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-customers").description("link to query customers"),
-                                linkWithRel("update-customer").description("link to update an existing customer")
+                                linkWithRel("update-customer").description("link to update an existing customer"),
+                                linkWithRel("profile").description("link to profile.")
                         ),
                         requestHeaders(
                                 headerWithName(HttpHeaders.ACCEPT).description("accept header"),
@@ -92,16 +93,19 @@ public class CustomerIbkApiConstrollerTest {
                                 headerWithName(HttpHeaders.LOCATION).description("Location header"),
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
                         ),
-                        // TODO ResponseFields로 변경
-                        relaxedResponseFields(
+                        responseFields(
                                 fieldWithPath("id").description("identifier of new customer"),
                                 fieldWithPath("name").description("name of new customer"),
                                 fieldWithPath("email").description("email of new customer"),
                                 fieldWithPath("nation").description("nation of new customer"),
-                                fieldWithPath("regDt").description("registration date of new customer"),
-                                fieldWithPath("newBranch").description("registration branch of new customer"),
-                                fieldWithPath("mngBranch").description("management branch of new customer"),
-                                fieldWithPath("regEmployee").description("registration employee of new customer.")
+                                fieldWithPath("regDateTime").description("registration date of new customer"),
+                                fieldWithPath("regBranchName").description("registration branch of new customer"),
+                                fieldWithPath("mngBranchName").description("management branch of new customer"),
+                                fieldWithPath("regEmployeeName").description("registration employee of new customer."),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.query-customers.href").description("link to query customers."),
+                                fieldWithPath("_links.update-customer.href").description("link to update existing customer."),
+                                fieldWithPath("_links.profile.href").description("link to profile.")
                         )
 
                 ))
@@ -114,7 +118,7 @@ public class CustomerIbkApiConstrollerTest {
     @TestDescription("빈값으로 고객 생성할때 에러가 발생하는 테스트")
     public void createIbkCustomerEmpty() throws Exception {
         //given
-        CustomerDto customerDto = CustomerDto.builder().build();
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder().build();
 
         //when
 
@@ -122,7 +126,7 @@ public class CustomerIbkApiConstrollerTest {
         mockMvc.perform(post("/api/ibk/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(customerDto)))
+                .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
         ;
@@ -132,7 +136,7 @@ public class CustomerIbkApiConstrollerTest {
     @TestDescription("잘못된 이메일을 입력 받을때 에러가 발생하는 테스트")
     public void createIbkCustomerWrongEmail() throws Exception {
         //given
-        CustomerDto customerDto = CustomerDto.builder()
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
                 .name("Park")
                 .email("park.com")
                 .nation("KR")
@@ -144,7 +148,7 @@ public class CustomerIbkApiConstrollerTest {
         mockMvc.perform(post("/api/ibk/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(customerDto)))
+                .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
         ;
@@ -155,7 +159,7 @@ public class CustomerIbkApiConstrollerTest {
     @TestDescription("잘못된 국가 정보를 입력 받을때 에러가 발생하는 테스트")
     public void createIbkCustomerWrongNation() throws Exception {
         //given
-        CustomerDto customerDto = CustomerDto.builder()
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
                 .name("Park")
                 .email("park@asdf.com")
                 .nation("KR")
@@ -167,7 +171,7 @@ public class CustomerIbkApiConstrollerTest {
         mockMvc.perform(post("/api/ibk/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(customerDto)))
+                .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$[0].objectName").exists())

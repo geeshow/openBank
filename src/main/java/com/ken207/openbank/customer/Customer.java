@@ -25,11 +25,11 @@ public class Customer {
     private String name;
     private String email;
     private String nation;
-    private LocalDateTime regDt;
+    private LocalDateTime regDateTime;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(referencedColumnName = "branch_id", name="new_branch_id")
-    private Branch newBranch;
+    private Branch regBranch;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(referencedColumnName = "branch_id", name="mng_branch_id")
@@ -46,8 +46,8 @@ public class Customer {
         this.name = name;
         this.email = email;
         this.nation = nation;
-        this.regDt = LocalDateTime.now();
-        this.newBranch = regEmployee.getBelongBranch();
+        this.regDateTime = LocalDateTime.now();
+        this.regBranch = regEmployee.getBelongBranch();
         this.mngBranch = regEmployee.getBelongBranch();
         this.regEmployee = regEmployee;
     }

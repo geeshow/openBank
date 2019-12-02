@@ -37,8 +37,8 @@ public class CustomerServiceTest {
 
         //then
         assertEquals("박규태", findCustomer.getName());
-        assertEquals("서울지점", findCustomer.getNewBranch().getName());
-        assertEquals("99", findCustomer.getNewBranch().getId());
+        assertEquals("서울지점", findCustomer.getRegBranch().getName());
+        assertEquals("99", findCustomer.getRegBranch().getId());
         assertEquals("서울지점", findCustomer.getMngBranch().getName());
         assertEquals("99", findCustomer.getMngBranch().getId());
         assertEquals("임사원", findCustomer.getRegEmployee().getName());

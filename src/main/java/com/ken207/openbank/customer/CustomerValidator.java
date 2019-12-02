@@ -6,9 +6,9 @@ import org.springframework.validation.Errors;
 @Controller
 public class CustomerValidator {
 
-    public void validate(CustomerDto customerDto, Errors errors) {
-        if ( !"KOR".equals(customerDto.getNation()) ) {
-            errors.rejectValue("nation", "wrongValue", "Nation is not KOR.");
+    public void validate(CustomerCreateRequest customerCreateRequest, Errors errors) {
+        if ( customerCreateRequest.getNation().length() < 3 ) {
+            errors.rejectValue("nation", "wrongValue", "Nation is too short.");
         }
     }
 }
