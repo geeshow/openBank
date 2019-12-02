@@ -16,7 +16,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultHandler;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
@@ -102,7 +101,7 @@ public class CustomerIbkApiConstrollerTest {
                                 fieldWithPath("regDt").description("registration date of new customer"),
                                 fieldWithPath("newBranch").description("registration branch of new customer"),
                                 fieldWithPath("mngBranch").description("management branch of new customer"),
-                                fieldWithPath("regEmployee").description("registration employee of new customer")
+                                fieldWithPath("regEmployee").description("registration employee of new customer.")
                         )
 
                 ))
