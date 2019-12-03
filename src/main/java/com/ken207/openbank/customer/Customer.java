@@ -4,6 +4,7 @@ import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.domain.account.Account;
 import lombok.*;
+import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -27,26 +28,32 @@ public class Customer {
     private String nation;
     private LocalDateTime regDateTime;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(referencedColumnName = "branch_id", name="new_branch_id")
+    @Nullable
+    @ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(referencedColumnName = "branch_id", name="reg_branch_id")
     private Branch regBranch;
 
-    @ManyToOne(fetch = LAZY)
+    @Nullable
+    @ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(referencedColumnName = "branch_id", name="mng_branch_id")
     private Branch mngBranch;
 
-    @OneToOne(fetch = LAZY)
+    @Nullable
+    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")
     private Employee regEmployee;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     private List<Account> accounts = new ArrayList<>();
 
-    public Customer(String name, String email, String nation, Employee regEmployee) {
+    public Customer(String name, String email, String nation) {
         this.name = name;
         this.email = email;
         this.nation = nation;
         this.regDateTime = LocalDateTime.now();
+    }
+
+    public void setRegEmployee(Employee regEmployee) {
         this.regBranch = regEmployee.getBelongBranch();
         this.mngBranch = regEmployee.getBelongBranch();
         this.regEmployee = regEmployee;

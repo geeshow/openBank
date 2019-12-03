@@ -27,9 +27,7 @@ public class CustomerServiceTest {
     @Test
     public void 고객등록테스트() throws Exception {
         //given
-        Customer customer = new Customer("박규태", "test@korea.com", "KOR",
-                new Employee("임사원", EmployeeType.인터넷뱅킹,
-                        new Branch("99", "서울지점", BranchType.인터넷)));
+        Customer customer = new Customer("박규태", "test@korea.com", "KOR");
 
         //when
         Long customer_id = customerService.createCustomer(customer);
@@ -37,12 +35,10 @@ public class CustomerServiceTest {
 
         //then
         assertEquals("박규태", findCustomer.getName());
-        assertEquals("서울지점", findCustomer.getRegBranch().getName());
-        assertEquals("99", findCustomer.getRegBranch().getId());
-        assertEquals("서울지점", findCustomer.getMngBranch().getName());
-        assertEquals("99", findCustomer.getMngBranch().getId());
-        assertEquals("임사원", findCustomer.getRegEmployee().getName());
-        assertEquals(EmployeeType.인터넷뱅킹, findCustomer.getRegEmployee().getEmployeeType());
+        assertNull(findCustomer.getRegBranch());
+        assertNull(findCustomer.getMngBranch());
+        assertNull(findCustomer.getRegEmployee());
+        assertNull(findCustomer.getRegEmployee());
     }
 
 

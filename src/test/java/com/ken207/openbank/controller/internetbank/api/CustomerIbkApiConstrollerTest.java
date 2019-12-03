@@ -3,7 +3,17 @@ package com.ken207.openbank.controller.internetbank.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ken207.openbank.common.RestDocsConfiguration;
 import com.ken207.openbank.common.TestDescription;
+import com.ken207.openbank.consts.ConstBranch;
+import com.ken207.openbank.customer.Customer;
 import com.ken207.openbank.customer.CustomerCreateRequest;
+import com.ken207.openbank.domain.Branch;
+import com.ken207.openbank.domain.Employee;
+import com.ken207.openbank.domain.enums.BranchType;
+import com.ken207.openbank.domain.enums.EmployeeType;
+import com.ken207.openbank.repository.BranchRepository;
+import com.ken207.openbank.repository.CustomerRepository;
+import com.ken207.openbank.repository.EmployeeRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +27,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
+
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -38,6 +52,24 @@ public class CustomerIbkApiConstrollerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @Autowired CustomerRepository customerRepository;
+    @Autowired
+    BranchRepository branchRepository;
+    @Autowired
+    EmployeeRepository employeeRepository;
+
+    private Branch branch;
+    private Employee employee;
+
+    /** init 은 Test 전 항상 수행 */
+    @Before
+    public void init() throws Exception {
+        if ( branch == null ) {
+            branch = branchRepository.save(new Branch(ConstBranch.INTERNET_ID20, "인터넷뱅킹", BranchType.인터넷));
+            employee = employeeRepository.save(new Employee("인터넷사용자", EmployeeType.인터넷뱅킹, branch));
+        }
+    }
 
     @Test
     @TestDescription("정상적으로 고객을 생성하는 테스트")
@@ -129,6 +161,7 @@ public class CustomerIbkApiConstrollerTest {
                 .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("_links.index").exists())
         ;
     }
 
@@ -151,6 +184,7 @@ public class CustomerIbkApiConstrollerTest {
                 .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("_links.index").exists())
         ;
     }
 
@@ -174,9 +208,38 @@ public class CustomerIbkApiConstrollerTest {
                 .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].objectName").exists())
-                .andExpect(jsonPath("$[0].defaultMessage").exists())
-                .andExpect(jsonPath("$[0].code").exists())
+                .andExpect(jsonPath("content[0].objectName").exists())
+                .andExpect(jsonPath("content[0].defaultMessage").exists())
+                .andExpect(jsonPath("content[0].code").exists())
+                .andExpect(jsonPath("_links.index").exists())
         ;
     }
+
+    @Test
+    @TestDescription("30개의 고객을 10개씩 두번째 페이지 조회하기")
+    public void queryCustomers() throws Exception {
+        //given
+        IntStream.range(0,30).forEach(this::generateCustomer);
+
+        //when
+        this.mockMvc.perform(get("/api/customers")
+                    .param("page", "1")
+                    .param("size", "10")
+                    .param("sort", "name,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+        ;
+
+        //then
+    }
+
+    private void generateCustomer(int index) {
+        Customer customer = new Customer("고객 " + index, "customer" + index + "@gmail.com", "KOREA");
+        Customer newCustomer = this.customerRepository.save(customer);
+        newCustomer.setRegEmployee(employee);
+    }
+
+
 }

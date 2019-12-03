@@ -1,5 +1,6 @@
 package com.ken207.openbank.customer;
 
+import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.consts.ConstBranch;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.Employee;
@@ -48,18 +49,18 @@ public class CustomerIbkApiConstroller {
     public ResponseEntity createIbkCustomer(@RequestBody @Valid CustomerCreateRequest customerCreateRequest, Errors errors) {
 
         if ( errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            return badRequest(errors);
         }
 
         customerValidator.validate(customerCreateRequest, errors);
-
         if ( errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);
+            return badRequest(errors);
         }
 
         //DB 저장
-        Customer customer = new Customer(customerCreateRequest.getName(), customerCreateRequest.getEmail(), customerCreateRequest.getNation(), internetEmployee);
+        Customer customer = new Customer(customerCreateRequest.getName(), customerCreateRequest.getEmail(), customerCreateRequest.getNation());
         Customer newCustomer = this.customerRepository.save(customer);
+        newCustomer.setRegEmployee(internetEmployee);
 
         //응답 설정
         CustomerCreateResponse customerCreateResponse = CustomerCreateResponse.builder()
@@ -83,6 +84,10 @@ public class CustomerIbkApiConstroller {
 
         URI createdUri = selfLinkBuilder.toUri();
         return ResponseEntity.created(createdUri).body(customerResource);
+    }
+
+    private ResponseEntity badRequest(Errors errors) {
+        return ResponseEntity.badRequest().body(new ErrorsResource(errors) );
     }
 
 //    @OpenBankService
