@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ken207.openbank.common.RestDocsConfiguration;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.consts.ConstBranch;
+import com.ken207.openbank.consts.ConstEmployee;
 import com.ken207.openbank.customer.Customer;
 import com.ken207.openbank.customer.CustomerCreateRequest;
 import com.ken207.openbank.domain.Branch;
@@ -13,6 +14,7 @@ import com.ken207.openbank.domain.enums.EmployeeType;
 import com.ken207.openbank.repository.BranchRepository;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
+import com.ken207.openbank.service.CustomerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +29,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+
+import javax.transaction.Transactional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
@@ -45,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 @Import(RestDocsConfiguration.class)
-public class CustomerIbkApiConstrollerTest {
+public class CustomerApiControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,22 +57,19 @@ public class CustomerIbkApiConstrollerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @Autowired CustomerRepository customerRepository;
     @Autowired
-    BranchRepository branchRepository;
+    CustomerService customerService;
+
+    @Autowired CustomerRepository customerRepository;
     @Autowired
     EmployeeRepository employeeRepository;
 
-    private Branch branch;
     private Employee employee;
 
     /** init 은 Test 전 항상 수행 */
     @Before
     public void init() throws Exception {
-        if ( branch == null ) {
-            branch = branchRepository.save(new Branch(ConstBranch.INTERNET_ID20, "인터넷뱅킹", BranchType.인터넷));
-            employee = employeeRepository.save(new Employee("인터넷사용자", EmployeeType.인터넷뱅킹, branch));
-        }
+        employee = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
     }
 
     @Test
@@ -222,7 +223,7 @@ public class CustomerIbkApiConstrollerTest {
         IntStream.range(0,30).forEach(this::generateCustomer);
 
         //when
-        this.mockMvc.perform(get("/api/customers")
+        this.mockMvc.perform(get("/api/ibk/customer")
                     .param("page", "1")
                     .param("size", "10")
                     .param("sort", "name,DESC")
@@ -237,8 +238,7 @@ public class CustomerIbkApiConstrollerTest {
 
     private void generateCustomer(int index) {
         Customer customer = new Customer("고객 " + index, "customer" + index + "@gmail.com", "KOREA");
-        Customer newCustomer = this.customerRepository.save(customer);
-        newCustomer.setRegEmployee(employee);
+        customerService.createCustomer(customer, employee.getId());
     }
 
 

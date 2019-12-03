@@ -6,6 +6,7 @@ import com.ken207.openbank.domain.enums.UserStatus;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,8 @@ public class Employee {
     @Id @GeneratedValue
     @Column(name = "employee_id")
     private Long id;
+
+    private String employeeCode;
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -35,12 +38,17 @@ public class Employee {
     @JoinColumn(name = "branch_id")
     private Branch belongBranch;
 
-    public Employee(String name, EmployeeType employeeType, Branch belongBranch) {
+    public Employee(String employeeCode, String name, EmployeeType employeeType, Branch belongBranch) {
+        this.employeeCode = employeeCode;
         this.name = name;
         this.employeeType = employeeType;
         this.userStat = UserStatus.근무;
         this.position = Position.사원;
-        this.belongBranch = belongBranch;
         this.regDate = LocalDateTime.now();
+        setBelongBranch(belongBranch);
+    }
+
+    public void setBelongBranch(Branch belongBranch) {
+        this.belongBranch = belongBranch;
     }
 }

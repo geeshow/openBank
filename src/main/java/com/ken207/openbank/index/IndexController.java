@@ -1,6 +1,6 @@
 package com.ken207.openbank.index;
 
-import com.ken207.openbank.customer.CustomerIbkApiConstroller;
+import com.ken207.openbank.customer.CustomerApiController;
 import lombok.var;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +14,7 @@ public class IndexController {
     @GetMapping("/")
     public ResourceSupport index() {
         var index = new ResourceSupport();
-        index.add(linkTo(CustomerIbkApiConstroller.class).withRel("customers"));
+        index.add(linkTo(CustomerApiController.class).withRel("customers"));
         return index;
     }
 }
