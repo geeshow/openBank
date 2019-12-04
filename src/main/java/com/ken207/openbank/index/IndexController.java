@@ -1,6 +1,6 @@
 package com.ken207.openbank.index;
 
-import com.ken207.openbank.customer.CustomerApiController;
+import com.ken207.openbank.controller.api.CustomerApiController;
 import lombok.var;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.web.bind.annotation.GetMapping;

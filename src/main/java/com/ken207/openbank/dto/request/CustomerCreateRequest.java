@@ -1,4 +1,4 @@
-package com.ken207.openbank.customer;
+package com.ken207.openbank.dto.request;
 
 import lombok.*;
 
