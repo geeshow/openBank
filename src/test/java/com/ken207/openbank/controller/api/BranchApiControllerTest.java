@@ -3,7 +3,6 @@ package com.ken207.openbank.controller.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ken207.openbank.common.RestDocsConfiguration;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.customer.Customer;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.dto.request.BranchCreateRequest;
@@ -85,11 +84,11 @@ public class BranchApiControllerTest {
                 .andExpect(jsonPath("businessNumber").value(businessNumber))
                 .andExpect(jsonPath("taxOfficeCode").value(taxOfficeCode))
                 .andExpect(jsonPath("telNumber").value(telNumber))
-                .andExpect(jsonPath("branchType").value(branchType))
+                .andExpect(jsonPath("branchType").value(branchType.toString()))
                 .andDo(document("create-branch",
                         links(
                                 linkWithRel("self").description("link to self"),
-                                linkWithRel("query-customers").description("link to query branches"),
+                                linkWithRel("query-branches").description("link to query branches"),
                                 linkWithRel("update-branch").description("link to update an existing branch"),
                                 linkWithRel("profile").description("link to profile.")
                         ),
@@ -202,7 +201,23 @@ public class BranchApiControllerTest {
                 .andExpect(jsonPath("taxOfficeCode").value("00" + index))
                 .andExpect(jsonPath("telNumber").value("02-1234-1234"))
                 .andExpect(jsonPath("branchType").value(BranchType.지점.toString()))
-                .andDo(document("get-branch"))
+                .andDo(document("get-branch",
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("identifier of branch"),
+                                fieldWithPath("name").description("name of branch"),
+                                fieldWithPath("businessNumber").description("businessNumber of branch"),
+                                fieldWithPath("taxOfficeCode").description("taxOfficeCode of branch"),
+                                fieldWithPath("telNumber").description("telNumber date of branch"),
+                                fieldWithPath("regDateTime").description("regDateTime branch of branch"),
+                                fieldWithPath("branchType").description("branchType branch of branch"),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.update-branch.href").description("link to first."),
+                                fieldWithPath("_links.query-branches.href").description("link to prev."),
+                                fieldWithPath("_links.profile.href").description("link to profile.")
+                        )))
         ;
     }
     private Branch generateBranch(int index) {

@@ -215,20 +215,39 @@ public class CustomerApiControllerTest {
     @TestDescription("30개의 고객을 10개씩 두번째 페이지 조회하기")
     public void queryCustomers() throws Exception {
         //given
+        String page = "1";
+        String size = "10";
+
         IntStream.range(0,30).forEach(this::generateCustomer);
 
         //when
         this.mockMvc.perform(get("/api/customer")
-                    .param("page", "1")
-                    .param("size", "10")
+                    .param("page", page)
+                    .param("size", size)
                     .param("sort", "name,DESC")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("page").exists())
-                .andExpect(jsonPath("_embedded.branchResponseList[0]._links.self").exists())
-                .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("page.size").value(size))
+                .andExpect(jsonPath("page.number").value(page))
+                .andExpect(jsonPath("page.totalPages").exists())
+                .andExpect(jsonPath("page.totalElements").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].id").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].name").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].email").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].nation").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].regBranchName").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].mngBranchName").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].regEmployeeName").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0].regDateTime").exists())
+                .andExpect(jsonPath("_embedded.customerResponseList[0]._links.self.href").exists())
+                .andExpect(jsonPath("_links.first.href").exists())
+                .andExpect(jsonPath("_links.prev.href").exists())
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.next.href").exists())
+                .andExpect(jsonPath("_links.last.href").exists())
+                .andExpect(jsonPath("_links.self.href").exists())
+                .andExpect(jsonPath("_links.profile.href").exists())
                 .andDo(document("query-customers",
                         links(
                             linkWithRel("first").description("link to first page"),

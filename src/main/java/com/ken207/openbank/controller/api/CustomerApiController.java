@@ -1,6 +1,5 @@
 package com.ken207.openbank.controller.api;
 
-import com.ken207.openbank.common.ResponseListResource;
 import com.ken207.openbank.consts.ConstEmployee;
 import com.ken207.openbank.customer.*;
 import com.ken207.openbank.domain.Employee;
@@ -20,11 +19,14 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -46,7 +48,7 @@ public class CustomerApiController {
     }
 
     @PostMapping
-    public ResponseEntity createIbkCustomer(@RequestBody @Valid CustomerCreateRequest customerCreateRequest, Errors errors) {
+    public ResponseEntity createCustomer(@RequestBody @Valid CustomerCreateRequest customerCreateRequest, Errors errors) {
 
         //Request Data Validation
         ResponseEntity validate = RequestValidator.validate(customerCreateRequest, errors);
@@ -63,16 +65,24 @@ public class CustomerApiController {
         CustomerResponse customerResponse = CustomerResponse.transform(newCustomer);
 
         //HATEOAS REST API
-        ResponseResource customerResource = new ResponseResource(customerResponse);
-        return customerResource.getResponse(this.getClass());
+        ResponseResource responseResource = new ResponseResource(customerResponse,
+                linkTo(this.getClass()).slash(newCustomer.getId()).withRel("update-customer"),
+                linkTo(this.getClass()).withRel(("query-customers")),
+                new Link("/docs/index.html#resources-customers-create").withRel("profile")
+        );
+
+        //redirect
+        ControllerLinkBuilder selfLinkBuilder = linkTo(this.getClass()).slash(customerResponse.getId());
+        URI createdUri = selfLinkBuilder.toUri();
+        return ResponseEntity.created(createdUri).body(responseResource);
     }
 
 
     @GetMapping
     public ResponseEntity queryCustomers(Pageable pageable, PagedResourcesAssembler<Customer> assembler) {
         Page<Customer> page = this.customerRepository.findAll(pageable);
-        PagedResources<ResponseListResource> pagedResources = assembler.toResource(page,
-                e -> new ResponseListResource(
+        PagedResources<ResponseResource> pagedResources = assembler.toResource(page,
+                e -> new ResponseResource(
                         CustomerResponse.transform(e)
                 ));
         pagedResources.add(new Link("/docs/index.html#resources-customers-list").withRel("profile"));

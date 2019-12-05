@@ -16,21 +16,7 @@ public class ResponseResource extends Resource {
     public ResponseResource(CreateResponse createResponse, Link... links) {
 
         super(createResponse, links);
-
-        ControllerLinkBuilder linkBuilder = linkTo(CreateResponse.class);
-
-        add(linkBuilder.slash(createResponse.getId()).withSelfRel());
-        add(linkBuilder.slash(createResponse.getId()).withRel("update-customer"));
-        add(linkBuilder.withRel(("query-customers")));
-        add(new Link("/docs/index.html#resources-customers-create").withRel("profile"));
-    }
-
-    public ResponseEntity getResponse(Class<?> controller) {
-
-        CreateResponse content = (CreateResponse) this.getContent();
-        ControllerLinkBuilder selfLinkBuilder = linkTo(controller).slash(content.getId());
-        URI createdUri = selfLinkBuilder.toUri();
-        return ResponseEntity.created(createdUri).body(this);
+        add(linkTo(CreateResponse.class).slash(createResponse.getId()).withSelfRel());
 
     }
 }
