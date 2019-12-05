@@ -235,8 +235,8 @@ public class BranchApiControllerTest {
         BranchUpdateRequest branchUpdateRequest = BranchUpdateRequest.builder()
                 .id(branch.getId())
                 .name(branch.getName())
-                .businessNumber(branch.getBusinessNumber())
-                .taxOfficeCode(branch.getTaxOfficeCode())
+                .businessNumber("123")
+                .taxOfficeCode("222222")
                 .telNumber(branch.getTelNumber())
                 .branchType(branch.getBranchType())
                 .build();

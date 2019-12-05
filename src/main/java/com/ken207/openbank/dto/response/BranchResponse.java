@@ -3,19 +3,18 @@ package com.ken207.openbank.dto.response;
 import com.ken207.openbank.customer.Customer;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.enums.BranchType;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 
-@Builder
-@Getter
+@Data
+@Builder @AllArgsConstructor
+@NoArgsConstructor
 public class BranchResponse implements CreateResponse {
 
-    @NotEmpty
     private Long id;
     @NotEmpty
     private String name;

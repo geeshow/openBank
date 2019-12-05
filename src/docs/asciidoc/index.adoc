@@ -147,3 +147,10 @@ operation::get-customers[snippets='response-fields,curl-request,http-response,li
 `Get` 요청을 사용해서 기존 지점 하나를 조회할 수 있다.
 
 operation::get-customer[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
+
+[[resources-branch-update]]
+=== 지점정보 수정
+
+`PUT` 요청을 사용해서 기존 지점정보를 수정할 수 있다.
+
+operation::update-customer[snippets='request-fields,curl-request,http-response,links']

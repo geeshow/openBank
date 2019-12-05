@@ -25,6 +25,20 @@ public class RequestValidator {
     }
 
     /**
+     * 지점 수정 요청값 검증
+     * @param branchUpdateRequest
+     * @param errors
+     * @return
+     */
+    public static ResponseEntity validate(BranchUpdateRequest branchUpdateRequest, Errors errors) {
+        if ( errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        return badRequest(errors);
+    }
+
+    /**
      * 오류 응답 REST API
      * @param errors
      * @return

@@ -7,6 +7,7 @@ import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.BranchResponse;
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.repository.BranchRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,8 +31,14 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @RequestMapping(value = "/api/branch", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
 public class BranchApiController {
 
-    @Autowired
+    private final ModelMapper modelMapper;
+
     BranchRepository branchRepository;
+
+    public BranchApiController(BranchRepository branchRepository, ModelMapper modelMapper) {
+        this.modelMapper = modelMapper;
+        this.branchRepository = branchRepository;
+    }
 
     @PostMapping
     public ResponseEntity createBranch(@RequestBody @Valid BranchCreateRequest branchCreateRequest, Errors errors) {
@@ -120,17 +127,27 @@ public class BranchApiController {
     public ResponseEntity updateBranch(@PathVariable Long id,
                                        @RequestBody @Valid BranchUpdateRequest branchUpdateRequest,
                                        Errors errors) {
-        //Request Data Validation
-        if (errors.hasErrors()) {
-            return RequestValidator.badRequest(errors);
-        }
 
         Optional<Branch> optionalBranch = this.branchRepository.findById(branchUpdateRequest.getId());
-        if ( optionalBranch.isPresent() ) {
+        if ( !optionalBranch.isPresent() ) {
             return ResponseEntity.notFound().build();
         }
-        
 
+        //Request Data Validation
+        ResponseEntity validate = RequestValidator.validate(branchUpdateRequest, errors);
+        if ( errors.hasErrors()) {
+            return validate;
+        }
+
+        Branch existingBranch = optionalBranch.get();
+        this.modelMapper.map(branchUpdateRequest, existingBranch);
+        Branch savedBranch = this.branchRepository.save(existingBranch);
+
+        BranchResponse branchResponse = this.modelMapper.map(savedBranch, BranchResponse.class);
+        ResponseResource responseResource = new ResponseResource(branchResponse);
+        responseResource.add(new Link("/docs/index.html#resources-branch-update").withRel("profile"));
+
+        return ResponseEntity.ok(responseResource);
     }
 
     private ResponseEntity<Object> notFoundResponse() {
