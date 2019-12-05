@@ -33,7 +33,6 @@ public class ResponseResource extends Resource {
         return ResponseEntity.created(createdUri).body(this);
 
     }
-
 }
 
 

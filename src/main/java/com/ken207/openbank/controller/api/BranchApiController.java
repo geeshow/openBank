@@ -1,22 +1,29 @@
 package com.ken207.openbank.controller.api;
 
+import com.ken207.openbank.common.ResponseListResource;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.dto.request.BranchCreateRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
-import com.ken207.openbank.dto.response.BranchCreateResponse;
+import com.ken207.openbank.dto.response.BranchResponse;
 import com.ken207.openbank.common.ResponseResource;
+import com.ken207.openbank.dto.response.CustomerResponse;
 import com.ken207.openbank.repository.BranchRepository;
 import lombok.var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -40,27 +47,65 @@ public class BranchApiController {
                 branchCreateRequest.getName(),
                 branchCreateRequest.getBusinessNumber(),
                 branchCreateRequest.getTaxOfficeCode(),
-                branchCreateRequest.getTelNumber()
+                branchCreateRequest.getTelNumber(),
+                branchCreateRequest.getBranchType()
         );
         Branch newBranch = branchRepository.save(branch);
 
         //Set response data
-        BranchCreateResponse branchCreateResponse = BranchCreateResponse.builder()
+        BranchResponse branchResponse = BranchResponse.builder()
                 .id(newBranch.getId())
                 .name(newBranch.getName())
                 .telNumber(newBranch.getTelNumber())
+                .businessNumber(newBranch.getBusinessNumber())
+                .taxOfficeCode(newBranch.getTaxOfficeCode())
+                .branchType(newBranch.getBranchType())
                 .regDateTime(newBranch.getRegDateTime())
                 .build();
 
         //HATEOAS REST API
-        ResponseResource responseResource = new ResponseResource(branchCreateResponse);
+        ResponseResource responseResource = new ResponseResource(branchResponse);
         return responseResource.getResponse(this.getClass());
     }
 
     @GetMapping
     public ResponseEntity queryBranches(Pageable pageable, PagedResourcesAssembler<Branch> assembler) {
         Page<Branch> page = this.branchRepository.findAll(pageable);
-        var pagedResources = assembler.toResource(page);
+        PagedResources<ResponseListResource> pagedResources = assembler.toResource(page,
+                e -> new ResponseListResource(
+                        BranchResponse.transform(e)
+                ));
+        pagedResources.add(new Link("/docs/index.html#resources-branches-list").withRel("profile"));
         return ResponseEntity.ok(pagedResources);
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity getBranch(@PathVariable Long id) {
+        Optional<Branch> byId = this.branchRepository.findById(id);
+        if (!byId.isPresent()) {
+            return notFoundResponse();
+        }
+
+        Branch branch = byId.get();
+
+        //Set response data
+        BranchResponse branchResponse = BranchResponse.builder()
+                .id(branch.getId())
+                .name(branch.getName())
+                .telNumber(branch.getTelNumber())
+                .businessNumber(branch.getBusinessNumber())
+                .taxOfficeCode(branch.getTaxOfficeCode())
+                .branchType(branch.getBranchType())
+                .regDateTime(branch.getRegDateTime())
+                .build();
+
+        //HATEOAS REST API
+        ResponseResource responseResource = new ResponseResource(branchResponse);
+        return ResponseEntity.ok().body(responseResource);
+    }
+
+    private ResponseEntity<Object> notFoundResponse() {
+        return ResponseEntity.notFound().build();
     }
 }

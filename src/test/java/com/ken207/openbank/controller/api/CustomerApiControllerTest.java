@@ -144,14 +144,14 @@ public class CustomerApiControllerTest {
 
     @Test
     @TestDescription("빈값으로 고객 생성할때 에러가 발생하는 테스트")
-    public void createIbkCustomerEmpty() throws Exception {
+    public void createCustomerEmpty() throws Exception {
         //given
         CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder().build();
 
         //when
 
         //then
-        mockMvc.perform(post("/api/ibk/customer")
+        mockMvc.perform(post("/api/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(customerCreateRequest)))
@@ -163,7 +163,7 @@ public class CustomerApiControllerTest {
 
     @Test
     @TestDescription("잘못된 이메일을 입력 받을때 에러가 발생하는 테스트")
-    public void createIbkCustomerWrongEmail() throws Exception {
+    public void createCustomerWrongEmail() throws Exception {
         //given
         CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
                 .name("Park")
@@ -174,7 +174,7 @@ public class CustomerApiControllerTest {
         //when
 
         //then
-        mockMvc.perform(post("/api/ibk/customer")
+        mockMvc.perform(post("/api/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(customerCreateRequest)))
@@ -187,7 +187,7 @@ public class CustomerApiControllerTest {
 
     @Test
     @TestDescription("잘못된 국가 정보를 입력 받을때 에러가 발생하는 테스트")
-    public void createIbkCustomerWrongNation() throws Exception {
+    public void createCustomerWrongNation() throws Exception {
         //given
         CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
                 .name("Park")
@@ -198,7 +198,7 @@ public class CustomerApiControllerTest {
         //when
 
         //then
-        mockMvc.perform(post("/api/ibk/customer")
+        mockMvc.perform(post("/api/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(customerCreateRequest)))
@@ -226,7 +226,7 @@ public class CustomerApiControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("page").exists())
-                .andExpect(jsonPath("_embedded.customerResponseList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.branchResponseList[0]._links.self").exists())
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
                 .andDo(document("query-customers",
