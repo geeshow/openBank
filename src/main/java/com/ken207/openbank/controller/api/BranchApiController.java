@@ -2,6 +2,7 @@ package com.ken207.openbank.controller.api;
 
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.dto.request.BranchCreateRequest;
+import com.ken207.openbank.dto.request.BranchUpdateRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.BranchResponse;
 import com.ken207.openbank.common.ResponseResource;
@@ -113,6 +114,23 @@ public class BranchApiController {
         );
 
         return ResponseEntity.ok().body(responseResource);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity updateBranch(@PathVariable Long id,
+                                       @RequestBody @Valid BranchUpdateRequest branchUpdateRequest,
+                                       Errors errors) {
+        //Request Data Validation
+        if (errors.hasErrors()) {
+            return RequestValidator.badRequest(errors);
+        }
+
+        Optional<Branch> optionalBranch = this.branchRepository.findById(branchUpdateRequest.getId());
+        if ( optionalBranch.isPresent() ) {
+            return ResponseEntity.notFound().build();
+        }
+        
+
     }
 
     private ResponseEntity<Object> notFoundResponse() {

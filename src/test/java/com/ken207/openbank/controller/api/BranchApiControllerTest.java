@@ -6,6 +6,7 @@ import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.dto.request.BranchCreateRequest;
+import com.ken207.openbank.dto.request.BranchUpdateRequest;
 import com.ken207.openbank.repository.BranchRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,8 +33,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -57,6 +57,7 @@ public class BranchApiControllerTest {
     @Test
     @TestDescription("정상적으로 지점을 생성하는 테스트")
     public void createBranch() throws Exception {
+        //given
         String branchName = "테스트지점";
         String businessNumber = "123-12-12345";
         String taxOfficeCode = "112";
@@ -70,6 +71,7 @@ public class BranchApiControllerTest {
                 .branchType(branchType)
                 .build();
 
+        //when & then
         mockMvc.perform(post("/api/branch")
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
@@ -131,7 +133,7 @@ public class BranchApiControllerTest {
         //given
         IntStream.range(0,30).forEach(this::generateBranch);
 
-        //when
+        //when & then
         this.mockMvc.perform(get("/api/branch")
                 .param("page", "1")
                 .param("size", "10")
@@ -186,9 +188,11 @@ public class BranchApiControllerTest {
     @Test
     @TestDescription("지점 한건 조회하기")
     public void getBranch() throws Exception {
+        //given
         int index = 200;
         Branch branch = generateBranch(index);
 
+        //when & then
         this.mockMvc.perform(get("/api/branch/{id}", branch.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -220,6 +224,139 @@ public class BranchApiControllerTest {
                         )))
         ;
     }
+
+    @Test
+    @TestDescription("지점 수정의 정상처리 확인")
+    public void updateBranch() throws Exception {
+        //given
+        Branch branch = this.generateBranch(230);
+
+        String branchName = "수정된지점명";
+        BranchUpdateRequest branchUpdateRequest = BranchUpdateRequest.builder()
+                .id(branch.getId())
+                .name(branch.getName())
+                .businessNumber(branch.getBusinessNumber())
+                .taxOfficeCode(branch.getTaxOfficeCode())
+                .telNumber(branch.getTelNumber())
+                .branchType(branch.getBranchType())
+                .build();
+
+        branchUpdateRequest.setName(branchName);
+
+        //when & then
+        this.mockMvc.perform(put("/api/branch/{id}", branchUpdateRequest.getId())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(this.objectMapper.writeValueAsString(branchUpdateRequest))
+                    )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("name").value(branchName))
+                .andExpect(jsonPath("_links.self").exists())
+        ;
+    }
+
+    @Test
+    @TestDescription("ID값이 없는 경우 오류 발생")
+    public void updateBranch400_withoutId() throws Exception {
+        //given
+        Branch branch = this.generateBranch(230);
+
+        String branchName = "수정된지점명";
+        BranchUpdateRequest branchUpdateRequest = BranchUpdateRequest.builder()
+                .name(branch.getName())
+                .businessNumber(branch.getBusinessNumber())
+                .taxOfficeCode(branch.getTaxOfficeCode())
+                .telNumber(branch.getTelNumber())
+                .branchType(branch.getBranchType())
+                .build();
+
+        branchUpdateRequest.setName(branchName);
+
+        //when & then
+        this.mockMvc.perform(put("/api/branch/{id}", branchUpdateRequest.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(branchUpdateRequest))
+        )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
+    @TestDescription("존재하지 않는 지점의 수정인 경우 오류 발생")
+    public void updateBranch404() throws Exception {
+        //given
+        Branch branch = this.generateBranch(230);
+
+        String branchName = "수정된지점명";
+        BranchUpdateRequest branchUpdateRequest = BranchUpdateRequest.builder()
+                .id(branch.getId())
+                .name(branch.getName())
+                .businessNumber(branch.getBusinessNumber())
+                .taxOfficeCode(branch.getTaxOfficeCode())
+                .telNumber(branch.getTelNumber())
+                .branchType(branch.getBranchType())
+                .build();
+
+        //when & then
+        this.mockMvc.perform(put("/api/branch/123123")
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .content(this.objectMapper.writeValueAsString(branchUpdateRequest)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+        ;
+    }
+
+    @Test
+    @TestDescription("지점타입이 잘못 된 경우 오류 발생")
+    public void updateBranch400_withoutBranchType() throws Exception {
+        //given
+        Branch branch = this.generateBranch(230);
+
+        String branchName = "수정된지점명";
+        BranchUpdateRequest branchUpdateRequest = BranchUpdateRequest.builder()
+                .id(branch.getId())
+                .name(branch.getName())
+                .businessNumber(branch.getBusinessNumber())
+                .taxOfficeCode(branch.getTaxOfficeCode())
+                .telNumber(branch.getTelNumber())
+                .build();
+
+        branchUpdateRequest.setName(branchName);
+
+        //when & then
+        this.mockMvc.perform(put("/api/branch/{id}", branchUpdateRequest.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(branchUpdateRequest))
+        )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
+    @TestDescription("입력값이 비어있는 경우 수정 실패")
+    public void updateBranch400() throws Exception {
+        //given
+        Branch branch = this.generateBranch(230);
+
+        String branchName = "수정된지점명";
+        BranchUpdateRequest branchUpdateRequest = BranchUpdateRequest.builder()
+                .build();
+
+        branchUpdateRequest.setName(branchName);
+
+        //when & then
+        this.mockMvc.perform(put("/api/branch/{id}", branchUpdateRequest.getId())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(this.objectMapper.writeValueAsString(branchUpdateRequest)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("name").value(branchName))
+                .andExpect(jsonPath("_links.self").exists())
+        ;
+    }
+
     private Branch generateBranch(int index) {
         Branch branch = new Branch("지점이름" + index, "bzNum" + index, "00" + index, "02-1234-1234", BranchType.지점);
         return branchRepository.save(branch);
