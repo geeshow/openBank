@@ -8,16 +8,16 @@ public class RequestValidator {
 
     /**
      * 고객 정보 생성 요청값 검증
-     * @param customerCreateRequest
+     * @param customerRequest
      * @param errors
      * @return
      */
-    public static ResponseEntity validate(CustomerCreateRequest customerCreateRequest, Errors errors) {
+    public static ResponseEntity validate(CustomerRequest customerRequest, Errors errors) {
         if ( errors.hasErrors()) {
             return badRequest(errors);
         }
 
-        if ( customerCreateRequest.getNation().length() < 3 ) {
+        if ( customerRequest.getNation().length() < 3 ) {
             errors.rejectValue("nation", "wrongValue", "Nation is too short.");
         }
 
@@ -26,11 +26,11 @@ public class RequestValidator {
 
     /**
      * 지점 수정 요청값 검증
-     * @param branchUpdateRequest
+     * @param BranchRequest
      * @param errors
      * @return
      */
-    public static ResponseEntity validate(BranchUpdateRequest branchUpdateRequest, Errors errors) {
+    public static ResponseEntity validate(BranchRequest BranchRequest, Errors errors) {
         if ( errors.hasErrors()) {
             return badRequest(errors);
         }
