@@ -1,10 +1,9 @@
 package com.ken207.openbank.domain.account;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ken207.openbank.domain.BaseEntity;
-import com.ken207.openbank.domain.BranchEntity;
-import com.ken207.openbank.domain.CustomerEntity;
-import com.ken207.openbank.domain.ProductEntity;
+import com.ken207.openbank.domain.Branch;
+import com.ken207.openbank.customer.Customer;
+import com.ken207.openbank.domain.Product;
 import com.ken207.openbank.domain.enums.AccoStcd;
 import com.ken207.openbank.domain.enums.ChnlDvcd;
 import com.ken207.openbank.domain.enums.TxtnDvcd;
@@ -24,8 +23,10 @@ import static javax.persistence.FetchType.LAZY;
 @DiscriminatorColumn(name = "subjCd")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class AccountEntity<T> extends BaseEntity<AccountEntity<T>> {
-
+public abstract class Account {
+    @Id @GeneratedValue
+    @Column(name = "account_id")
+    private String id; //계좌식별번호
     private String acno; //계좌번호
     private String custNo; //고객번호
     private String passwd; //비밀번호
@@ -53,19 +54,19 @@ public abstract class AccountEntity<T> extends BaseEntity<AccountEntity<T>> {
     @JsonIgnore
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "accounts")
-    private CustomerEntity customerEntity;
+    private Customer customer;
 
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "product_id")
-    private ProductEntity productEntity; //상품코드
+    private Product product; //상품코드
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "branch_id", insertable=false, updatable=false)
-    private BranchEntity newBranchEntity;
+    private Branch newBranch;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "branch_id", insertable=false, updatable=false)
-    private BranchEntity mngBranchEntity;
+    private Branch mngBranch;
 
     @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_log_id")

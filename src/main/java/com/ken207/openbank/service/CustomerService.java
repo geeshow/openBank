@@ -1,7 +1,7 @@
 package com.ken207.openbank.service;
 
-import com.ken207.openbank.domain.CustomerEntity;
-import com.ken207.openbank.domain.EmployeeEntity;
+import com.ken207.openbank.customer.Customer;
+import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +17,15 @@ public class CustomerService {
     private final EmployeeRepository employeeRepository;
 
     @Transactional
-    public Long createCustomer(CustomerEntity customerEntity) {
-        return customerRepository.save(customerEntity).getId();
+    public Long createCustomer(Customer customer) {
+        return customerRepository.save(customer).getId();
     }
 
     @Transactional
-    public Long createCustomer(CustomerEntity customerEntity, Long employeeId) {
-        EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).get();
-        customerEntity.setRegEmployeeEntity(employeeEntity);
-        return customerRepository.save(customerEntity).getId();
+    public Long createCustomer(Customer customer, Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId).get();
+        customer.setRegEmployee(employee);
+        return customerRepository.save(customer).getId();
     }
 
 }

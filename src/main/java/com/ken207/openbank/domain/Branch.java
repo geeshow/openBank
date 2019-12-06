@@ -4,15 +4,17 @@ import com.ken207.openbank.domain.enums.BranchType;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
+@EqualsAndHashCode(of = "id")
 @Builder @NoArgsConstructor @AllArgsConstructor
-@Table(name="Branch")
-@AttributeOverride(name = "id",column = @Column(name = "branch_id"))
-public class BranchEntity extends BaseEntity<BranchEntity> {
+public class Branch {
+
+    @Id @GeneratedValue
+    @Column(name = "branch_id")
+    private Long id;
 
     private String name;
     private String businessNumber;
@@ -24,7 +26,15 @@ public class BranchEntity extends BaseEntity<BranchEntity> {
     @Enumerated(EnumType.STRING)
     private BranchType branchType;
 
-    public BranchEntity(String name, String businessNumber, String taxOfficeCode, String telNumber, BranchType branchType) {
+    public Branch(String name, String businessNumber, String taxOfficeCode, String telNumber) {
+        this.name = name;
+        this.businessNumber = businessNumber;
+        this.taxOfficeCode = taxOfficeCode;
+        this.telNumber = telNumber;
+        this.regDateTime = LocalDateTime.now();
+    }
+
+    public Branch(String name, String businessNumber, String taxOfficeCode, String telNumber, BranchType branchType) {
         this.name = name;
         this.businessNumber = businessNumber;
         this.taxOfficeCode = taxOfficeCode;

@@ -1,15 +1,16 @@
 package com.ken207.openbank.controller.api;
 
 import com.ken207.openbank.consts.ConstEmployee;
-import com.ken207.openbank.domain.CustomerEntity;
-import com.ken207.openbank.domain.EmployeeEntity;
-import com.ken207.openbank.dto.request.CustomerRequest;
+import com.ken207.openbank.customer.*;
+import com.ken207.openbank.domain.Employee;
+import com.ken207.openbank.dto.request.CustomerCreateRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.CustomerResponse;
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
 import com.ken207.openbank.service.CustomerService;
+import lombok.Data;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,32 +41,32 @@ public class CustomerApiController {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private ModelMapper modelMapper;
 
-    private EmployeeEntity employeeEntity;
+    private Employee employee;
 
     public void start() {
-        employeeEntity = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
+        employee = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
     }
 
     @PostMapping
-    public ResponseEntity createCustomer(@RequestBody @Valid CustomerRequest customerRequest, Errors errors) {
+    public ResponseEntity createCustomer(@RequestBody @Valid CustomerCreateRequest customerCreateRequest, Errors errors) {
 
         //Request Data Validation
-        ResponseEntity validate = RequestValidator.validate(customerRequest, errors);
+        ResponseEntity validate = RequestValidator.validate(customerCreateRequest, errors);
         if ( errors.hasErrors()) {
             return validate;
         }
 
         //Data Save
-        CustomerEntity customerEntity = new CustomerEntity(customerRequest.getName(), customerRequest.getEmail(), customerRequest.getNation());
-        Long customerId = customerService.createCustomer(customerEntity, employeeEntity.getId());
+        Customer customer = new Customer(customerCreateRequest.getName(), customerCreateRequest.getEmail(), customerCreateRequest.getNation());
+        Long customerId = customerService.createCustomer(customer, employee.getId());
 
         //Set response data
-        CustomerEntity newCustomerEntity = customerRepository.findById(customerId).get();
-        CustomerResponse customerResponse = CustomerResponse.transform(newCustomerEntity);
+        Customer newCustomer = customerRepository.findById(customerId).get();
+        CustomerResponse customerResponse = CustomerResponse.transform(newCustomer);
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(customerResponse,
-                linkTo(this.getClass()).slash(newCustomerEntity.getId()).withRel("update-customer"),
+                linkTo(this.getClass()).slash(newCustomer.getId()).withRel("update-customer"),
                 linkTo(this.getClass()).withRel(("query-customers")),
                 new Link("/docs/index.html#resources-customers-create").withRel("profile")
         );
@@ -78,8 +79,8 @@ public class CustomerApiController {
 
 
     @GetMapping
-    public ResponseEntity queryCustomers(Pageable pageable, PagedResourcesAssembler<CustomerEntity> assembler) {
-        Page<CustomerEntity> page = this.customerRepository.findAll(pageable);
+    public ResponseEntity queryCustomers(Pageable pageable, PagedResourcesAssembler<Customer> assembler) {
+        Page<Customer> page = this.customerRepository.findAll(pageable);
         PagedResources<ResponseResource> pagedResources = assembler.toResource(page,
                 e -> new ResponseResource(
                         CustomerResponse.transform(e)
@@ -88,4 +89,18 @@ public class CustomerApiController {
         return ResponseEntity.ok(pagedResources);
     }
 
+    @Data
+    static class CreateCustomerReq {
+        private String name;
+        private String nation;
+    }
+
+    @Data
+    static class CreateCustomerRes {
+        private Long customer_id;
+
+        public CreateCustomerRes(Long customer_id) {
+            this.customer_id = customer_id;
+        }
+    }
 }

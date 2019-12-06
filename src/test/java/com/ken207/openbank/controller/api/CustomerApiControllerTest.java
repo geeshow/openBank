@@ -1,21 +1,28 @@
 package com.ken207.openbank.controller.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ken207.openbank.common.RestDocsConfiguration;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.consts.ConstEmployee;
-import com.ken207.openbank.controller.BaseControllerTest;
-import com.ken207.openbank.domain.CustomerEntity;
-import com.ken207.openbank.dto.request.CustomerRequest;
-import com.ken207.openbank.domain.EmployeeEntity;
+import com.ken207.openbank.customer.Customer;
+import com.ken207.openbank.dto.request.CustomerCreateRequest;
+import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
 import com.ken207.openbank.service.CustomerService;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
 
 
 import java.util.stream.IntStream;
@@ -32,7 +39,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class CustomerEntityApiControllerTest extends BaseControllerTest  {
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureRestDocs
+@Import(RestDocsConfiguration.class)
+public class CustomerApiControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     CustomerService customerService;
@@ -41,12 +59,12 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
     @Autowired
     EmployeeRepository employeeRepository;
 
-    private EmployeeEntity employeeEntity;
+    private Employee employee;
 
     /** init 은 Test 전 항상 수행 */
     @Before
     public void init() throws Exception {
-        employeeEntity = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
+        employee = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
     }
 
     @Test
@@ -56,7 +74,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
         String email = "masterhong@gil.dong.com";
         String nation = "KOREA";
         String name = "홍길동";
-        CustomerRequest customerRequest = CustomerRequest.builder()
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
                 .name(name)
                 .email(email)
                 .nation(nation)
@@ -67,7 +85,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
         mockMvc.perform(post("/api/customer")
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(customerRequest)))
+                    .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
@@ -128,7 +146,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
     @TestDescription("빈값으로 고객 생성할때 에러가 발생하는 테스트")
     public void createCustomerEmpty() throws Exception {
         //given
-        CustomerRequest customerRequest = CustomerRequest.builder().build();
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder().build();
 
         //when
 
@@ -136,7 +154,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
         mockMvc.perform(post("/api/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest)))
+                .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("_links.index").exists())
@@ -147,7 +165,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
     @TestDescription("잘못된 이메일을 입력 받을때 에러가 발생하는 테스트")
     public void createCustomerWrongEmail() throws Exception {
         //given
-        CustomerRequest customerRequest = CustomerRequest.builder()
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
                 .name("Park")
                 .email("park.com")
                 .nation("KR")
@@ -159,7 +177,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
         mockMvc.perform(post("/api/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest)))
+                .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("_links.index").exists())
@@ -171,7 +189,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
     @TestDescription("잘못된 국가 정보를 입력 받을때 에러가 발생하는 테스트")
     public void createCustomerWrongNation() throws Exception {
         //given
-        CustomerRequest customerRequest = CustomerRequest.builder()
+        CustomerCreateRequest customerCreateRequest = CustomerCreateRequest.builder()
                 .name("Park")
                 .email("park@asdf.com")
                 .nation("KR")
@@ -183,7 +201,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
         mockMvc.perform(post("/api/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(customerRequest)))
+                .content(objectMapper.writeValueAsString(customerCreateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("content[0].objectName").exists())
@@ -276,8 +294,8 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
     }
 
     private void generateCustomer(int index) {
-        CustomerEntity customerEntity = new CustomerEntity("고객 " + index, "customer" + index + "@gmail.com", "KOREA");
-        customerService.createCustomer(customerEntity, employeeEntity.getId());
+        Customer customer = new Customer("고객 " + index, "customer" + index + "@gmail.com", "KOREA");
+        customerService.createCustomer(customer, employee.getId());
     }
 
 
