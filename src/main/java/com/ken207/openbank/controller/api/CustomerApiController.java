@@ -1,12 +1,12 @@
 package com.ken207.openbank.controller.api;
 
+import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.consts.ConstEmployee;
 import com.ken207.openbank.domain.CustomerEntity;
 import com.ken207.openbank.domain.EmployeeEntity;
 import com.ken207.openbank.dto.request.CustomerRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.CustomerResponse;
-import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
 import com.ken207.openbank.service.CustomerService;
@@ -24,7 +24,6 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-
 import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;

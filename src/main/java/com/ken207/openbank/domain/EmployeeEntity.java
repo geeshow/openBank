@@ -2,7 +2,7 @@ package com.ken207.openbank.domain;
 
 import com.ken207.openbank.domain.enums.EmployeeType;
 import com.ken207.openbank.domain.enums.Position;
-import com.ken207.openbank.domain.enums.UserStatus;
+import com.ken207.openbank.domain.enums.EmployeeStatus;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,7 +24,7 @@ public class EmployeeEntity extends BaseEntity<EmployeeEntity> {
     private EmployeeType employeeType;
 
     @Enumerated(EnumType.STRING)
-    private UserStatus userStat;
+    private EmployeeStatus userStat;
 
     @Enumerated(EnumType.STRING)
     private Position position;
@@ -38,7 +38,7 @@ public class EmployeeEntity extends BaseEntity<EmployeeEntity> {
         this.employeeCode = employeeCode;
         this.name = name;
         this.employeeType = employeeType;
-        this.userStat = UserStatus.근무;
+        this.userStat = EmployeeStatus.근무;
         this.position = Position.사원;
         this.regDate = LocalDateTime.now();
         setBelongBranchEntity(belongBranchEntity);

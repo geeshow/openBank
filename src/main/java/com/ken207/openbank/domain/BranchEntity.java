@@ -4,7 +4,6 @@ import com.ken207.openbank.domain.enums.BranchType;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,6 +22,9 @@ public class BranchEntity extends BaseEntity<BranchEntity> {
 
     @Enumerated(EnumType.STRING)
     private BranchType branchType;
+
+    @ManyToOne
+    private MemberEntity manager;
 
     public BranchEntity(String name, String businessNumber, String taxOfficeCode, String telNumber, BranchType branchType) {
         this.name = name;
