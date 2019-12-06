@@ -7,7 +7,7 @@ import javax.validation.constraints.NotEmpty;
 
 @Builder
 @Getter
-public class CustomerCreateRequest {
+public class CustomerRequest {
 
     @NotEmpty
     private String name;

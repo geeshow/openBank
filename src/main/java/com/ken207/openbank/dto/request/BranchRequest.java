@@ -1,17 +1,14 @@
 package com.ken207.openbank.dto.request;
 
-import com.ken207.openbank.domain.enums.BranchType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
-import java.time.LocalDateTime;
 
 @Builder
-@Getter
-public class BranchCreateRequest {
+@Getter @Setter
+public class BranchRequest {
 
     @NotEmpty
     private String name;
@@ -20,6 +17,4 @@ public class BranchCreateRequest {
     private String taxOfficeCode;
     private String telNumber;
 
-    @Enumerated(EnumType.STRING)
-    private BranchType branchType;
 }

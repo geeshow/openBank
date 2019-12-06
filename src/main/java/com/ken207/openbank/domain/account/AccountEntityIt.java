@@ -10,7 +10,7 @@ import javax.persistence.Entity;
 @DiscriminatorValue("31")
 @Getter
 @Setter
-public class AccountIt extends Account {
+public class AccountEntityIt extends AccountEntity<AccountEntityIt> {
     private String contractMonth; //계약기간월수
     private String contractDay; //계약기간일수
     private String nextPaymentDate; //다음납입일자
