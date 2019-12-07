@@ -13,13 +13,5 @@ public class OpenbankApplication {
 		SpringApplication.run(OpenbankApplication.class, args);
 	}
 
-	@Bean
-	Hibernate5Module hibernate5Module() {
-		return new Hibernate5Module();
-	}
 
-	@Bean
-	public ModelMapper modelMapper() {
-		return new ModelMapper();
-	}
 }

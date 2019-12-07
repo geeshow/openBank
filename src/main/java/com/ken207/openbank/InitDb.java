@@ -25,7 +25,7 @@ public class InitDb {
     @PostConstruct
     public void init() {
         System.out.println("InitDb init ############################");
-        initService.dbInit();
+ //       initService.dbInit();
     }
 
     @Component
