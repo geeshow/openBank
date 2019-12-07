@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -37,7 +38,7 @@ public class MemberServiceTest extends BaseControllerTest {
     MemberService memberService;
 
     @Autowired
-    MemberRepository memberRepository;
+    PasswordEncoder passwordEncoder;
 
     @Test
     public void findByUsername() {
@@ -53,14 +54,14 @@ public class MemberServiceTest extends BaseControllerTest {
                 .password(password)
                 .roles(roles)
                 .build();
-        this.memberRepository.save(user);
+        this.memberService.saveMember(user);
 
         //when
         UserDetailsService userDetailsService = memberService;
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         //then
-        assertThat(userDetails.getPassword()).isEqualTo(password);
+        assertThat(this.passwordEncoder.matches(password, userDetails.getPassword())).isTrue();
     }
 
     @Test
