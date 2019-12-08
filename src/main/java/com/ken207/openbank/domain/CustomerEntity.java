@@ -2,7 +2,6 @@ package com.ken207.openbank.domain;
 
 import com.ken207.openbank.domain.account.AccountEntity;
 import lombok.*;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -23,17 +22,14 @@ public class CustomerEntity extends BaseEntity<CustomerEntity> {
     private String nation;
     private LocalDateTime regDateTime;
 
-    @Nullable
     @ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(referencedColumnName = "branch_id", name="reg_branch_id")
     private BranchEntity regBranchEntity;
 
-    @Nullable
     @ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(referencedColumnName = "branch_id", name="mng_branch_id")
     private BranchEntity mngBranchEntity;
 
-    @Nullable
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")
     private EmployeeEntity regEmployeeEntity;
