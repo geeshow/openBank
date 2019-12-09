@@ -7,12 +7,15 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name="Member")
-@Getter @Setter
+@Table(name = "Member_User")
+@Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @NoArgsConstructor @AllArgsConstructor
-@AttributeOverride(name = "id",column = @Column(name = "member_id"))
-public class MemberEntity extends BaseEntity<MemberEntity> {
+public class MemberEntity {
 
+    @Id @GeneratedValue
+    public Integer id;
+
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String password;
@@ -22,3 +25,4 @@ public class MemberEntity extends BaseEntity<MemberEntity> {
     private Set<MemberRole> roles;
 
 }
+

@@ -1,10 +1,10 @@
 package com.ken207.openbank.configs;
 
-import com.ken207.openbank.service.MemberService;
-import org.aspectj.weaver.patterns.BasicTokenSource;
+import com.ken207.openbank.common.AppSecurityProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -18,16 +18,19 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
-    AuthenticationManager authenticationManager;
+    private UserDetailsService userDetailsService;
 
     @Autowired
-    MemberService memberService;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    TokenStore tokenStore;
+    private TokenStore tokenStore;
+
+    @Autowired
+    private AppSecurityProperties appSecurityProperties;
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
@@ -37,18 +40,18 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
-                .withClient("myApp")
-                .authorizedGrantTypes("password","refresh_token")
-                .scopes("read", "write")
-                .secret(this.passwordEncoder.encode("pass"))
+                .withClient(appSecurityProperties.getDefaultClientId())
+                .authorizedGrantTypes("password", "refresh_token")
+                .scopes("read", "write", "trust")
+                .secret(passwordEncoder.encode(appSecurityProperties.getDefaultClientSecret()))
                 .accessTokenValiditySeconds(10 * 60)
-                .refreshTokenValiditySeconds(6 * 10 * 60);
+                .refreshTokenValiditySeconds(60 * 60);
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints.authenticationManager(authenticationManager)
-                .userDetailsService(memberService)
-                .tokenStore(tokenStore);
+        endpoints.tokenStore(tokenStore)
+                .authenticationManager(authenticationManager)
+                .userDetailsService(userDetailsService);
     }
 }

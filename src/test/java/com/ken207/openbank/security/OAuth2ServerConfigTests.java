@@ -1,8 +1,7 @@
-package com.ken207.openbank.configs;
+package com.ken207.openbank.security;
 
 import com.ken207.openbank.accounts.MemberRole;
 import com.ken207.openbank.common.AppSecurityProperties;
-import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.service.MemberService;
 import org.junit.Test;
@@ -22,14 +21,13 @@ import java.util.Set;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-public class AuthServerConfigTest {
+public class OAuth2ServerConfigTests {
 
     @Autowired
     MockMvc mockMvc;
@@ -41,34 +39,36 @@ public class AuthServerConfigTest {
     AppSecurityProperties appSecurityProperties;
 
     @Test
-    @TestDescription("인증 토근을 발급 받는 테스트")
-    public void getAuthToken() throws Exception {
-        //given
-        String username = "ken@email.com";
-        String password = "ken207";
+    public void getAccessToken() throws Exception {
+        // Given
+        String password = "pass";
+        String email = "test@email.com";
         MemberEntity member = MemberEntity.builder()
-                .email(username)
+                .email(email)
                 .password(password)
                 .roles(Set.of(MemberRole.USER))
                 .build();
         memberService.createUser(member);
 
-        String clientId = appSecurityProperties.getDefaultClientId();
-        String clientSecret = appSecurityProperties.getDefaultClientSecret();
-
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "password");
-        params.add("username", username);
+        params.add("username", email);
         params.add("password", password);
 
-        this.mockMvc.perform(post("/oauth/token")
-                    .with(httpBasic(clientId, clientSecret))
-                    .accept(MediaType.APPLICATION_JSON_UTF8)
-                    .params(params)
-                )
+        // When & Then
+        mockMvc.perform(post("/oauth/token")
+                .params(params)
+                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
+                .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("access_token").exists());
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(jsonPath("access_token").isNotEmpty())
+                .andExpect(jsonPath("token_type").value("bearer"))
+                .andExpect(jsonPath("refresh_token").isNotEmpty())
+                .andExpect(jsonPath("expires_in").isNumber())
+                .andExpect(jsonPath("scope").value("read write trust"))
+        ;
 
     }
 

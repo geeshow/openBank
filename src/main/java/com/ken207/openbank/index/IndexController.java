@@ -13,7 +13,7 @@ public class IndexController {
 
     @GetMapping("/api")
     public ResourceSupport index() {
-        var index = new ResourceSupport();
+        ResourceSupport index = new ResourceSupport();
         index.add(linkTo(CustomerApiController.class).withRel("customers"));
         return index;
     }

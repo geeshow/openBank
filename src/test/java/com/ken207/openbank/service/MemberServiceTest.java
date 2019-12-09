@@ -54,7 +54,7 @@ public class MemberServiceTest extends BaseControllerTest {
                 .password(password)
                 .roles(roles)
                 .build();
-        this.memberService.saveMember(user);
+        this.memberService.createUser(user);
 
         //when
         UserDetailsService userDetailsService = memberService;
