@@ -1,13 +1,8 @@
 package com.ken207.openbank.common;
 
-import com.ken207.openbank.controller.api.CustomerApiController;
 import com.ken207.openbank.dto.response.CreateResponse;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
-import org.springframework.http.ResponseEntity;
-
-import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 

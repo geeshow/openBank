@@ -1,6 +1,6 @@
 package com.ken207.openbank.security;
 
-import com.ken207.openbank.accounts.MemberRole;
+import com.ken207.openbank.user.MemberRole;
 import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.service.MemberService;

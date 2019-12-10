@@ -1,6 +1,5 @@
 package com.ken207.openbank.user;
 
-import com.ken207.openbank.accounts.MemberRole;
 import com.ken207.openbank.domain.MemberEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

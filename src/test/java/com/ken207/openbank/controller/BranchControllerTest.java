@@ -1,17 +1,28 @@
-package com.ken207.openbank.controller.api;
+package com.ken207.openbank.controller;
 
+import com.ken207.openbank.user.MemberRole;
+import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.controller.BaseControllerTest;
 import com.ken207.openbank.domain.BranchEntity;
+import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.dto.request.BranchRequest;
 import com.ken207.openbank.repository.BranchRepository;
+import com.ken207.openbank.repository.MemberRepository;
+import com.ken207.openbank.service.MemberService;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -21,14 +32,29 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class BranchEntityApiControllerTest extends BaseControllerTest {
+public class BranchControllerTest extends BaseControllerTest {
 
     @Autowired
     BranchRepository branchRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
+    MemberService memberService;
+
+    @Autowired
+    AppSecurityProperties appSecurityProperties;
+
+    @Before
+    public void setUp() {
+        this.memberRepository.deleteAll();
+    }
 
     @Test
     @TestDescription("정상적으로 지점을 생성하는 테스트")
@@ -48,6 +74,7 @@ public class BranchEntityApiControllerTest extends BaseControllerTest {
 
         //when & then
         mockMvc.perform(post("/api/branch")
+                    .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
                     .content(objectMapper.writeValueAsString(branchRequest)))
@@ -99,6 +126,35 @@ public class BranchEntityApiControllerTest extends BaseControllerTest {
 
                 ))
         ;
+    }
+
+    private String getBearerToken() throws Exception {
+        //given
+        MemberEntity member = MemberEntity.builder()
+                .email(appSecurityProperties.getUserUsername())
+                .password(appSecurityProperties.getUserPassword())
+                .roles(Set.of(MemberRole.USER))
+                .build();
+        memberService.createUser(member);
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "password");
+        params.add("username", appSecurityProperties.getUserUsername());
+        params.add("password", appSecurityProperties.getUserPassword());
+
+        this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .params(params)
+        );
+        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .params(params)
+        );
+        String responseBody = perform.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser parser = new Jackson2JsonParser();
+        return "Bearer " + parser.parseMap(responseBody).get("access_token").toString();
     }
 
     @Test
@@ -218,6 +274,7 @@ public class BranchEntityApiControllerTest extends BaseControllerTest {
 
         //when & then
         this.mockMvc.perform(put("/api/branch/{id}", branchEntity.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(this.objectMapper.writeValueAsString(branchRequest))
                     )
@@ -246,6 +303,7 @@ public class BranchEntityApiControllerTest extends BaseControllerTest {
 
         //when & then
         this.mockMvc.perform(put("/api/branch/{id}", "")
+                    .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .content(this.objectMapper.writeValueAsString(branchRequest)))
                 .andDo(print())
@@ -269,6 +327,7 @@ public class BranchEntityApiControllerTest extends BaseControllerTest {
 
         //when & then
         this.mockMvc.perform(put("/api/branch/123123")
+                    .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .content(this.objectMapper.writeValueAsString(branchRequest)))
                 .andDo(print())
@@ -287,6 +346,7 @@ public class BranchEntityApiControllerTest extends BaseControllerTest {
 
         //when & then
         this.mockMvc.perform(put("/api/branch/{id}", branchEntity.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(this.objectMapper.writeValueAsString(branchRequest)))
                 .andDo(print())

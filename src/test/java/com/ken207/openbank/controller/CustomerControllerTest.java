@@ -1,23 +1,32 @@
-package com.ken207.openbank.controller.api;
+package com.ken207.openbank.controller;
 
+import com.ken207.openbank.user.MemberRole;
+import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.consts.ConstEmployee;
 import com.ken207.openbank.controller.BaseControllerTest;
 import com.ken207.openbank.domain.CustomerEntity;
+import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.dto.request.CustomerRequest;
 import com.ken207.openbank.domain.EmployeeEntity;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
+import com.ken207.openbank.repository.MemberRepository;
 import com.ken207.openbank.service.CustomerService;
+import com.ken207.openbank.service.MemberService;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -27,12 +36,13 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-public class CustomerEntityApiControllerTest extends BaseControllerTest  {
+public class CustomerControllerTest extends BaseControllerTest  {
 
     @Autowired
     CustomerService customerService;
@@ -43,10 +53,20 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
 
     private EmployeeEntity employeeEntity;
 
+    @Autowired
+    MemberService memberService;
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
+    AppSecurityProperties appSecurityProperties;
+
     /** init 은 Test 전 항상 수행 */
     @Before
     public void init() throws Exception {
         employeeEntity = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
+        this.memberRepository.deleteAll();
     }
 
     @Test
@@ -65,6 +85,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
 
         //then
         mockMvc.perform(post("/api/customer")
+                    .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
                     .content(objectMapper.writeValueAsString(customerRequest)))
@@ -134,6 +155,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
 
         //then
         mockMvc.perform(post("/api/customer")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(customerRequest)))
@@ -157,6 +179,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
 
         //then
         mockMvc.perform(post("/api/customer")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(customerRequest)))
@@ -181,6 +204,7 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
 
         //then
         mockMvc.perform(post("/api/customer")
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(customerRequest)))
@@ -281,4 +305,37 @@ public class CustomerEntityApiControllerTest extends BaseControllerTest  {
     }
 
 
+    private String getBearerToken() throws Exception {
+        //given
+        String username = "ken@email.com";
+        String password = "ken207";
+        MemberEntity member = MemberEntity.builder()
+                .email(username)
+                .password(password)
+                .roles(Set.of(MemberRole.USER))
+                .build();
+        memberService.createUser(member);
+
+        String clientId = appSecurityProperties.getDefaultClientId();
+        String clientSecret = appSecurityProperties.getDefaultClientSecret();
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "password");
+        params.add("username", username);
+        params.add("password", password);
+
+        this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(clientId, clientSecret))
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .params(params)
+        );
+        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(clientId, clientSecret))
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .params(params)
+        );
+        String responseBody = perform.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser parser = new Jackson2JsonParser();
+        return "Bearer " + parser.parseMap(responseBody).get("access_token").toString();
+    }
 }

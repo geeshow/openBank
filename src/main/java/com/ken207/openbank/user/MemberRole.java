@@ -1,4 +1,4 @@
-package com.ken207.openbank.accounts;
+package com.ken207.openbank.user;
 
 public enum MemberRole {
     ADMIN, USER

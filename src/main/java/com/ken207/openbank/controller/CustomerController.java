@@ -1,4 +1,4 @@
-package com.ken207.openbank.controller.api;
+package com.ken207.openbank.controller;
 
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.consts.ConstEmployee;
@@ -30,7 +30,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping(value = "/api/customer", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
-public class CustomerApiController {
+public class CustomerController {
 
     @Autowired private CustomerService customerService;
     //@Autowired private BranchRepository branchRepository;
@@ -64,13 +64,13 @@ public class CustomerApiController {
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(customerResponse,
-                linkTo(this.getClass()).slash(newCustomerEntity.getId()).withRel("update-customer"),
-                linkTo(this.getClass()).withRel(("query-customers")),
+                linkTo(CustomerController.class).slash(newCustomerEntity.getId()).withRel("update-customer"),
+                linkTo(CustomerController.class).withRel(("query-customers")),
                 new Link("/docs/index.html#resources-customers-create").withRel("profile")
         );
 
         //redirect
-        ControllerLinkBuilder selfLinkBuilder = linkTo(this.getClass()).slash(customerResponse.getId());
+        ControllerLinkBuilder selfLinkBuilder = linkTo(CustomerController.class).slash(customerResponse.getId());
         URI createdUri = selfLinkBuilder.toUri();
         return ResponseEntity.created(createdUri).body(responseResource);
     }

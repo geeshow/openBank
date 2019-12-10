@@ -1,6 +1,6 @@
 package com.ken207.openbank.common;
 
-import com.ken207.openbank.index.IndexController;
+import com.ken207.openbank.controller.IndexController;
 import org.springframework.validation.Errors;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;

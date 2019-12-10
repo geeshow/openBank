@@ -1,13 +1,13 @@
 package com.ken207.openbank.domain;
 
-import com.ken207.openbank.accounts.MemberRole;
+import com.ken207.openbank.user.MemberRole;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "Member_User")
+@Table(name = "Member")
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @NoArgsConstructor @AllArgsConstructor
 public class MemberEntity {

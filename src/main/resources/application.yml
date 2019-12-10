@@ -28,7 +28,7 @@ logging:
     springframework:
       data:
         repository: DEBUG
-
+        
 app-security:
   default-client-id: myApp
   default-client-secret: secret
@@ -36,3 +36,4 @@ app-security:
   admin-password: admin
   user-username: user@email.com
   user-password: user
+

@@ -1,4 +1,4 @@
-package com.ken207.openbank.controller.api;
+package com.ken207.openbank.controller;
 
 import com.ken207.openbank.domain.BranchEntity;
 import com.ken207.openbank.domain.enums.BranchType;
@@ -28,13 +28,13 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
 @RequestMapping(value = "/api/branch", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
-public class BranchApiController {
+public class BranchController {
 
     private final ModelMapper modelMapper;
 
     BranchRepository branchRepository;
 
-    public BranchApiController(BranchRepository branchRepository, ModelMapper modelMapper) {
+    public BranchController(BranchRepository branchRepository, ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
         this.branchRepository = branchRepository;
     }
@@ -70,13 +70,13 @@ public class BranchApiController {
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(branchResponse,
-                linkTo(this.getClass()).slash(branchResponse.getId()).withRel("update-branch"),
-                linkTo(this.getClass()).withRel(("query-branches")),
+                linkTo(BranchController.class).slash(branchResponse.getId()).withRel("update-branch"),
+                linkTo(BranchController.class).withRel(("query-branches")),
                 new Link("/docs/index.html#resources-branches-create").withRel("profile")
         );
 
         //redirect
-        ControllerLinkBuilder selfLinkBuilder = linkTo(this.getClass()).slash(branchResponse.getId());
+        ControllerLinkBuilder selfLinkBuilder = linkTo(BranchController.class).slash(branchResponse.getId());
         URI createdUri = selfLinkBuilder.toUri();
         return ResponseEntity.created(createdUri).body(responseResource);
     }
@@ -114,8 +114,8 @@ public class BranchApiController {
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(branchResponse,
-                linkTo(this.getClass()).slash(branchResponse.getId()).withRel("update-branch"),
-                linkTo(this.getClass()).withRel(("query-branches")),
+                linkTo(BranchController.class).slash(branchResponse.getId()).withRel("update-branch"),
+                linkTo(BranchController.class).withRel(("query-branches")),
                 new Link("/docs/index.html#resources-branch-get").withRel("profile")
         );
 

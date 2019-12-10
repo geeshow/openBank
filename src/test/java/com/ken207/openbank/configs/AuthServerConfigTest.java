@@ -1,6 +1,6 @@
 package com.ken207.openbank.configs;
 
-import com.ken207.openbank.accounts.MemberRole;
+import com.ken207.openbank.user.MemberRole;
 import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.MemberEntity;
@@ -44,11 +44,9 @@ public class AuthServerConfigTest {
     @TestDescription("인증 토근을 발급 받는 테스트")
     public void getAuthToken() throws Exception {
         //given
-        String username = "ken@email.com";
-        String password = "ken207";
         MemberEntity member = MemberEntity.builder()
-                .email(username)
-                .password(password)
+                .email(appSecurityProperties.getUserUsername())
+                .password(appSecurityProperties.getUserPassword())
                 .roles(Set.of(MemberRole.USER))
                 .build();
         memberService.createUser(member);
@@ -58,8 +56,8 @@ public class AuthServerConfigTest {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "password");
-        params.add("username", username);
-        params.add("password", password);
+        params.add("username", appSecurityProperties.getUserUsername());
+        params.add("password", appSecurityProperties.getUserPassword());
 
         this.mockMvc.perform(post("/oauth/token")
                     .with(httpBasic(clientId, clientSecret))

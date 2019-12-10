@@ -1,9 +1,8 @@
 package com.ken207.openbank.service;
 
-import com.ken207.openbank.accounts.MemberRole;
+import com.ken207.openbank.user.MemberRole;
 import com.ken207.openbank.controller.BaseControllerTest;
 import com.ken207.openbank.domain.MemberEntity;
-import com.ken207.openbank.repository.MemberRepository;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
