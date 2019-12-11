@@ -34,9 +34,6 @@ public class CustomerEntity extends BaseEntity<CustomerEntity> {
     @JoinColumn(name = "employee_id")
     private EmployeeEntity regEmployeeEntity;
 
-    @OneToMany(mappedBy = "customerEntity", cascade = CascadeType.ALL)
-    private List<AccountEntity> accountEntities = new ArrayList<>();
-
     public CustomerEntity(String name, String email, String nation) {
         this.name = name;
         this.email = email;

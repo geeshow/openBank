@@ -24,7 +24,7 @@ public class MemberAdapter extends User {
                 .collect(Collectors.toSet());
     }
 
-    public MemberEntity getUser() {
+    public MemberEntity getMemberEntity() {
         return memberEntity;
     }
 }

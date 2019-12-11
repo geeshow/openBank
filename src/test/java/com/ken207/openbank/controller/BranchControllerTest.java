@@ -215,6 +215,68 @@ public class BranchControllerTest extends BaseControllerTest {
                 ));
     }
 
+
+    @Test
+    @TestDescription("30개의 지점을 10개씩 두번째 페이지 조회하기")
+    public void queryBranchesWithAuthentication() throws Exception {
+        //given
+        IntStream.range(0,30).forEach(this::generateBranch);
+
+        //when & then
+        this.mockMvc.perform(get("/api/branch")
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .param("page", "1")
+                        .param("size", "10")
+                        .param("sort", "name,DESC"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.branchResponseList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.create-branch").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("query-branches",
+                        links(
+                                linkWithRel("first").description("link to first page"),
+                                linkWithRel("prev").description("link to prev page"),
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("next").description("link to next page"),
+                                linkWithRel("last").description("link to last page"),
+                                linkWithRel("create-branch").description("link to last."),
+                                linkWithRel("profile").description("link to profile.")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("현재 페이지 번호. 0페이지 부터 시작."),
+                                parameterWithName("size").description("한 페이지의 사이즈"),
+                                parameterWithName("sort").description("데이터 정렬. ex)name, DESC")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("_embedded.branchResponseList[0].id").description("identifier of branch"),
+                                fieldWithPath("_embedded.branchResponseList[0].name").description("name of branch"),
+                                fieldWithPath("_embedded.branchResponseList[0].businessNumber").description("businessNumber of branch"),
+                                fieldWithPath("_embedded.branchResponseList[0].taxOfficeCode").description("taxOfficeCode of branch"),
+                                fieldWithPath("_embedded.branchResponseList[0].telNumber").description("telNumber date of branch"),
+                                fieldWithPath("_embedded.branchResponseList[0].regDateTime").description("regDateTime branch of branch"),
+                                fieldWithPath("_embedded.branchResponseList[0].branchType").description("branchType branch of branch"),
+                                fieldWithPath("_embedded.branchResponseList[0]._links.self.href").description("link to self."),
+                                fieldWithPath("_links.first.href").description("link to first."),
+                                fieldWithPath("_links.prev.href").description("link to prev."),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.next.href").description("link to next."),
+                                fieldWithPath("_links.last.href").description("link to last."),
+                                fieldWithPath("_links.create-branch.href").description("link to last."),
+                                fieldWithPath("_links.profile.href").description("link to profile."),
+                                fieldWithPath("page.size").description("size of one page."),
+                                fieldWithPath("page.totalElements").description("amount of datas."),
+                                fieldWithPath("page.totalPages").description("amount of pages."),
+                                fieldWithPath("page.number").description("current page number.")
+                        )
+                ));
+    }
+
     @Test
     @TestDescription("지점 한건 조회하기")
     public void getBranch() throws Exception {

@@ -1,12 +1,16 @@
 package com.ken207.openbank.controller;
 
+import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.domain.BranchEntity;
+import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.dto.request.BranchRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.BranchResponse;
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.repository.BranchRepository;
+import com.ken207.openbank.user.MemberAdapter;
+import com.ken207.openbank.user.MemberRole;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +19,12 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,18 +91,24 @@ public class BranchController {
     }
 
     @GetMapping
-    public ResponseEntity queryBranches(Pageable pageable, PagedResourcesAssembler<BranchEntity> assembler) {
+    public ResponseEntity queryBranches(Pageable pageable, PagedResourcesAssembler<BranchEntity> assembler,
+                                        @CurrentUser MemberEntity memberEntity) {
         Page<BranchEntity> page = this.branchRepository.findAll(pageable);
         PagedResources<ResponseResource> pagedResources = assembler.toResource(page,
                 e -> new ResponseResource(
                         BranchResponse.transform(e)
                 ));
         pagedResources.add(new Link("/docs/index.html#resources-branches-list").withRel("profile"));
+        if ( memberEntity != null ) {
+            pagedResources.add(linkTo(BranchController.class).withRel("create-branch"));
+        }
         return ResponseEntity.ok(pagedResources);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity getBranch(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         Optional<BranchEntity> byId = this.branchRepository.findById(id);
         if (!byId.isPresent()) {
             return notFoundResponse();
@@ -125,7 +140,12 @@ public class BranchController {
     @PutMapping("/{id}")
     public ResponseEntity updateBranch(@PathVariable Long id,
                                        @RequestBody @Valid BranchRequest BranchRequest,
-                                       Errors errors) {
+                                       Errors errors,
+                                       @CurrentUser MemberEntity currentMember) {
+
+        if ( currentMember.getRoles().contains(MemberRole.ADMIN) ) {
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        }
 
         Optional<BranchEntity> optionalBranch = this.branchRepository.findById(id);
         if ( !optionalBranch.isPresent() ) {

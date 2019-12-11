@@ -44,13 +44,6 @@ public class AuthServerConfigTest {
     @TestDescription("인증 토근을 발급 받는 테스트")
     public void getAuthToken() throws Exception {
         //given
-        MemberEntity member = MemberEntity.builder()
-                .email(appSecurityProperties.getUserUsername())
-                .password(appSecurityProperties.getUserPassword())
-                .roles(Set.of(MemberRole.USER))
-                .build();
-        memberService.createUser(member);
-
         String clientId = appSecurityProperties.getDefaultClientId();
         String clientSecret = appSecurityProperties.getDefaultClientSecret();
 
@@ -59,6 +52,7 @@ public class AuthServerConfigTest {
         params.add("username", appSecurityProperties.getUserUsername());
         params.add("password", appSecurityProperties.getUserPassword());
 
+        //when & then
         this.mockMvc.perform(post("/oauth/token")
                     .with(httpBasic(clientId, clientSecret))
                     .accept(MediaType.APPLICATION_JSON_UTF8)
