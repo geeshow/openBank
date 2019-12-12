@@ -3,6 +3,7 @@ package com.ken207.openbank.service;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.domain.enums.TradeCd;
+import com.ken207.openbank.exception.BizRuntimeException;
 import com.ken207.openbank.repository.AccountRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,5 +102,57 @@ public class AccountServiceTest {
         assertEquals(trnAmt1+trnAmt2+trnAmt3, accountEntity.getTradeLogs().get(3).getBlncAfter());
         assertEquals(trnAmt3, accountEntity.getTradeLogs().get(3).getAmount());
 
+    }
+
+
+    @Test
+    @TestDescription("정상 출금 테스트")
+    public void outAccount() throws Exception {
+        //given
+        String acno = accountService.openAccount();
+        long trnAmt1 = 1000000;
+        long trnAmt2 = 30000;
+        long trnAmt3 = trnAmt1 - trnAmt2;
+
+        //when
+        long result1 = accountService.inAmount(acno, trnAmt1);
+        long result2 = accountService.outAmount(acno, trnAmt2);
+        long result3 = accountService.outAmount(acno, trnAmt3);
+        AccountEntity accountEntity = accountRepository.findByAcno(acno);
+
+        //then
+        assertEquals(trnAmt1, result1);
+        assertEquals(trnAmt1-trnAmt2, result2);
+        assertEquals(trnAmt1-trnAmt2-trnAmt3, result3);
+        assertEquals(trnAmt1-trnAmt2-trnAmt3, accountEntity.getAccoBlnc());
+        assertEquals(4, accountEntity.getTradeLogs().size());
+
+        assertEquals(0, accountEntity.getTradeLogs().get(1).getBlncBefore());
+        assertEquals(trnAmt1, accountEntity.getTradeLogs().get(1).getBlncAfter());
+        assertEquals(trnAmt1, accountEntity.getTradeLogs().get(1).getAmount());
+        assertEquals(TradeCd.IN, accountEntity.getTradeLogs().get(1).getTradeCd());
+
+        assertEquals(trnAmt1, accountEntity.getTradeLogs().get(2).getBlncBefore());
+        assertEquals(trnAmt1-trnAmt2, accountEntity.getTradeLogs().get(2).getBlncAfter());
+        assertEquals(trnAmt2, accountEntity.getTradeLogs().get(2).getAmount());
+
+        assertEquals(trnAmt1-trnAmt2, accountEntity.getTradeLogs().get(3).getBlncBefore());
+        assertEquals(trnAmt1-trnAmt2-trnAmt3, accountEntity.getTradeLogs().get(3).getBlncAfter());
+        assertEquals(trnAmt3, accountEntity.getTradeLogs().get(3).getAmount());
+    }
+
+    @Test(expected = BizRuntimeException.class)
+    @TestDescription("잔액 초과 출금 테스트")
+    public void outAccount_BizRuntimeException() throws Exception {
+        //given
+        String acno = accountService.openAccount();
+        long trnAmt1 = 1000000;
+        long trnAmt2 = 1000001;
+
+        //when
+        long result1 = accountService.inAmount(acno, trnAmt1);
+        long result2 = accountService.outAmount(acno, trnAmt2);
+
+        //then
     }
 }

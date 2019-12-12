@@ -15,9 +15,12 @@ import static javax.persistence.FetchType.LAZY;
 @Getter @Setter
 @Builder @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AttributeOverride(name = "id",column = @Column(name = "trade_id"))
 public class TradeLog extends BaseEntity<TradeLog> {
 
+    private long srno;
     private String tradeDate;
+    private String bzDate;
     private long amount;
     private long blncBefore;
     private long blncAfter;

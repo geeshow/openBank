@@ -1,10 +1,8 @@
 package com.ken207.openbank.domain.account;
 
 import com.ken207.openbank.domain.BaseEntity;
-import com.ken207.openbank.domain.enums.AccoStcd;
-import com.ken207.openbank.domain.enums.ChnlDvcd;
-import com.ken207.openbank.domain.enums.TradeCd;
-import com.ken207.openbank.domain.enums.TxtnDvcd;
+import com.ken207.openbank.domain.enums.*;
+import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.*;
 import lombok.Builder.Default;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,19 +19,22 @@ import static javax.persistence.FetchType.LAZY;
 @Entity
 @Getter
 @Builder @NoArgsConstructor @AllArgsConstructor
+@AttributeOverride(name = "id",column = @Column(name = "account_id"))
 public class AccountEntity extends BaseEntity<AccountEntity> {
 
-    @Id
-    @GeneratedValue
-    private Long id;
     private String subjcd; //과목코드
     private String acno; //계좌번호
     private String password; //비밀번호
     private String newDt; //신규일자
     private String trmtDt; //해지일자
-    private String lastTrnDt; //최종거래일자
     private String lastIntsDt; //최종이자계산일자
     private long accoBlnc;
+    private long loanLimitAmount; //대출한도금액
+    private long lastTrnSrno; //최종거래일련번호
+
+    @Enumerated(EnumType.STRING)
+    @Default
+    private YesNo loanYn = YesNo.N; //대출한도금액
 
     @Enumerated(EnumType.STRING)
     private AccoStcd accoStcd; //계좌상태코드
@@ -55,6 +56,9 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     @JoinColumn(name = "account_log_id")
     private List<TradeLog> tradeLogs = new ArrayList<>();
 
+    @Transient
+    private String reckonDt; //기산일자
+
     /**
      * 신규
      * @return
@@ -65,8 +69,9 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .subjcd("13") //과목코드
                 .acno("") //계좌번호
                 .newDt(tradeDate) //신규일자
-                .lastTrnDt(tradeDate) //최종거래일자
+                .reckonDt(tradeDate) //최종거래일자
                 .lastIntsDt(tradeDate) //최종이자계산일자
+                .lastTrnId(0) //최종이자계산일자
                 .accoBlnc(0)
                 .build();
 
@@ -102,12 +107,24 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      */
     public long outAmount(long tradeAmount) {
 
+        if ( getPosibleOutAmt() < tradeAmount ) {
+            throw new BizRuntimeException("출금가능금액 부족");
+        }
         long blncBefore = this.accoBlnc;
         this.accoBlnc -= tradeAmount;
 
         addTradeLog(tradeAmount, blncBefore, TradeCd.OUT);
 
         return this.accoBlnc;
+    }
+
+    public long getPosibleOutAmt() {
+        if ( this.loanYn == YesNo.Y ) {
+            return this.loanLimitAmount + this.accoBlnc;
+        }
+        else {
+            return this.accoBlnc;
+        }
     }
 
     /**
