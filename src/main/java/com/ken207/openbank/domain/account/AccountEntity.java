@@ -8,6 +8,7 @@ import com.ken207.openbank.domain.enums.TxtnDvcd;
 import lombok.*;
 import lombok.Builder.Default;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 
@@ -20,7 +21,7 @@ import static javax.persistence.FetchType.LAZY;
 @Entity
 @Getter
 @Builder @NoArgsConstructor @AllArgsConstructor
-public class AccountEntity {
+public class AccountEntity extends BaseEntity<AccountEntity> {
 
     @Id
     @GeneratedValue
@@ -69,14 +70,7 @@ public class AccountEntity {
                 .accoBlnc(0)
                 .build();
 
-        TradeLog tradeLog = TradeLog.builder()
-                .amount(0)
-                .tradeCd(TradeCd.OPEN)
-                .tradeDate(tradeDate)
-                .accountEntity(account)
-                .build();
-
-        account.getTradeLogs().add(tradeLog);
+        account.addTradeLog(0, 0, TradeCd.OPEN);
 
         return account;
     }
@@ -94,21 +88,11 @@ public class AccountEntity {
      * 입금
      */
     public long inAmount(long tradeAmount) {
-        String tradeDate = LocalDate.now().toString();
 
         long blncBefore = this.accoBlnc;
         this.accoBlnc += tradeAmount;
 
-        TradeLog tradeLog = TradeLog.builder()
-                .amount(tradeAmount)
-                .blncBefore(blncBefore)
-                .blncAfter(this.accoBlnc)
-                .tradeCd(TradeCd.IN)
-                .tradeDate(tradeDate)
-                .accountEntity(this)
-                .build();
-
-        this.tradeLogs.add(tradeLog);
+        addTradeLog(tradeAmount, blncBefore, TradeCd.IN);
 
         return this.accoBlnc;
     }
@@ -116,8 +100,14 @@ public class AccountEntity {
     /**
      * 출금
      */
-    public void outAmount() {
+    public long outAmount(long tradeAmount) {
 
+        long blncBefore = this.accoBlnc;
+        this.accoBlnc -= tradeAmount;
+
+        addTradeLog(tradeAmount, blncBefore, TradeCd.OUT);
+
+        return this.accoBlnc;
     }
 
     /**
@@ -126,4 +116,22 @@ public class AccountEntity {
     public void closeAmount() {
 
     }
+
+
+    private void addTradeLog(long tradeAmount, long blncBefore, TradeCd tradeCd) {
+        String tradeDate = LocalDate.now().toString();
+
+        TradeLog tradeLog = TradeLog.builder()
+                .amount(tradeAmount)
+                .blncBefore(blncBefore)
+                .blncAfter(this.accoBlnc)
+                .tradeCd(tradeCd)
+                .tradeDate(tradeDate)
+                .accountEntity(this)
+                .build();
+
+        this.tradeLogs.add(tradeLog);
+        this.lastTrnDt = tradeDate;
+    }
+
 }
