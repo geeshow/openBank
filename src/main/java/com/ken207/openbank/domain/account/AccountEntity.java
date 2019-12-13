@@ -1,5 +1,6 @@
 package com.ken207.openbank.domain.account;
 
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.BaseEntity;
 import com.ken207.openbank.domain.enums.*;
 import com.ken207.openbank.exception.BizRuntimeException;
@@ -114,6 +115,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
         }
         this.tradeAmount = tradeAmount;
         this.blncBefore = this.accoBlnc;
+        this.accoBlnc -= this.tradeAmount;
 
         addTradeLog(TradeCd.OUT);
 
@@ -153,8 +155,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
 
     public String getReckonDt() {
         if ( reckonDt == null ) {
-            SimpleDateFormat yyyymmdd = new SimpleDateFormat("yyyymmdd");
-            return yyyymmdd.format(LocalDate.now());
+            return OBDateUtils.getToday();
         }
 
         return reckonDt;

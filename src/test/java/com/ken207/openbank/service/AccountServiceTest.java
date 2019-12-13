@@ -1,5 +1,6 @@
 package com.ken207.openbank.service;
 
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.domain.enums.TradeCd;
@@ -40,10 +41,10 @@ public class AccountServiceTest {
         AccountEntity accountEntity = accountRepository.findByAcno(acno);
 
         //then
-        assertEquals(String.valueOf(13100000 + accountEntity.getId().intValue()), accountEntity.getAcno());
-        assertEquals(LocalDate.now().toString(), accountEntity.getNewDt());
-        assertEquals(LocalDate.now().toString(), accountEntity.getLastIntsDt());
-        assertEquals(LocalDate.now().toString(), accountEntity.getLastTrnDt());
+        assertThat(accountEntity.getAcno().contains("1310000"));
+        assertEquals(OBDateUtils.getToday(), accountEntity.getNewDt());
+        assertEquals(OBDateUtils.getToday(), accountEntity.getLastIntsDt());
+        assertEquals(OBDateUtils.getToday(), accountEntity.getReckonDt());
         assertEquals(password, accountEntity.getPassword());
         assertEquals(0, accountEntity.getAccoBlnc());
     }
@@ -52,16 +53,18 @@ public class AccountServiceTest {
     @TestDescription("비밀번호 없이 계좌 정상 신규 테스트")
     public void openAccountWithoutPassword() throws Exception {
         //given
+        String subjCd = "13";
 
         //when
         String acno = accountService.openAccount();
         AccountEntity accountEntity = accountRepository.findByAcno(acno);
 
         //then
-        assertEquals(String.valueOf(13100000 + accountEntity.getId().intValue()), accountEntity.getAcno());
-        assertEquals(LocalDate.now().toString(), accountEntity.getNewDt());
-        assertEquals(LocalDate.now().toString(), accountEntity.getLastIntsDt());
-        assertEquals(LocalDate.now().toString(), accountEntity.getLastTrnDt());
+        assertThat(accountEntity.getAcno().contains("1310000"));
+        assertEquals(OBDateUtils.getToday(), accountEntity.getNewDt());
+        assertEquals(OBDateUtils.getToday(), accountEntity.getLastIntsDt());
+        assertEquals(OBDateUtils.getToday(), accountEntity.getReckonDt());
+        assertEquals(subjCd, accountEntity.getSubjcd());
         assertEquals("", accountEntity.getPassword());
         assertEquals(0, accountEntity.getAccoBlnc());
     }

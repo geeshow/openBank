@@ -1,5 +1,6 @@
 package com.ken207.openbank.service;
 
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.CodeGeneratorRepository;
@@ -24,10 +25,8 @@ public class AccountService {
     public String openAccount(String passwd) {
         String subjCd = "13";
         String acno = codeGeneratorService.createAcno(subjCd);
-        SimpleDateFormat yyyymmdd = new SimpleDateFormat("yyyymmdd");
-        String newDt = yyyymmdd.format(LocalDate.now());
 
-        AccountEntity accountEntity = AccountEntity.openAccount(acno, subjCd, newDt);
+        AccountEntity accountEntity = AccountEntity.openAccount(acno, subjCd, OBDateUtils.getToday());
         accountEntity.setPassword(passwd);
         AccountEntity saveAccount = accountRepository.save(accountEntity);
         return saveAccount.getAcno();
