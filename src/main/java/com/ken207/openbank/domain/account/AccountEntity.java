@@ -10,6 +10,7 @@ import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,30 +60,30 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     @Transient
     private String reckonDt; //기산일자
 
+    @Transient
+    private long blncBefore; //거래전잔액
+
+    @Transient
+    private long tradeAmount; //거래금액
     /**
      * 신규
      * @return
      */
-    public static AccountEntity openAccount() {
-        String tradeDate = LocalDate.now().toString();
+    public static AccountEntity openAccount(String acno, String subjCd, String newDt) {
         AccountEntity account = AccountEntity.builder()
-                .subjcd("13") //과목코드
-                .acno("") //계좌번호
-                .newDt(tradeDate) //신규일자
-                .reckonDt(tradeDate) //최종거래일자
-                .lastIntsDt(tradeDate) //최종이자계산일자
-                .lastTrnId(0) //최종이자계산일자
+                .subjcd(subjCd) //과목코드
+                .acno(acno) //계좌번호
+                .newDt(newDt) //신규일자
+                .reckonDt(newDt) //최종거래일자
+                .lastIntsDt(newDt) //최종이자계산일자
                 .accoBlnc(0)
+                .blncBefore(0)
+                .tradeAmount(0)
                 .build();
 
-        account.addTradeLog(0, 0, TradeCd.OPEN);
+        account.addTradeLog(TradeCd.OPEN);
 
         return account;
-    }
-
-    public String setAcno() {
-        this.acno = this.subjcd + (100000+this.getId());
-        return this.acno;
     }
 
     public void setPassword(String password) {
@@ -94,10 +95,11 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      */
     public long inAmount(long tradeAmount) {
 
-        long blncBefore = this.accoBlnc;
-        this.accoBlnc += tradeAmount;
+        this.tradeAmount = tradeAmount;
+        this.blncBefore = this.accoBlnc;
+        this.accoBlnc += this.tradeAmount;
 
-        addTradeLog(tradeAmount, blncBefore, TradeCd.IN);
+        addTradeLog(TradeCd.IN);
 
         return this.accoBlnc;
     }
@@ -110,10 +112,10 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
         if ( getPosibleOutAmt() < tradeAmount ) {
             throw new BizRuntimeException("출금가능금액 부족");
         }
-        long blncBefore = this.accoBlnc;
-        this.accoBlnc -= tradeAmount;
+        this.tradeAmount = tradeAmount;
+        this.blncBefore = this.accoBlnc;
 
-        addTradeLog(tradeAmount, blncBefore, TradeCd.OUT);
+        addTradeLog(TradeCd.OUT);
 
         return this.accoBlnc;
     }
@@ -135,20 +137,26 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     }
 
 
-    private void addTradeLog(long tradeAmount, long blncBefore, TradeCd tradeCd) {
-        String tradeDate = LocalDate.now().toString();
+    private void addTradeLog(TradeCd tradeCd) {
 
         TradeLog tradeLog = TradeLog.builder()
-                .amount(tradeAmount)
-                .blncBefore(blncBefore)
+                .amount(this.tradeAmount)
+                .blncBefore(this.blncBefore)
                 .blncAfter(this.accoBlnc)
                 .tradeCd(tradeCd)
-                .tradeDate(tradeDate)
+                .tradeDate(this.getReckonDt())
                 .accountEntity(this)
                 .build();
 
         this.tradeLogs.add(tradeLog);
-        this.lastTrnDt = tradeDate;
     }
 
+    public String getReckonDt() {
+        if ( reckonDt == null ) {
+            SimpleDateFormat yyyymmdd = new SimpleDateFormat("yyyymmdd");
+            return yyyymmdd.format(LocalDate.now());
+        }
+
+        return reckonDt;
+    }
 }

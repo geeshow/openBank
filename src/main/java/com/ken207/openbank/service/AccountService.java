@@ -2,11 +2,14 @@ package com.ken207.openbank.service;
 
 import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.CodeGeneratorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -15,13 +18,18 @@ import java.util.Optional;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final CodeGeneratorService codeGeneratorService;
 
     @Transactional
     public String openAccount(String passwd) {
-        AccountEntity accountEntity = AccountEntity.openAccount();
+        String subjCd = "13";
+        String acno = codeGeneratorService.createAcno(subjCd);
+        SimpleDateFormat yyyymmdd = new SimpleDateFormat("yyyymmdd");
+        String newDt = yyyymmdd.format(LocalDate.now());
+
+        AccountEntity accountEntity = AccountEntity.openAccount(acno, subjCd, newDt);
         accountEntity.setPassword(passwd);
         AccountEntity saveAccount = accountRepository.save(accountEntity);
-        saveAccount.setAcno();
         return saveAccount.getAcno();
     }
 

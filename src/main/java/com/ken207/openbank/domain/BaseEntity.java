@@ -19,6 +19,7 @@ public abstract class BaseEntity<T extends BaseEntity<?>> implements Comparable<
 
     @Id
     @GeneratedValue
+
     private Long id;
 
 //    @JsonProperty(access = READ_ONLY)
