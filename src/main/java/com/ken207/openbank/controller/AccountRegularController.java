@@ -12,6 +12,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,7 @@ public class AccountRegularController {
     private final AccountRepository accountRepository;
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(AccountRegularController.class);
 
+    @PostMapping
     public ResponseEntity createAccount(@RequestBody @Valid AccountDto.Request accountRequest, Errors errors) {
 
         //Request Data Validation
@@ -47,7 +49,7 @@ public class AccountRegularController {
                 .taxationCode(account.getTaxationCode())
                 .accoBlnc(account.getAccoBlnc())
                 .accountStatusCode(account.getAccountStatusCode())
-                .accoutNum(account.getAccountNum())
+                .accountNum(account.getAccountNum())
                 .lastIntsDt(account.getLastIntsDt())
                 .subjectCode(account.getSubjectCode())
                 .closeDate(account.getCloseDate())
@@ -55,15 +57,15 @@ public class AccountRegularController {
 
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,
-                controllerLinkBuilder.slash(newAccount.getAccoutNum()).withSelfRel(),
+                controllerLinkBuilder.slash(newAccount.getAccountNum()).withSelfRel(),
 
-                controllerLinkBuilder.slash(newAccount.getAccoutNum()).withRel("update-account"),
+                controllerLinkBuilder.slash(newAccount.getAccountNum()).withRel("update-account"),
                 controllerLinkBuilder.withRel(("query-accounts")),
                 new Link("/docs/index.html#resources-accounts-create").withRel("profile")
         );
 
         //redirect
-        URI createdUri = controllerLinkBuilder.slash(newAccount.getAccoutNum()).toUri();
+        URI createdUri = controllerLinkBuilder.slash(newAccount.getAccountNum()).toUri();
         return ResponseEntity.created(createdUri).body(responseResource);
     }
 }

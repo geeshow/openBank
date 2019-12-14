@@ -45,11 +45,6 @@ public class BranchControllerTest extends BaseControllerTest {
     @Autowired
     MemberRepository memberRepository;
 
-    @Before
-    public void setUp() {
-        this.memberRepository.deleteAll();
-    }
-
     @Test
     @TestDescription("정상적으로 지점을 생성하는 테스트")
     public void createBranch() throws Exception {

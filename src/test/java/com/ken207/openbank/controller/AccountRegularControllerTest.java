@@ -37,36 +37,6 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     @Autowired
     AccountRegularController accountRegularController;
 
-
-    public String getBearerToken2() throws Exception {
-        //given
-        MemberEntity member = MemberEntity.builder()
-                .email(appSecurityProperties.getUserUsername())
-                .password(appSecurityProperties.getUserPassword())
-                .roles(Set.of(MemberRole.USER))
-                .build();
-        memberService.createUser(member);
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "password");
-        params.add("username", appSecurityProperties.getUserUsername());
-        params.add("password", appSecurityProperties.getUserPassword());
-
-        this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .params(params)
-        );
-        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .params(params)
-        );
-        String responseBody = perform.andReturn().getResponse().getContentAsString();
-        Jackson2JsonParser parser = new Jackson2JsonParser();
-        return "Bearer " + parser.parseMap(responseBody).get("access_token").toString();
-    }
-
     @Test
     @TestDescription("보통예금 계좌생성 정상 테스트")
     public void openAccount() throws Exception {
@@ -80,22 +50,22 @@ public class AccountRegularControllerTest extends BaseControllerTest {
 
         //when & then
         mockMvc.perform(post("/api/account/regular")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken2())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(accountRequest)))
+                    .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsString(accountRequest)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("accoutNum").exists())
+                .andExpect(jsonPath("accountNum").exists())
                 .andExpect(jsonPath("regDate").value(regDate))
-                .andExpect(jsonPath("taxationCode").value(taxation))
-                .andExpect(jsonPath("closeDate").value(regDate))
+                .andExpect(jsonPath("taxationCode").value(taxation.toString()))
+                .andExpect(jsonPath("closeDate").isEmpty())
                 .andExpect(jsonPath("lastIntsDt").value(regDate))
                 .andExpect(jsonPath("accoBlnc").value(0))
-                .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR))
-                .andExpect(jsonPath("accoStcd").value(AccountStatusCode.ACTIVE))
+                .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR.toString()))
+                .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("create-account",
                         links(
                                 linkWithRel("self").description("link to self"),
@@ -116,13 +86,14 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
                         ),
                         responseFields(
-                                fieldWithPath("accoutNum").description("Number of new account"),
+                                fieldWithPath("accountNum").description("Number of new account"),
                                 fieldWithPath("regDate").description("Registration Date of new account"),
+                                fieldWithPath("closeDate").description("Close Date of account"),
                                 fieldWithPath("taxationCode").description("way to tax in interest"),
                                 fieldWithPath("lastIntsDt").description("the last calculated date of account interest"),
                                 fieldWithPath("accoBlnc").description("balance of account"),
                                 fieldWithPath("subjectCode").description("code of account type"),
-                                fieldWithPath("accoStcd").description("status of account"),
+                                fieldWithPath("accountStatusCode").description("status of account"),
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.query-accounts.href").description("link to query accountes."),
                                 fieldWithPath("_links.update-account.href").description("link to update existing account."),

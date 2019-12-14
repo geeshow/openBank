@@ -103,7 +103,6 @@ public class BranchController {
                         controllerLinkBuilder.slash(e.getId()).withSelfRel()
                 ));
 
-        pagedResources.add(controllerLinkBuilder.withSelfRel());
         pagedResources.add(new Link("/docs/index.html#resources-branches-list").withRel("profile"));
         if ( memberEntity != null ) {
             pagedResources.add(controllerLinkBuilder.withRel("create-branch"));

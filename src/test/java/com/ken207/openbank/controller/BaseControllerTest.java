@@ -56,13 +56,6 @@ public class BaseControllerTest {
 
     public String getBearerToken() throws Exception {
         //given
-        MemberEntity member = MemberEntity.builder()
-                .email(appSecurityProperties.getUserUsername())
-                .password(appSecurityProperties.getUserPassword())
-                .roles(Set.of(MemberRole.USER))
-                .build();
-        memberService.createUser(member);
-
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "password");
         params.add("username", appSecurityProperties.getUserUsername());
