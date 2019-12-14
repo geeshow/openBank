@@ -39,6 +39,8 @@ public class CustomerController {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private ModelMapper modelMapper;
 
+    private final ControllerLinkBuilder controllerLinkBuilder = linkTo(CustomerController.class);
+
     private EmployeeEntity employeeEntity;
 
     public void start() {
@@ -64,13 +66,14 @@ public class CustomerController {
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(customerResponse,
-                linkTo(CustomerController.class).slash(newCustomerEntity.getId()).withRel("update-customer"),
-                linkTo(CustomerController.class).withRel(("query-customers")),
+                controllerLinkBuilder.slash(newCustomerEntity.getId()).withSelfRel(),
+                controllerLinkBuilder.slash(newCustomerEntity.getId()).withRel("update-customer"),
+                controllerLinkBuilder.withRel(("query-customers")),
                 new Link("/docs/index.html#resources-customers-create").withRel("profile")
         );
 
         //redirect
-        ControllerLinkBuilder selfLinkBuilder = linkTo(CustomerController.class).slash(customerResponse.getId());
+        ControllerLinkBuilder selfLinkBuilder = controllerLinkBuilder.slash(customerResponse.getId());
         URI createdUri = selfLinkBuilder.toUri();
         return ResponseEntity.created(createdUri).body(responseResource);
     }
@@ -83,6 +86,7 @@ public class CustomerController {
                 e -> new ResponseResource(
                         CustomerResponse.transform(e)
                 ));
+        pagedResources.add(controllerLinkBuilder.withSelfRel());
         pagedResources.add(new Link("/docs/index.html#resources-customers-list").withRel("profile"));
         return ResponseEntity.ok(pagedResources);
     }

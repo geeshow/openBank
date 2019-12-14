@@ -9,7 +9,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 public class ResponseResource extends Resource {
 
-    public ResponseResource(CreateResponse createResponse, Link... links) {
+    public
+    ResponseResource(CreateResponse createResponse, Link... links) {
 
         super(createResponse, links);
 

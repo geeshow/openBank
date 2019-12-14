@@ -56,6 +56,7 @@ public class AccountRegularController {
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,
                 controllerLinkBuilder.slash(newAccount.getAccoutNum()).withSelfRel(),
+
                 controllerLinkBuilder.slash(newAccount.getAccoutNum()).withRel("update-account"),
                 controllerLinkBuilder.withRel(("query-accounts")),
                 new Link("/docs/index.html#resources-accounts-create").withRel("profile")

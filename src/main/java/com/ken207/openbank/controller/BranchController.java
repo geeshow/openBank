@@ -43,6 +43,8 @@ public class BranchController {
 
     BranchRepository branchRepository;
 
+    private final ControllerLinkBuilder controllerLinkBuilder = linkTo(BranchController.class);
+
     public BranchController(BranchRepository branchRepository, ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
         this.branchRepository = branchRepository;
@@ -79,13 +81,14 @@ public class BranchController {
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(branchResponse,
-                linkTo(BranchController.class).slash(branchResponse.getId()).withRel("update-branch"),
-                linkTo(BranchController.class).withRel(("query-branches")),
+                controllerLinkBuilder.slash(branchResponse.getId()).withSelfRel(),
+                controllerLinkBuilder.slash(branchResponse.getId()).withRel("update-branch"),
+                controllerLinkBuilder.withRel(("query-branches")),
                 new Link("/docs/index.html#resources-branches-create").withRel("profile")
         );
 
         //redirect
-        ControllerLinkBuilder selfLinkBuilder = linkTo(BranchController.class).slash(branchResponse.getId());
+        ControllerLinkBuilder selfLinkBuilder = controllerLinkBuilder.slash(branchResponse.getId());
         URI createdUri = selfLinkBuilder.toUri();
         return ResponseEntity.created(createdUri).body(responseResource);
     }
@@ -96,11 +99,14 @@ public class BranchController {
         Page<BranchEntity> page = this.branchRepository.findAll(pageable);
         PagedResources<ResponseResource> pagedResources = assembler.toResource(page,
                 e -> new ResponseResource(
-                        BranchResponse.transform(e)
+                        BranchResponse.transform(e),
+                        controllerLinkBuilder.slash(e.getId()).withSelfRel()
                 ));
+
+        pagedResources.add(controllerLinkBuilder.withSelfRel());
         pagedResources.add(new Link("/docs/index.html#resources-branches-list").withRel("profile"));
         if ( memberEntity != null ) {
-            pagedResources.add(linkTo(BranchController.class).withRel("create-branch"));
+            pagedResources.add(controllerLinkBuilder.withRel("create-branch"));
         }
         return ResponseEntity.ok(pagedResources);
     }
@@ -129,8 +135,9 @@ public class BranchController {
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(branchResponse,
-                linkTo(BranchController.class).slash(branchResponse.getId()).withRel("update-branch"),
-                linkTo(BranchController.class).withRel(("query-branches")),
+                controllerLinkBuilder.slash(branchResponse.getId()).withSelfRel(),
+                controllerLinkBuilder.slash(branchResponse.getId()).withRel("update-branch"),
+                controllerLinkBuilder.withRel(("query-branches")),
                 new Link("/docs/index.html#resources-branch-get").withRel("profile")
         );
 
@@ -164,6 +171,7 @@ public class BranchController {
 
         BranchResponse branchResponse = this.modelMapper.map(savedBranchEntity, BranchResponse.class);
         ResponseResource responseResource = new ResponseResource(branchResponse);
+        responseResource.add(controllerLinkBuilder.slash(branchResponse.getId()).withSelfRel());
         responseResource.add(new Link("/docs/index.html#resources-branch-update").withRel("profile"));
 
         return ResponseEntity.ok(responseResource);
