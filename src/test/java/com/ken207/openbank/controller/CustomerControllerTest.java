@@ -305,37 +305,4 @@ public class CustomerControllerTest extends BaseControllerTest  {
     }
 
 
-    private String getBearerToken() throws Exception {
-        //given
-        String username = "ken@email.com";
-        String password = "ken207";
-        MemberEntity member = MemberEntity.builder()
-                .email(username)
-                .password(password)
-                .roles(Set.of(MemberRole.USER))
-                .build();
-        memberService.createUser(member);
-
-        String clientId = appSecurityProperties.getDefaultClientId();
-        String clientSecret = appSecurityProperties.getDefaultClientSecret();
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "password");
-        params.add("username", username);
-        params.add("password", password);
-
-        this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret))
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .params(params)
-        );
-        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret))
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .params(params)
-        );
-        String responseBody = perform.andReturn().getResponse().getContentAsString();
-        Jackson2JsonParser parser = new Jackson2JsonParser();
-        return "Bearer " + parser.parseMap(responseBody).get("access_token").toString();
-    }
 }

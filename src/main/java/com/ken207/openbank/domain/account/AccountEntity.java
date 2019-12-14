@@ -6,13 +6,9 @@ import com.ken207.openbank.domain.enums.*;
 import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.*;
 import lombok.Builder.Default;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.thymeleaf.util.StringUtils;
 
 import javax.persistence.*;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,31 +20,27 @@ import static javax.persistence.FetchType.LAZY;
 @AttributeOverride(name = "id",column = @Column(name = "account_id"))
 public class AccountEntity extends BaseEntity<AccountEntity> {
 
-    private String subjcd; //과목코드
-    private String acno; //계좌번호
+    private String accountNum; //계좌번호
     private String password; //비밀번호
-    private String newDt; //신규일자
-    private String trmtDt; //해지일자
+    private String regDate; //신규일자
+    private String closeDate; //해지일자
     private String lastIntsDt; //최종이자계산일자
     private long accoBlnc;
     private long loanLimitAmount; //대출한도금액
     private long lastTrnSrno; //최종거래일련번호
 
     @Enumerated(EnumType.STRING)
+    private SubjectCode subjectCode; //과목코드
+
+    @Enumerated(EnumType.STRING)
     @Default
-    private YesNo loanYn = YesNo.N; //대출한도금액
+    private YesNo loanYn = YesNo.N; //대출계좌여부
 
     @Enumerated(EnumType.STRING)
-    private AccoStcd accoStcd; //계좌상태코드
+    private AccountStatusCode accountStatusCode; //계좌상태코드
 
     @Enumerated(EnumType.STRING)
-    private AccoStcd accoNewStcd; //계좌신규상태코드
-
-    @Enumerated(EnumType.STRING)
-    private AccoStcd accoTrmtStcd; //계좌해지상태코드
-
-    @Enumerated(EnumType.STRING)
-    private TxtnDvcd txtnDvcd; //과세구분코드
+    private TaxationCode taxationCode; //과세구분코드
 
     @Enumerated(EnumType.STRING)
     private ChnlDvcd regChnlDvcd;
@@ -70,13 +62,15 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      * 신규
      * @return
      */
-    public static AccountEntity openAccount(String acno, String subjCd, String newDt) {
+    public static AccountEntity openAccount(String accountNum, SubjectCode subjectCode, String regDate, TaxationCode taxationCode) {
         AccountEntity account = AccountEntity.builder()
-                .subjcd(subjCd) //과목코드
-                .acno(acno) //계좌번호
-                .newDt(newDt) //신규일자
-                .reckonDt(newDt) //최종거래일자
-                .lastIntsDt(newDt) //최종이자계산일자
+                .subjectCode(subjectCode) //과목코드
+                .accountNum(accountNum) //계좌번호
+                .regDate(regDate) //신규일자
+                .reckonDt(regDate) //최종거래일자
+                .lastIntsDt(regDate) //최종이자계산일자
+                .taxationCode(taxationCode) //과세구분코드
+                .accountStatusCode(AccountStatusCode.ACTIVE)
                 .accoBlnc(0)
                 .blncBefore(0)
                 .tradeAmount(0)

@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
-    AccountEntity findByAcno(String acno);
+    AccountEntity findByAccountNum(String accountNum);
 }

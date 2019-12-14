@@ -139,18 +139,25 @@ operation::create-branchEntity[snippets='request-fields,curl-request,http-reques
 
 `GET` 요청을 사용하여 서비스의 모든 지점정보를 조회할 수 있다.
 
-operation::get-customers[snippets='response-fields,curl-request,http-response,links']
+operation::get-branches[snippets='response-fields,curl-request,http-response,links']
 
 [[resources-branchEntity-get]]
 === 지점 조회
 
 `Get` 요청을 사용해서 기존 지점 하나를 조회할 수 있다.
 
-operation::get-customerEntity[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
+operation::get-branchEntity[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
 
 [[resources-branchEntity-update]]
 === 지점정보 수정
 
 `PUT` 요청을 사용해서 기존 지점정보를 수정할 수 있다.
 
-operation::update-customerEntity[snippets='request-fields,curl-request,http-response,links']
+operation::update-branchEntity[snippets='request-fields,curl-request,http-response,links']
+
+[[resources-accounts-create]]
+=== 계좌 생성
+
+`POST` 요청을 사용해서 새 계좌를 만들 수 있다.
+
+operation::create-accountEntity[snippets='request-fields,curl-request,http-request,request-headers,http-response,response-headers,response-fields,links']

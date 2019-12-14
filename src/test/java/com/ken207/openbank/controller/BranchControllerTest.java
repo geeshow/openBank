@@ -45,12 +45,6 @@ public class BranchControllerTest extends BaseControllerTest {
     @Autowired
     MemberRepository memberRepository;
 
-    @Autowired
-    MemberService memberService;
-
-    @Autowired
-    AppSecurityProperties appSecurityProperties;
-
     @Before
     public void setUp() {
         this.memberRepository.deleteAll();
@@ -74,7 +68,7 @@ public class BranchControllerTest extends BaseControllerTest {
 
         //when & then
         mockMvc.perform(post("/api/branch")
-                    .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                    .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
                     .content(objectMapper.writeValueAsString(branchRequest)))
@@ -128,34 +122,6 @@ public class BranchControllerTest extends BaseControllerTest {
         ;
     }
 
-    private String getBearerToken() throws Exception {
-        //given
-        MemberEntity member = MemberEntity.builder()
-                .email(appSecurityProperties.getUserUsername())
-                .password(appSecurityProperties.getUserPassword())
-                .roles(Set.of(MemberRole.USER))
-                .build();
-        memberService.createUser(member);
-
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", "password");
-        params.add("username", appSecurityProperties.getUserUsername());
-        params.add("password", appSecurityProperties.getUserPassword());
-
-        this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .params(params)
-        );
-        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
-                .accept(MediaType.APPLICATION_JSON_UTF8)
-                .params(params)
-        );
-        String responseBody = perform.andReturn().getResponse().getContentAsString();
-        Jackson2JsonParser parser = new Jackson2JsonParser();
-        return "Bearer " + parser.parseMap(responseBody).get("access_token").toString();
-    }
 
     @Test
     @TestDescription("30개의 지점을 10개씩 두번째 페이지 조회하기")

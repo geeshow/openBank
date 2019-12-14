@@ -1,17 +1,14 @@
 package com.ken207.openbank.service;
 
-import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.account.AccountEntity;
+import com.ken207.openbank.domain.enums.SubjectCode;
+import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.repository.AccountRepository;
-import com.ken207.openbank.repository.CodeGeneratorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,19 +19,18 @@ public class AccountService {
     private final CodeGeneratorService codeGeneratorService;
 
     @Transactional
-    public String openAccount(String passwd) {
-        String subjCd = "13";
-        String acno = codeGeneratorService.createAcno(subjCd);
+    public String openRegularAccount(AccountDto.Request accountRequest) {
+        String accountNum = codeGeneratorService.createAcno(SubjectCode.REGULAR.getSubjectCode());
 
-        AccountEntity accountEntity = AccountEntity.openAccount(acno, subjCd, OBDateUtils.getToday());
-        accountEntity.setPassword(passwd);
+        AccountEntity accountEntity = AccountEntity.openAccount(accountNum, SubjectCode.REGULAR, accountRequest.getRegDate(), accountRequest.getTaxationCode());
         AccountEntity saveAccount = accountRepository.save(accountEntity);
-        return saveAccount.getAcno();
+        return saveAccount.getAccountNum();
     }
 
     @Transactional
-    public String openAccount() {
-        return openAccount("");
+    public void setPassword(String accountNum, String newPassword) {
+        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+        account.setPassword(newPassword);
     }
 
     @Transactional
@@ -52,7 +48,7 @@ public class AccountService {
     }
 
     private AccountEntity getAccountEntity(String acno) {
-        AccountEntity account = accountRepository.findByAcno(acno);
+        AccountEntity account = accountRepository.findByAccountNum(acno);
         if (account == null) {
             throw new EntityNotFoundException("존재하지 않는 계좌번호 입니다.");
         }
