@@ -75,4 +75,27 @@ public class BaseControllerTest {
         Jackson2JsonParser parser = new Jackson2JsonParser();
         return "Bearer " + parser.parseMap(responseBody).get("access_token").toString();
     }
+
+
+    public String getAdminBearerToken() throws Exception {
+        //given
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "password");
+        params.add("username", appSecurityProperties.getAdminUsername());
+        params.add("password", appSecurityProperties.getAdminPassword());
+
+        this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .params(params)
+        );
+        ResultActions perform = this.mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(appSecurityProperties.getDefaultClientId(), appSecurityProperties.getDefaultClientSecret()))
+                .accept(MediaType.APPLICATION_JSON_UTF8)
+                .params(params)
+        );
+        String responseBody = perform.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser parser = new Jackson2JsonParser();
+        return "Bearer " + parser.parseMap(responseBody).get("access_token").toString();
+    }
 }

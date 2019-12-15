@@ -66,7 +66,6 @@ public class CustomerControllerTest extends BaseControllerTest  {
     @Before
     public void init() throws Exception {
         employeeEntity = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
-        this.memberRepository.deleteAll();
     }
 
     @Test
@@ -204,7 +203,7 @@ public class CustomerControllerTest extends BaseControllerTest  {
 
         //then
         mockMvc.perform(post("/api/customer")
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(customerRequest)))

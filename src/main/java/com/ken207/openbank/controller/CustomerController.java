@@ -84,9 +84,9 @@ public class CustomerController {
         Page<CustomerEntity> page = this.customerRepository.findAll(pageable);
         PagedResources<ResponseResource> pagedResources = assembler.toResource(page,
                 e -> new ResponseResource(
-                        CustomerResponse.transform(e)
+                        CustomerResponse.transform(e),
+                        controllerLinkBuilder.slash(e.getId()).withSelfRel()
                 ));
-        pagedResources.add(controllerLinkBuilder.withSelfRel());
         pagedResources.add(new Link("/docs/index.html#resources-customers-list").withRel("profile"));
         return ResponseEntity.ok(pagedResources);
     }

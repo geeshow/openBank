@@ -149,7 +149,7 @@ public class BranchController {
                                        Errors errors,
                                        @CurrentUser MemberEntity currentMember) {
 
-        if ( currentMember.getRoles().contains(MemberRole.ADMIN) ) {
+        if ( !currentMember.getRoles().contains(MemberRole.ADMIN) ) {
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
 
