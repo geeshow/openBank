@@ -70,7 +70,9 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("query-accounts").description("link to query accounts"),
-                                linkWithRel("update-account").description("link to update an existing account"),
+                                linkWithRel("deposit").description("link to deposit an existing account"),
+                                linkWithRel("withdraw").description("link to withdraw an existing account"),
+                                linkWithRel("close").description("link to close an existing account"),
                                 linkWithRel("profile").description("link to profile.")
                         ),
                         requestHeaders(
@@ -96,11 +98,56 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 fieldWithPath("accountStatusCode").description("status of account"),
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.query-accounts.href").description("link to query accountes."),
-                                fieldWithPath("_links.update-account.href").description("link to update existing account."),
+                                fieldWithPath("_links.deposit.href").description("link to deposit existing account."),
+                                fieldWithPath("_links.withdraw.href").description("link to withdraw existing account."),
+                                fieldWithPath("_links.close.href").description("link to close existing account."),
                                 fieldWithPath("_links.profile.href").description("link to profile.")
                         )
 
                 ))
+        ;
+    }
+
+    @Test
+    @TestDescription("인증없이 보통예금 계좌생성 오류 테스트")
+    public void openAccountWithoutAuthorization() throws Exception {
+        //given
+        String regDate = "20191214";
+        TaxationCode taxation = TaxationCode.REGULAR;
+        AccountDto.Request accountRequest = AccountDto.Request.builder()
+                .regDate(regDate)
+                .taxationCode(taxation)
+                .build();
+
+        //when & then
+        mockMvc.perform(post("/api/account/regular")
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsString(accountRequest)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized())
+        ;
+    }
+
+    @Test
+    @TestDescription("등록일 입력값 오류 테스트")
+    public void openAccountEmptyTest() throws Exception {
+        //given
+        String regDate = "";
+        TaxationCode taxation = TaxationCode.REGULAR;
+        AccountDto.Request accountRequest = AccountDto.Request.builder()
+                .regDate(regDate)
+                .taxationCode(taxation)
+                .build();
+
+        //when & then
+        mockMvc.perform(post("/api/account/regular")
+                    .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsString(accountRequest)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
         ;
     }
 }

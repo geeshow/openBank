@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder @AllArgsConstructor
 @NoArgsConstructor
-public class BranchResponse implements CreateResponse {
+public class BranchResponse implements BaseResponse {
 
     private Long id;
     @NotEmpty

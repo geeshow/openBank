@@ -1,16 +1,22 @@
 package com.ken207.openbank.dto;
 
+import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 
 public class AccountDto {
 
     @Builder
     @Getter @Setter
     public static class Request extends AccountDto {
+        @NonNull
         private String regDate; //신규일자
+        @NonNull
         private TaxationCode taxationCode; //과세구분코드
     }
 
@@ -28,4 +34,16 @@ public class AccountDto {
         private AccountStatusCode accountStatusCode; //계좌상태코드
     }
 
+    public static Response transform(AccountEntity accountEntity) {
+
+        return Response.builder()
+                .regDate(accountEntity.getRegDate())
+                .taxationCode(accountEntity.getTaxationCode())
+                .accountNum(accountEntity.getAccountNum())
+                .closeDate(accountEntity.getCloseDate())
+                .lastIntsDt(accountEntity.getLastIntsDt())
+                .accoBlnc(accountEntity.getAccoBlnc())
+                .build();
+
+    }
 }

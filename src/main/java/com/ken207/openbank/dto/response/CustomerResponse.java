@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
-public class CustomerResponse implements CreateResponse {
+public class CustomerResponse implements BaseResponse {
 
     @NotEmpty
     private Long id;
