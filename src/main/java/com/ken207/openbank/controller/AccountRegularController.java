@@ -8,6 +8,7 @@ import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.BranchResponse;
+import com.ken207.openbank.mapper.AccountMapper;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.service.AccountService;
 import com.ken207.openbank.user.MemberRole;
@@ -64,16 +65,17 @@ public class AccountRegularController {
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
 
         //Set response data
-        AccountDto.Response newAccount = AccountDto.Response.builder()
-                .regDate(account.getRegDate())
-                .taxationCode(account.getTaxationCode())
-                .accoBlnc(account.getAccoBlnc())
-                .accountStatusCode(account.getAccountStatusCode())
-                .accountNum(account.getAccountNum())
-                .lastIntsDt(account.getLastIntsDt())
-                .subjectCode(account.getSubjectCode())
-                .closeDate(account.getCloseDate())
-                .build();
+//        AccountDto.Response newAccount = AccountDto.Response.builder()
+//                .regDate(account.getRegDate())
+//                .taxationCode(account.getTaxationCode())
+//                .accoBlnc(account.getAccoBlnc())
+//                .accountStatusCode(account.getAccountStatusCode())
+//                .accountNum(account.getAccountNum())
+//                .lastIntsDt(account.getLastIntsDt())
+//                .subjectCode(account.getSubjectCode())
+//                .closeDate(account.getCloseDate())
+//                .build();
+        AccountDto.Response newAccount = AccountMapper.INSTANCE.accountForResponse(account);
 
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,

@@ -203,7 +203,7 @@ public class BranchControllerTest extends BaseControllerTest {
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("next").description("link to next page"),
                                 linkWithRel("last").description("link to last page"),
-                                linkWithRel("create-branch").description("link to last."),
+                                linkWithRel("create-branch").description("link to create branch."),
                                 linkWithRel("profile").description("link to profile.")
                         ),
                         requestParameters(
@@ -228,7 +228,7 @@ public class BranchControllerTest extends BaseControllerTest {
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.next.href").description("link to next."),
                                 fieldWithPath("_links.last.href").description("link to last."),
-                                fieldWithPath("_links.create-branch.href").description("link to last."),
+                                fieldWithPath("_links.create-branch.href").description("link to create branch."),
                                 fieldWithPath("_links.profile.href").description("link to profile."),
                                 fieldWithPath("page.size").description("size of one page."),
                                 fieldWithPath("page.totalElements").description("amount of datas."),

@@ -1,41 +1,35 @@
 package com.ken207.openbank.controller;
 
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.dto.AccountDto;
-import com.ken207.openbank.user.MemberRole;
+import com.ken207.openbank.service.AccountService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
-import java.util.Set;
+import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 public class AccountRegularControllerTest extends BaseControllerTest {
 
     @Autowired
-    AccountRegularController accountRegularController;
+    AccountService accountService;
 
     @Test
     @TestDescription("보통예금 계좌생성 정상 테스트")
@@ -133,21 +127,88 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     @TestDescription("등록일 입력값 오류 테스트")
     public void openAccountEmptyTest() throws Exception {
         //given
-        String regDate = "";
+        String regDate = "20191215";
         TaxationCode taxation = TaxationCode.REGULAR;
         AccountDto.Request accountRequest = AccountDto.Request.builder()
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
 
+        IntStream.range(0,50).forEach(
+                e -> accountService.openRegularAccount(accountRequest)
+        );
+
         //when & then
-        mockMvc.perform(post("/api/account/regular")
-                    .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
-                    .contentType(MediaType.APPLICATION_JSON_UTF8)
-                    .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
+        this.mockMvc.perform(get("/api/account/regular")
+                    .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                    .param("page", "1")
+                    .param("size", "10")
+                    .param("sort", "accountNum,DESC"))
                 .andDo(print())
-                .andExpect(status().isBadRequest())
-        ;
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.responseList[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].accountNum").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].regDate").value(regDate))
+                .andExpect(jsonPath("_embedded.responseList[0].taxationCode").value(taxation.toString()))
+                .andExpect(jsonPath("_embedded.responseList[0].closeDate").isEmpty())
+                .andExpect(jsonPath("_embedded.responseList[0].lastIntsDt").value(regDate))
+                .andExpect(jsonPath("_embedded.responseList[0].accoBlnc").value(0))
+                .andExpect(jsonPath("_embedded.responseList[0].subjectCode").value(SubjectCode.REGULAR.toString()))
+                .andExpect(jsonPath("_embedded.responseList[0].accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.create-account").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andDo(document("query-accounts",
+                        links(
+                                linkWithRel("first").description("link to first page"),
+                                linkWithRel("prev").description("link to prev page"),
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("next").description("link to next page"),
+                                linkWithRel("last").description("link to last page"),
+                                linkWithRel("create-account").description("link to open account."),
+                                linkWithRel("profile").description("link to profile.")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("현재 페이지 번호. 0페이지 부터 시작."),
+                                parameterWithName("size").description("한 페이지의 사이즈"),
+                                parameterWithName("sort").description("데이터 정렬. ex)name, DESC")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("_embedded.responseList[0].accountNum").description("Number of new account"),
+                                fieldWithPath("_embedded.responseList[0].regDate").description("Registration Date of new account"),
+                                fieldWithPath("_embedded.responseList[0].closeDate").description("Close Date of account"),
+                                fieldWithPath("_embedded.responseList[0].taxationCode").description("way to tax in interest"),
+                                fieldWithPath("_embedded.responseList[0].lastIntsDt").description("the last calculated date of account interest"),
+                                fieldWithPath("_embedded.responseList[0].accoBlnc").description("balance of account"),
+                                fieldWithPath("_embedded.responseList[0].subjectCode").description("code of account type"),
+                                fieldWithPath("_embedded.responseList[0].accountStatusCode").description("status of account"),
+                                fieldWithPath("_embedded.responseList[0]._links.self.href").description("link to self."),
+                                fieldWithPath("_links.first.href").description("link to first."),
+                                fieldWithPath("_links.prev.href").description("link to prev."),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.next.href").description("link to next."),
+                                fieldWithPath("_links.last.href").description("link to last."),
+                                fieldWithPath("_links.create-account.href").description("link to open account."),
+                                fieldWithPath("_links.profile.href").description("link to profile."),
+                                fieldWithPath("page.size").description("size of one page."),
+                                fieldWithPath("page.totalElements").description("amount of datas."),
+                                fieldWithPath("page.totalPages").description("amount of pages."),
+                                fieldWithPath("page.number").description("current page number.")
+                        )
+                ));
+    }
+
+    @Test
+    @TestDescription("계좌 목록 조회")
+    public void queryAccounts() throws Exception {
+        //given
+
+        //when
+
+        //then
     }
 }

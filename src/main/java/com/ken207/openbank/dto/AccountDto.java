@@ -4,10 +4,7 @@ import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 public class AccountDto {
 
@@ -21,6 +18,7 @@ public class AccountDto {
     }
 
     @Builder
+    @NoArgsConstructor @AllArgsConstructor
     @Getter @Setter
     public static class Response extends AccountDto {
         private String regDate; //신규일자
@@ -43,6 +41,8 @@ public class AccountDto {
                 .closeDate(accountEntity.getCloseDate())
                 .lastIntsDt(accountEntity.getLastIntsDt())
                 .accoBlnc(accountEntity.getAccoBlnc())
+                .accountStatusCode(accountEntity.getAccountStatusCode())
+                .subjectCode(accountEntity.getSubjectCode())
                 .build();
 
     }
