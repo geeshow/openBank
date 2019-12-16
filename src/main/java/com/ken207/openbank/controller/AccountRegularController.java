@@ -65,16 +65,6 @@ public class AccountRegularController {
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
 
         //Set response data
-//        AccountDto.Response newAccount = AccountDto.Response.builder()
-//                .regDate(account.getRegDate())
-//                .taxationCode(account.getTaxationCode())
-//                .accoBlnc(account.getAccoBlnc())
-//                .accountStatusCode(account.getAccountStatusCode())
-//                .accountNum(account.getAccountNum())
-//                .lastIntsDt(account.getLastIntsDt())
-//                .subjectCode(account.getSubjectCode())
-//                .closeDate(account.getCloseDate())
-//                .build();
         AccountDto.Response newAccount = AccountMapper.INSTANCE.accountForResponse(account);
 
         //HATEOAS REST API
@@ -97,7 +87,7 @@ public class AccountRegularController {
                                         @CurrentUser MemberEntity memberEntity) {
         Page<AccountEntity> page = this.accountRepository.findAll(pageable);
         PagedResources<Resource> pagedResources = assembler.toResource(page,
-                e -> new Resource(AccountDto.transform(e),
+                e -> new Resource(AccountMapper.INSTANCE.accountForResponse(e),
                         controllerLinkBuilder.slash(e.getAccountNum()).withSelfRel()
                 ));
 

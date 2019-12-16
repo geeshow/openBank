@@ -8,10 +8,10 @@ import com.ken207.openbank.dto.request.BranchRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.BranchResponse;
 import com.ken207.openbank.common.ResponseResource;
+import com.ken207.openbank.mapper.BranchMapper;
 import com.ken207.openbank.repository.BranchRepository;
 import com.ken207.openbank.user.MemberAdapter;
 import com.ken207.openbank.user.MemberRole;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -39,15 +39,15 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @RequestMapping(value = "/api/branch", produces = MediaTypes.HAL_JSON_UTF8_VALUE)
 public class BranchController {
 
-    private final ModelMapper modelMapper;
-
     BranchRepository branchRepository;
+
+    BranchMapper branchMapper;
 
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(BranchController.class);
 
-    public BranchController(BranchRepository branchRepository, ModelMapper modelMapper) {
-        this.modelMapper = modelMapper;
+    public BranchController(BranchRepository branchRepository) {
         this.branchRepository = branchRepository;
+        this.branchMapper = BranchMapper.INSTANCE;
     }
 
     @PostMapping
@@ -69,15 +69,7 @@ public class BranchController {
         BranchEntity newBranchEntity = branchRepository.save(branchEntity);
 
         //Set response data
-        BranchResponse branchResponse = BranchResponse.builder()
-                .id(newBranchEntity.getId())
-                .name(newBranchEntity.getName())
-                .telNumber(newBranchEntity.getTelNumber())
-                .businessNumber(newBranchEntity.getBusinessNumber())
-                .taxOfficeCode(newBranchEntity.getTaxOfficeCode())
-                .branchType(newBranchEntity.getBranchType())
-                .regDateTime(newBranchEntity.getRegDateTime())
-                .build();
+        BranchResponse branchResponse = branchMapper.entityToResponse(newBranchEntity);
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(branchResponse,
@@ -99,7 +91,7 @@ public class BranchController {
         Page<BranchEntity> page = this.branchRepository.findAll(pageable);
         PagedResources<ResponseResource> pagedResources = assembler.toResource(page,
                 e -> new ResponseResource(
-                        BranchResponse.transform(e),
+                        branchMapper.entityToResponse(e),
                         controllerLinkBuilder.slash(e.getId()).withSelfRel()
                 ));
 
@@ -122,15 +114,7 @@ public class BranchController {
         BranchEntity branchEntity = byId.get();
 
         //Set response data
-        BranchResponse branchResponse = BranchResponse.builder()
-                .id(branchEntity.getId())
-                .name(branchEntity.getName())
-                .telNumber(branchEntity.getTelNumber())
-                .businessNumber(branchEntity.getBusinessNumber())
-                .taxOfficeCode(branchEntity.getTaxOfficeCode())
-                .branchType(branchEntity.getBranchType())
-                .regDateTime(branchEntity.getRegDateTime())
-                .build();
+        BranchResponse branchResponse = branchMapper.entityToResponse(branchEntity);
 
         //HATEOAS REST API
         ResponseResource responseResource = new ResponseResource(branchResponse,
@@ -145,7 +129,7 @@ public class BranchController {
 
     @PutMapping("/{id}")
     public ResponseEntity updateBranch(@PathVariable Long id,
-                                       @RequestBody @Valid BranchRequest BranchRequest,
+                                       @RequestBody @Valid BranchRequest branchRequest,
                                        Errors errors,
                                        @CurrentUser MemberEntity currentMember) {
 
@@ -159,16 +143,20 @@ public class BranchController {
         }
 
         //Request Data Validation
-        ResponseEntity validate = RequestValidator.validate(BranchRequest, errors);
+        ResponseEntity validate = RequestValidator.validate(branchRequest, errors);
         if ( errors.hasErrors()) {
             return validate;
         }
 
+        //Data mapping from Dto to Entity
         BranchEntity existingBranchEntity = optionalBranch.get();
-        this.modelMapper.map(BranchRequest, existingBranchEntity);
-        BranchEntity savedBranchEntity = this.branchRepository.save(existingBranchEntity);
+        branchMapper.updateBranchFromDto(branchRequest, existingBranchEntity);
 
-        BranchResponse branchResponse = this.modelMapper.map(savedBranchEntity, BranchResponse.class);
+        //Data mapping for response data
+        BranchEntity savedBranchEntity = this.branchRepository.save(existingBranchEntity);
+        BranchResponse branchResponse = branchMapper.entityToResponse(savedBranchEntity);
+
+        //Hateoas
         ResponseResource responseResource = new ResponseResource(branchResponse);
         responseResource.add(controllerLinkBuilder.slash(branchResponse.getId()).withSelfRel());
         responseResource.add(new Link("/docs/index.html#resources-branch-update").withRel("profile"));

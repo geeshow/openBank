@@ -10,7 +10,6 @@ import com.ken207.openbank.dto.response.CustomerResponse;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
 import com.ken207.openbank.service.CustomerService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,7 +36,6 @@ public class CustomerController {
     @Autowired private EmployeeRepository employeeRepository;
 
     @Autowired private CustomerRepository customerRepository;
-    @Autowired private ModelMapper modelMapper;
 
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(CustomerController.class);
 
