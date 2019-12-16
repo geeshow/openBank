@@ -1,6 +1,7 @@
 package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
+import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.domain.BranchEntity;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.enums.BranchType;
@@ -10,7 +11,6 @@ import com.ken207.openbank.dto.response.BranchResponse;
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.mapper.BranchMapper;
 import com.ken207.openbank.repository.BranchRepository;
-import com.ken207.openbank.user.MemberAdapter;
 import com.ken207.openbank.user.MemberRole;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +22,7 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,11 +49,13 @@ public class BranchController {
     }
 
     @PostMapping
-    public ResponseEntity createBranch(@RequestBody @Valid BranchRequest branchRequest, Errors errors) {
+    public ResponseEntity createBranch(@RequestBody @Valid BranchRequest branchRequest, Errors errors,
+                                        @CurrentUser MemberEntity memberEntity) {
 
         //Request Data Validation
+        HttpStatus httpStatus = RequestValidator.createBranch(branchRequest, errors, memberEntity);
         if (errors.hasErrors()) {
-            return RequestValidator.badRequest(errors);
+            return new ResponseEntity(new ErrorsResource(errors), httpStatus);
         }
 
         //Create Entity and save to database
@@ -133,19 +133,15 @@ public class BranchController {
                                        Errors errors,
                                        @CurrentUser MemberEntity currentMember) {
 
-        if ( !currentMember.getRoles().contains(MemberRole.ADMIN) ) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-        }
-
         Optional<BranchEntity> optionalBranch = this.branchRepository.findById(id);
         if ( !optionalBranch.isPresent() ) {
             return ResponseEntity.notFound().build();
         }
 
         //Request Data Validation
-        ResponseEntity validate = RequestValidator.validate(branchRequest, errors);
+        HttpStatus httpStatus = RequestValidator.createBranch(branchRequest, errors, currentMember);
         if ( errors.hasErrors()) {
-            return validate;
+            return new ResponseEntity(new ErrorsResource(errors), httpStatus);
         }
 
         //Data mapping from Dto to Entity

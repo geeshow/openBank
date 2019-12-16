@@ -120,12 +120,45 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                     .content(objectMapper.writeValueAsString(accountRequest)))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("error").value("unauthorized"))
+                .andExpect(jsonPath("error_description").value("Full authentication is required to access this resource"))
         ;
     }
 
     @Test
-    @TestDescription("등록일 입력값 오류 테스트")
+    @TestDescription("빈 입력값 오류 테스트")
     public void openAccountEmptyTest() throws Exception {
+        //given
+        String regDate = "";
+        TaxationCode taxation = TaxationCode.REGULAR;
+        AccountDto.Request accountRequest = AccountDto.Request.builder()
+                .regDate(regDate)
+                .taxationCode(taxation)
+                .build();
+
+        //when & then
+        mockMvc.perform(post("/api/account/regular")
+                    .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
+                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .accept(MediaTypes.HAL_JSON)
+                    .content(objectMapper.writeValueAsString(accountRequest)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("content[0].field").exists())
+                .andExpect(jsonPath("content[0].objectName").exists())
+                .andExpect(jsonPath("content[0].code").exists())
+                .andExpect(jsonPath("content[0].defaultMessage").exists())
+                .andExpect(jsonPath("content[0].rejectedValue").isEmpty())
+                .andExpect(jsonPath("_links.index.href").exists())
+
+        ;
+    }
+
+    @Test
+    @TestDescription("계좌 목록 조회")
+    public void queryAccounts() throws Exception {
         //given
         String regDate = "20191215";
         TaxationCode taxation = TaxationCode.REGULAR;
@@ -200,15 +233,5 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 fieldWithPath("page.number").description("current page number.")
                         )
                 ));
-    }
-
-    @Test
-    @TestDescription("계좌 목록 조회")
-    public void queryAccounts() throws Exception {
-        //given
-
-        //when
-
-        //then
     }
 }

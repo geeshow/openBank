@@ -1,6 +1,7 @@
 package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
+import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.domain.BranchEntity;
 import com.ken207.openbank.domain.MemberEntity;
@@ -48,16 +49,9 @@ public class AccountRegularController {
                                         @CurrentUser MemberEntity currentMember) {
 
         //Request Data Validation
-        if (StringUtils.isEmpty(accountRequest.getRegDate())) {
-            errors.rejectValue("regDate", "wrongValue", "regDate must not be empty.");
-        }
+        HttpStatus httpStatus = RequestValidator.createAccount(accountRequest, errors, currentMember);
         if (errors.hasErrors()) {
-            return RequestValidator.badRequest(errors);
-        }
-
-        //check member authorization
-        if ( !currentMember.getRoles().contains(MemberRole.ADMIN) ) {
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity(new ErrorsResource(errors), httpStatus);
         }
 
         //Create Entity and save to database

@@ -1,5 +1,6 @@
 package com.ken207.openbank.controller;
 
+import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.consts.ConstEmployee;
 import com.ken207.openbank.domain.CustomerEntity;
@@ -18,6 +19,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -49,9 +51,9 @@ public class CustomerController {
     public ResponseEntity createCustomer(@RequestBody @Valid CustomerRequest customerRequest, Errors errors) {
 
         //Request Data Validation
-        ResponseEntity validate = RequestValidator.validate(customerRequest, errors);
+        HttpStatus httpStatus = RequestValidator.createCustomer(customerRequest, errors);
         if ( errors.hasErrors()) {
-            return validate;
+            return new ResponseEntity(new ErrorsResource(errors), httpStatus);
         }
 
         //Data Save

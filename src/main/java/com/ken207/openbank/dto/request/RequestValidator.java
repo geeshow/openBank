@@ -1,7 +1,13 @@
 package com.ken207.openbank.dto.request;
 
+import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
+import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.user.MemberRole;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 
 public class RequestValidator {
@@ -12,38 +18,54 @@ public class RequestValidator {
      * @param errors
      * @return
      */
-    public static ResponseEntity validate(CustomerRequest customerRequest, Errors errors) {
+    public static HttpStatus createCustomer(CustomerRequest customerRequest, Errors errors) {
         if ( errors.hasErrors()) {
-            return badRequest(errors);
+            return HttpStatus.BAD_REQUEST;
         }
 
         if ( customerRequest.getNation().length() < 3 ) {
             errors.rejectValue("nation", "wrongValue", "Nation is too short.");
         }
 
-        return badRequest(errors);
+        return HttpStatus.BAD_REQUEST;
     }
 
     /**
-     * 지점 수정 요청값 검증
-     * @param BranchRequest
+     * 고객 정보 생성 요청값 검증
+     * @param branchRequest
      * @param errors
+     * @param currentMember
      * @return
      */
-    public static ResponseEntity validate(BranchRequest BranchRequest, Errors errors) {
+    public static HttpStatus createBranch(BranchRequest branchRequest, Errors errors, MemberEntity currentMember) {
         if ( errors.hasErrors()) {
-            return badRequest(errors);
+            return HttpStatus.BAD_REQUEST;
         }
 
-        return badRequest(errors);
+        if ( branchRequest.getName().length() < 3 ) {
+            errors.rejectValue("name", "wrongValue", "name of branch is too short.");
+        }
+
+        return HttpStatus.BAD_REQUEST;
     }
 
     /**
-     * 오류 응답 REST API
+     * 계좌 생성 요청값 검증
+     * @param accountRequest
      * @param errors
+     * @param currentMember
      * @return
      */
-    public static ResponseEntity badRequest(Errors errors) {
-        return ResponseEntity.badRequest().body(new ErrorsResource(errors) );
+    public static HttpStatus createAccount(AccountDto.Request accountRequest, Errors errors, MemberEntity currentMember) {
+        //check data validation
+        if (StringUtils.isEmpty(accountRequest.getRegDate())) {
+            errors.rejectValue("regDate", "wrongValue", "regDate must not be empty.");
+        }
+
+        if (errors.hasErrors()) {
+            return HttpStatus.BAD_REQUEST;
+        }
+
+        return HttpStatus.CREATED;
     }
 }
