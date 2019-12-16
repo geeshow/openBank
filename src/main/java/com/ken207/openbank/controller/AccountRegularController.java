@@ -7,6 +7,7 @@ import com.ken207.openbank.domain.BranchEntity;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.account.AccountEntity;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.request.BranchRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.dto.response.BranchResponse;
 import com.ken207.openbank.mapper.AccountMapper;
@@ -24,6 +25,8 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -43,6 +46,7 @@ public class AccountRegularController {
     private final AccountService accountService;
     private final AccountRepository accountRepository;
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(AccountRegularController.class);
+    private final AccountMapper accountMapper = AccountMapper.INSTANCE;
 
     @PostMapping
     public ResponseEntity createAccount(@RequestBody @Valid AccountDto.Request accountRequest, Errors errors,
@@ -59,7 +63,7 @@ public class AccountRegularController {
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
 
         //Set response data
-        AccountDto.Response newAccount = AccountMapper.INSTANCE.accountForResponse(account);
+        AccountDto.Response newAccount = accountMapper.accountForResponse(account);
 
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,
@@ -81,7 +85,7 @@ public class AccountRegularController {
                                         @CurrentUser MemberEntity memberEntity) {
         Page<AccountEntity> page = this.accountRepository.findAll(pageable);
         PagedResources<Resource> pagedResources = assembler.toResource(page,
-                e -> new Resource(AccountMapper.INSTANCE.accountForResponse(e),
+                e -> new Resource(accountMapper.accountForResponse(e),
                         controllerLinkBuilder.slash(e.getAccountNum()).withSelfRel()
                 ));
 
@@ -91,4 +95,32 @@ public class AccountRegularController {
         }
         return ResponseEntity.ok(pagedResources);
     }
+
+    @GetMapping("/{accountNum}")
+    public ResponseEntity getAccount(@PathVariable String accountNum) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+
+        //Request Data Validation
+        if ( account == null ) {
+            return ResponseEntity.notFound().build();
+        }
+
+        //Set response data
+        AccountDto.Response response = accountMapper.accountForResponse(account);
+
+        //HATEOAS REST API
+        Resource resource = new Resource(response,
+                controllerLinkBuilder.slash(response.getAccountNum()).withSelfRel(),
+                controllerLinkBuilder.slash(response.getAccountNum()).slash("deposit").withRel("deposit"),
+                controllerLinkBuilder.slash(response.getAccountNum()).slash("withdraw").withRel("withdraw"),
+                controllerLinkBuilder.slash(response.getAccountNum()).slash("close").withRel("close"),
+                controllerLinkBuilder.withRel(("query-accounts")),
+                new Link("/docs/index.html#resources-account-get").withRel("profile")
+        );
+
+        return ResponseEntity.ok().body(resource);
+    }
+
 }

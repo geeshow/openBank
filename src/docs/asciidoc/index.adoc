@@ -167,5 +167,11 @@ operation::create-account[snippets='request-fields,curl-request,http-request,req
 
 `GET` 요청을 사용하여 서비스의 모든 계좌정보를 조회할 수 있다.
 
-operation::get-accounts[snippets='response-fields,curl-request,http-response,links']
+operation::query-accounts[snippets='response-fields,curl-request,http-response,links']
 
+[[resources-account-get]]
+=== 계좌 정보 조회
+
+`Get` 요청을 사용해서 계좌 정보 하나를 조회할 수 있다.
+
+operation::get-account[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
