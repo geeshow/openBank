@@ -1,7 +1,5 @@
 package com.ken207.openbank.domain;
 
-import com.ken207.openbank.domain.account.AccountEntity;
-
 public interface Products {
     AccountEntity openAccount(AccountEntity accountEntity);
     AccountEntity closeAccount(AccountEntity accountEntity);

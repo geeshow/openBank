@@ -1,12 +1,9 @@
 package com.ken207.openbank.domain;
 
-import com.ken207.openbank.domain.account.AccountEntity;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 

@@ -1,6 +1,6 @@
 package com.ken207.openbank.dto;
 
-import com.ken207.openbank.domain.account.AccountEntity;
+import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
@@ -10,7 +10,7 @@ public class AccountDto {
 
     @Builder
     @Getter @Setter
-    public static class Request extends AccountDto {
+    public static class RequestOpen {
         @NonNull
         private String regDate; //신규일자
         @NonNull
@@ -20,13 +20,13 @@ public class AccountDto {
     @Builder
     @NoArgsConstructor @AllArgsConstructor
     @Getter @Setter
-    public static class Response extends AccountDto {
+    public static class Response {
         private String regDate; //신규일자
         private TaxationCode taxationCode; //과세구분코드
         private String accountNum; //계좌번호
         private String closeDate; //해지일자
         private String lastIntsDt; //최종이자계산일자
-        private long accoBlnc;
+        private long balance;
 
         private SubjectCode subjectCode; //과목코드
         private AccountStatusCode accountStatusCode; //계좌상태코드
@@ -40,7 +40,7 @@ public class AccountDto {
                 .accountNum(accountEntity.getAccountNum())
                 .closeDate(accountEntity.getCloseDate())
                 .lastIntsDt(accountEntity.getLastIntsDt())
-                .accoBlnc(accountEntity.getAccoBlnc())
+                .balance(accountEntity.getBalance())
                 .accountStatusCode(accountEntity.getAccountStatusCode())
                 .subjectCode(accountEntity.getSubjectCode())
                 .build();

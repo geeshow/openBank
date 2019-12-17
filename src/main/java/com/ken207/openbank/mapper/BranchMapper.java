@@ -1,8 +1,6 @@
 package com.ken207.openbank.mapper;
 
 import com.ken207.openbank.domain.BranchEntity;
-import com.ken207.openbank.domain.account.AccountEntity;
-import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.request.BranchRequest;
 import com.ken207.openbank.dto.response.BranchResponse;
 import org.mapstruct.Mapper;

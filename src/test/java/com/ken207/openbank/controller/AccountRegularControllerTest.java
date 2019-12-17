@@ -5,6 +5,7 @@ import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.service.AccountService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,7 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,7 +39,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         String regDate = "20191214";
         TaxationCode taxation = TaxationCode.REGULAR;
-        AccountDto.Request accountRequest = AccountDto.Request.builder()
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
@@ -49,7 +49,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(accountRequest)))
+                .content(objectMapper.writeValueAsString(accountRequestOpen)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
@@ -59,7 +59,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("closeDate").isEmpty())
                 .andExpect(jsonPath("lastIntsDt").value(regDate))
-                .andExpect(jsonPath("accoBlnc").value(0))
+                .andExpect(jsonPath("balance").value(0))
                 .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR.toString()))
                 .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("create-account",
@@ -86,7 +86,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         String regDate = "20191214";
         TaxationCode taxation = TaxationCode.REGULAR;
-        AccountDto.Request accountRequest = AccountDto.Request.builder()
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
@@ -95,7 +95,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         mockMvc.perform(post("/api/account/regular")
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
+                    .content(objectMapper.writeValueAsString(accountRequestOpen)))
                 .andDo(print())
                 .andExpect(status().isUnauthorized())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
@@ -110,7 +110,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         String regDate = "";
         TaxationCode taxation = TaxationCode.REGULAR;
-        AccountDto.Request accountRequest = AccountDto.Request.builder()
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
@@ -120,7 +120,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                     .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
                     .contentType(MediaType.APPLICATION_JSON_UTF8)
                     .accept(MediaTypes.HAL_JSON)
-                    .content(objectMapper.writeValueAsString(accountRequest)))
+                    .content(objectMapper.writeValueAsString(accountRequestOpen)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
@@ -139,13 +139,13 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         String regDate = "20191215";
         TaxationCode taxation = TaxationCode.REGULAR;
-        AccountDto.Request accountRequest = AccountDto.Request.builder()
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
 
         IntStream.range(0,50).forEach(
-                e -> accountService.openRegularAccount(accountRequest)
+                e -> accountService.openRegularAccount(accountRequestOpen)
         );
 
         //when & then
@@ -163,7 +163,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.responseList[0].taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("_embedded.responseList[0].closeDate").isEmpty())
                 .andExpect(jsonPath("_embedded.responseList[0].lastIntsDt").value(regDate))
-                .andExpect(jsonPath("_embedded.responseList[0].accoBlnc").value(0))
+                .andExpect(jsonPath("_embedded.responseList[0].balance").value(0))
                 .andExpect(jsonPath("_embedded.responseList[0].subjectCode").value(SubjectCode.REGULAR.toString()))
                 .andExpect(jsonPath("_embedded.responseList[0].accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("query-accounts",
@@ -190,7 +190,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 fieldWithPath("_embedded.responseList[0].closeDate").description("Close Date of account"),
                                 fieldWithPath("_embedded.responseList[0].taxationCode").description("way to tax in interest"),
                                 fieldWithPath("_embedded.responseList[0].lastIntsDt").description("the last calculated date of account interest"),
-                                fieldWithPath("_embedded.responseList[0].accoBlnc").description("balance of account"),
+                                fieldWithPath("_embedded.responseList[0].balance").description("balance of account"),
                                 fieldWithPath("_embedded.responseList[0].subjectCode").description("code of account type"),
                                 fieldWithPath("_embedded.responseList[0].accountStatusCode").description("status of account"),
                                 fieldWithPath("_embedded.responseList[0]._links.self.href").description("link to self."),
@@ -215,11 +215,11 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         String regDate = "20191215";
         TaxationCode taxation = TaxationCode.REGULAR;
-        AccountDto.Request accountRequest = AccountDto.Request.builder()
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
-        String accountNum = accountService.openRegularAccount(accountRequest);
+        String accountNum = accountService.openRegularAccount(accountRequestOpen);
 
         //when & then
         mockMvc.perform(get("/api/account/regular/{accountNum}", accountNum)
@@ -233,7 +233,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("closeDate").isEmpty())
                 .andExpect(jsonPath("lastIntsDt").value(regDate))
-                .andExpect(jsonPath("accoBlnc").value(0))
+                .andExpect(jsonPath("balance").value(0))
                 .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR.toString()))
                 .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("get-account",
@@ -265,7 +265,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 fieldWithPath("closeDate").description("Close Date of account"),
                 fieldWithPath("taxationCode").description("way to tax in interest"),
                 fieldWithPath("lastIntsDt").description("the last calculated date of account interest"),
-                fieldWithPath("accoBlnc").description("balance of account"),
+                fieldWithPath("balance").description("balance of account"),
                 fieldWithPath("subjectCode").description("code of account type"),
                 fieldWithPath("accountStatusCode").description("status of account"),
                 fieldWithPath("_links.self.href").description("link to self."),
@@ -277,5 +277,52 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         );
     }
 
+    @Test
+    @TestDescription("정상 입금 테스트")
+    public void accountDeposit() throws Exception {
+        //given
+        String tradeDate = "20191215";
+        long amount = 100000;
+        TaxationCode taxation = TaxationCode.REGULAR;
 
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .regDate(tradeDate)
+                .taxationCode(taxation)
+                .build();
+        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+
+        TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
+                .amount(amount)
+                .tradeDate(tradeDate)
+                .build();
+
+        //when & then
+
+        mockMvc.perform(put("/api/account/regular/{accountNum}/deposit", accountNum)
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(this.objectMapper.writeValueAsString(requestDeposit))
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("accountNum").exists())
+                .andExpect(jsonPath("regDate").value(regDate))
+                .andExpect(jsonPath("taxationCode").value(taxation.toString()))
+                .andExpect(jsonPath("closeDate").isEmpty())
+                .andExpect(jsonPath("lastIntsDt").value(regDate))
+                .andExpect(jsonPath("balance").value(0))
+                .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR.toString()))
+                .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
+                .andDo(document("get-account",
+                        getLinksOfAccount(),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        getResponseFieldsOfAccount()
+                ));
+    }
 }

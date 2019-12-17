@@ -1,8 +1,9 @@
 package com.ken207.openbank.service;
 
-import com.ken207.openbank.domain.account.AccountEntity;
+import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,10 +20,10 @@ public class AccountService {
     private final CodeGeneratorService codeGeneratorService;
 
     @Transactional
-    public String openRegularAccount(AccountDto.Request accountRequest) {
+    public String openRegularAccount(AccountDto.RequestOpen accountRequestOpen) {
         String accountNum = codeGeneratorService.createAcno(SubjectCode.REGULAR.getSubjectCode());
 
-        AccountEntity accountEntity = AccountEntity.openAccount(accountNum, SubjectCode.REGULAR, accountRequest.getRegDate(), accountRequest.getTaxationCode());
+        AccountEntity accountEntity = AccountEntity.openAccount(accountNum, SubjectCode.REGULAR, accountRequestOpen.getRegDate(), accountRequestOpen.getTaxationCode());
         AccountEntity saveAccount = accountRepository.save(accountEntity);
         return saveAccount.getAccountNum();
     }
@@ -34,17 +35,18 @@ public class AccountService {
     }
 
     @Transactional
-    public Long inAmount(String acno, long amount) {
+    public Long deposit(String acno, TradeDto.RequestDeposit requestDeposit) {
         AccountEntity account = getAccountEntity(acno);
-        account.inAmount(amount);
-        return account.getAccoBlnc();
+        account.setReckonDt(requestDeposit.getTradeDate());
+        account.deposit(requestDeposit.getAmount());
+        return account.getBalance();
     }
 
     @Transactional
     public Long outAmount(String acno, long amount) {
         AccountEntity account = getAccountEntity(acno);
         account.outAmount(amount);
-        return account.getAccoBlnc();
+        return account.getBalance();
     }
 
     private AccountEntity getAccountEntity(String acno) {

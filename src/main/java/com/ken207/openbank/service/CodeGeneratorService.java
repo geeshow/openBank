@@ -1,8 +1,6 @@
 package com.ken207.openbank.service;
 
 import com.ken207.openbank.domain.CodeGenerator;
-import com.ken207.openbank.domain.account.AccountEntity;
-import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.CodeGeneratorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

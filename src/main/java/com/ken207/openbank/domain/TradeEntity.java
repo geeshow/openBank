@@ -1,13 +1,10 @@
-package com.ken207.openbank.domain.account;
+package com.ken207.openbank.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ken207.openbank.domain.BaseEntity;
-import com.ken207.openbank.domain.EmployeeEntity;
 import com.ken207.openbank.domain.enums.TradeCd;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -16,7 +13,7 @@ import static javax.persistence.FetchType.LAZY;
 @Builder @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AttributeOverride(name = "id",column = @Column(name = "trade_id"))
-public class TradeLog extends BaseEntity<TradeLog> {
+public class TradeEntity extends BaseEntity<TradeEntity> {
 
     private long srno;
     private String tradeDate;

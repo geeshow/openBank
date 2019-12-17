@@ -1,6 +1,6 @@
 package com.ken207.openbank.mapper;
 
-import com.ken207.openbank.domain.account.AccountEntity;
+import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.dto.AccountDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

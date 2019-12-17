@@ -1,7 +1,6 @@
-package com.ken207.openbank.domain.account;
+package com.ken207.openbank.domain;
 
 import com.ken207.openbank.common.OBDateUtils;
-import com.ken207.openbank.domain.BaseEntity;
 import com.ken207.openbank.domain.enums.*;
 import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.*;
@@ -25,7 +24,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private String regDate; //신규일자
     private String closeDate; //해지일자
     private String lastIntsDt; //최종이자계산일자
-    private long accoBlnc;
+    private long balance;
     private long loanLimitAmount; //대출한도금액
     private long lastTrnSrno; //최종거래일련번호
 
@@ -48,7 +47,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     @Default
     @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_log_id")
-    private List<TradeLog> tradeLogs = new ArrayList<>();
+    private List<TradeEntity> tradeEntities = new ArrayList<>();
 
     @Transient
     private String reckonDt; //기산일자
@@ -71,7 +70,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .lastIntsDt(regDate) //최종이자계산일자
                 .taxationCode(taxationCode) //과세구분코드
                 .accountStatusCode(AccountStatusCode.ACTIVE)
-                .accoBlnc(0)
+                .balance(0)
                 .blncBefore(0)
                 .tradeAmount(0)
                 .build();
@@ -88,15 +87,13 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 입금
      */
-    public long inAmount(long tradeAmount) {
+    public TradeEntity deposit(long tradeAmount) {
 
         this.tradeAmount = tradeAmount;
-        this.blncBefore = this.accoBlnc;
-        this.accoBlnc += this.tradeAmount;
+        this.blncBefore = this.balance;
+        this.balance += this.tradeAmount;
 
-        addTradeLog(TradeCd.IN);
-
-        return this.accoBlnc;
+        return addTradeLog(TradeCd.DEPOSIT);
     }
 
     /**
@@ -108,20 +105,20 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
             throw new BizRuntimeException("출금가능금액 부족");
         }
         this.tradeAmount = tradeAmount;
-        this.blncBefore = this.accoBlnc;
-        this.accoBlnc -= this.tradeAmount;
+        this.blncBefore = this.balance;
+        this.balance -= this.tradeAmount;
 
         addTradeLog(TradeCd.OUT);
 
-        return this.accoBlnc;
+        return this.balance;
     }
 
     public long getPosibleOutAmt() {
         if ( this.loanYn == YesNo.Y ) {
-            return this.loanLimitAmount + this.accoBlnc;
+            return this.loanLimitAmount + this.balance;
         }
         else {
-            return this.accoBlnc;
+            return this.balance;
         }
     }
 
@@ -133,18 +130,23 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     }
 
 
-    private void addTradeLog(TradeCd tradeCd) {
+    private TradeEntity addTradeLog(TradeCd tradeCd) {
 
-        TradeLog tradeLog = TradeLog.builder()
+        TradeEntity tradeEntity = TradeEntity.builder()
                 .amount(this.tradeAmount)
                 .blncBefore(this.blncBefore)
-                .blncAfter(this.accoBlnc)
+                .blncAfter(this.balance)
                 .tradeCd(tradeCd)
                 .tradeDate(this.getReckonDt())
                 .accountEntity(this)
                 .build();
 
-        this.tradeLogs.add(tradeLog);
+        this.tradeEntities.add(tradeEntity);
+        return tradeEntity;
+    }
+
+    public void setReckonDt(String reckonDt) {
+        this.reckonDt = reckonDt;
     }
 
     public String getReckonDt() {

@@ -1,12 +1,8 @@
 package com.ken207.openbank.dto.request;
 
-import com.ken207.openbank.annotation.CurrentUser;
-import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.dto.AccountDto;
-import com.ken207.openbank.user.MemberRole;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
 
@@ -51,14 +47,14 @@ public class RequestValidator {
 
     /**
      * 계좌 생성 요청값 검증
-     * @param accountRequest
+     * @param accountRequestOpen
      * @param errors
      * @param currentMember
      * @return
      */
-    public static HttpStatus createAccount(AccountDto.Request accountRequest, Errors errors, MemberEntity currentMember) {
+    public static HttpStatus createAccount(AccountDto.RequestOpen accountRequestOpen, Errors errors, MemberEntity currentMember) {
         //check data validation
-        if (StringUtils.isEmpty(accountRequest.getRegDate())) {
+        if (StringUtils.isEmpty(accountRequestOpen.getRegDate())) {
             errors.rejectValue("regDate", "wrongValue", "regDate must not be empty.");
         }
 

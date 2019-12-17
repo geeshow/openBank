@@ -175,3 +175,11 @@ operation::query-accounts[snippets='response-fields,curl-request,http-response,l
 `Get` 요청을 사용해서 계좌 정보 하나를 조회할 수 있다.
 
 operation::get-account[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
+
+[[resources-account-deposit]]
+=== 계좌 입금 요청
+
+`PUT` 요청을 사용해서 해당 계좌에 입금을 할 수 있다.
+
+operation::account-deposit[snippets='request-fields,curl-request,http-response,links']
+
