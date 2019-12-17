@@ -4,10 +4,12 @@ import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.mapper.AccountMapper;
+import com.ken207.openbank.mapper.TradeMapper;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,7 @@ public class AccountRegularController {
     private final AccountRepository accountRepository;
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(AccountRegularController.class);
     private final AccountMapper accountMapper = AccountMapper.INSTANCE;
+    private final TradeMapper tradeMapper = TradeMapper.INSTANCE;
 
     @PostMapping
     public ResponseEntity createAccount(@RequestBody @Valid AccountDto.RequestOpen accountRequestOpen, Errors errors,
@@ -62,9 +65,9 @@ public class AccountRegularController {
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,
                 controllerLinkBuilder.slash(newAccount.getAccountNum()).withSelfRel(),
-                getLinkOfDeposit(account),
-                getLinkOfWithdraw(account),
-                getLinkOfClose(account),
+                getLinkOfDeposit(accountNum),
+                getLinkOfWithdraw(accountNum),
+                getLinkOfClose(accountNum),
                 getLinkOfQuery(),
                 getLinkOfProfile("#resources-accounts-create")
         );
@@ -108,9 +111,9 @@ public class AccountRegularController {
         //HATEOAS REST API
         Resource resource = new Resource(response,
                 controllerLinkBuilder.slash(response.getAccountNum()).withSelfRel(),
-                getLinkOfDeposit(account),
-                getLinkOfWithdraw(account),
-                getLinkOfClose(account),
+                getLinkOfDeposit(accountNum),
+                getLinkOfWithdraw(accountNum),
+                getLinkOfClose(accountNum),
                 getLinkOfQuery(),
                 getLinkOfProfile("#resources-accounts-get")
         );
@@ -119,24 +122,23 @@ public class AccountRegularController {
     }
 
     @PutMapping("/{accountNum}/deposit")
-    public ResponseEntity deposit(@PathVariable String accountNum,
+    public ResponseEntity accountDeposit(@PathVariable String accountNum,
                                   @RequestBody @Valid TradeDto.RequestDeposit requestDeposit,
                                   Errors errors,
                                   @CurrentUser MemberEntity currentMember) {
 
-        Long balance = this.accountService.deposit(accountNum, requestDeposit);
+        //update for deposit
+        TradeEntity resultTrade = this.accountService.deposit(accountNum, requestDeposit);
 
-        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
-
-        //Set response data
-        AccountDto.Response response = accountMapper.accountForResponse(account);
+        //set response data
+        TradeDto.Response response = tradeMapper.entityToResponse(resultTrade);
 
         //HATEOAS REST API
         Resource resource = new Resource(response,
-                controllerLinkBuilder.slash(response.getAccountNum()).slash("deposit").withSelfRel(),
-                getLinkOfDeposit(account),
-                getLinkOfWithdraw(account),
-                getLinkOfClose(account),
+                controllerLinkBuilder.slash(accountNum).slash("deposit").withSelfRel(),
+                getLinkOfDeposit(accountNum),
+                getLinkOfWithdraw(accountNum),
+                getLinkOfClose(accountNum),
                 getLinkOfQuery(),
                 getLinkOfProfile("#resources-accounts-deposit")
         );
@@ -145,16 +147,16 @@ public class AccountRegularController {
     }
 
 
-    private Link getLinkOfDeposit(AccountEntity account) {
-        return controllerLinkBuilder.slash(account.getAccountNum()).slash("deposit").withRel("deposit");
+    private Link getLinkOfDeposit(String accountNum) {
+        return controllerLinkBuilder.slash(accountNum).slash("deposit").withRel("deposit");
     }
 
-    private Link getLinkOfWithdraw(AccountEntity account) {
-        return controllerLinkBuilder.slash(account.getAccountNum()).slash("withdraw").withRel("withdraw");
+    private Link getLinkOfWithdraw(String accountNum) {
+        return controllerLinkBuilder.slash(accountNum).slash("withdraw").withRel("withdraw");
     }
 
-    private Link getLinkOfClose(AccountEntity account) {
-        return controllerLinkBuilder.slash(account.getAccountNum()).slash("close").withRel("close");
+    private Link getLinkOfClose(String accountNum) {
+        return controllerLinkBuilder.slash(accountNum).slash("close").withRel("close");
     }
 
     private Link getLinkOfQuery() {

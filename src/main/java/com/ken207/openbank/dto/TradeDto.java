@@ -2,10 +2,7 @@ package com.ken207.openbank.dto;
 
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.domain.enums.TradeCd;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 
 public class TradeDto {
 
@@ -17,6 +14,8 @@ public class TradeDto {
     }
 
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Getter @Setter
     public static class Response {
         private long srno;

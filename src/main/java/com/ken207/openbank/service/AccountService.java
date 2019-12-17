@@ -1,6 +1,7 @@
 package com.ken207.openbank.service;
 
 import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
@@ -35,18 +36,17 @@ public class AccountService {
     }
 
     @Transactional
-    public Long deposit(String acno, TradeDto.RequestDeposit requestDeposit) {
-        AccountEntity account = getAccountEntity(acno);
+    public TradeEntity deposit(String accountNum, TradeDto.RequestDeposit requestDeposit) {
+        AccountEntity account = getAccountEntity(accountNum);
         account.setReckonDt(requestDeposit.getTradeDate());
-        account.deposit(requestDeposit.getAmount());
-        return account.getBalance();
+        return account.deposit(requestDeposit.getAmount());
     }
 
     @Transactional
-    public Long outAmount(String acno, long amount) {
-        AccountEntity account = getAccountEntity(acno);
-        account.outAmount(amount);
-        return account.getBalance();
+    public TradeEntity outAmount(String accountNum, TradeDto.RequestDeposit requestOut) {
+        AccountEntity account = getAccountEntity(accountNum);
+        account.setReckonDt(requestOut.getTradeDate());
+        return account.outAmount(requestOut.getAmount());
     }
 
     private AccountEntity getAccountEntity(String acno) {

@@ -99,7 +99,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 출금
      */
-    public long outAmount(long tradeAmount) {
+    public TradeEntity outAmount(long tradeAmount) {
 
         if ( getPosibleOutAmt() < tradeAmount ) {
             throw new BizRuntimeException("출금가능금액 부족");
@@ -108,9 +108,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
         this.blncBefore = this.balance;
         this.balance -= this.tradeAmount;
 
-        addTradeLog(TradeCd.OUT);
-
-        return this.balance;
+        return addTradeLog(TradeCd.OUT);
     }
 
     public long getPosibleOutAmt() {
@@ -138,6 +136,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .blncAfter(this.balance)
                 .tradeCd(tradeCd)
                 .tradeDate(this.getReckonDt())
+                .bzDate(OBDateUtils.getToday())
                 .accountEntity(this)
                 .build();
 

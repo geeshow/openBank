@@ -16,8 +16,8 @@ import static javax.persistence.FetchType.LAZY;
 public class TradeEntity extends BaseEntity<TradeEntity> {
 
     private long srno;
-    private String tradeDate;
-    private String bzDate;
+    private String tradeDate; // reckon date, request date
+    private String bzDate; // real trade date, system date
     private long amount;
     private long blncBefore;
     private long blncAfter;

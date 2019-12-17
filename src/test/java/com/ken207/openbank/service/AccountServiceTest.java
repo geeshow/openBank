@@ -3,9 +3,11 @@ package com.ken207.openbank.service;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.exception.BizRuntimeException;
 import com.ken207.openbank.repository.AccountRepository;
 import org.junit.Test;
@@ -109,20 +111,33 @@ public class AccountServiceTest {
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
         String acno = accountService.openRegularAccount(accountRequestOpen);
-        long trnAmt1 = 30000;
-        long trnAmt2 = 200000;
-        long trnAmt3 = 1000000;
+
+        int trnAmt1 = 30000;
+        int trnAmt2 = 200000;
+        int trnAmt3 = 1000000;
+        TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt1)
+                .build();
+        TradeDto.RequestDeposit request2 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt2)
+                .build();
+        TradeDto.RequestDeposit request3 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt3)
+                .build();
 
         //when
-        long result1 = accountService.deposit(acno, trnAmt1);
-        long result2 = accountService.deposit(acno, trnAmt2);
-        long result3 = accountService.deposit(acno, trnAmt3);
+        TradeEntity result1 = accountService.deposit(acno, request1);
+        TradeEntity result2 = accountService.deposit(acno, request2);
+        TradeEntity result3 = accountService.deposit(acno, request3);
         AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
 
         //then
-        assertEquals(trnAmt1, result1);
-        assertEquals(trnAmt1+trnAmt2, result2);
-        assertEquals(trnAmt1+trnAmt2+trnAmt3, result3);
+        assertEquals(request1.getAmount(), result1.getBlncAfter());
+        assertEquals(trnAmt1+trnAmt2, result2.getBlncAfter());
+        assertEquals(trnAmt1+trnAmt2+trnAmt3, result3.getBlncAfter());
         assertEquals(trnAmt1+trnAmt2+trnAmt3, accountEntity.getBalance());
         assertEquals(4, accountEntity.getTradeEntities().size());
 
@@ -154,17 +169,28 @@ public class AccountServiceTest {
         long trnAmt1 = 1000000;
         long trnAmt2 = 30000;
         long trnAmt3 = trnAmt1 - trnAmt2;
-
+        TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt1)
+                .build();
+        TradeDto.RequestDeposit request2 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt2)
+                .build();
+        TradeDto.RequestDeposit request3 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt3)
+                .build();
         //when
-        long result1 = accountService.deposit(acno, trnAmt1);
-        long result2 = accountService.outAmount(acno, trnAmt2);
-        long result3 = accountService.outAmount(acno, trnAmt3);
+        TradeEntity result1 = accountService.deposit(acno, request1);
+        TradeEntity result2 = accountService.outAmount(acno, request2);
+        TradeEntity result3 = accountService.outAmount(acno, request3);
         AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
 
         //then
-        assertEquals(trnAmt1, result1);
-        assertEquals(trnAmt1-trnAmt2, result2);
-        assertEquals(trnAmt1-trnAmt2-trnAmt3, result3);
+        assertEquals(trnAmt1, result1.getBlncAfter());
+        assertEquals(trnAmt1-trnAmt2, result2.getBlncAfter());
+        assertEquals(trnAmt1-trnAmt2-trnAmt3, result3.getBlncAfter());
         assertEquals(trnAmt1-trnAmt2-trnAmt3, accountEntity.getBalance());
         assertEquals(4, accountEntity.getTradeEntities().size());
 
@@ -193,11 +219,20 @@ public class AccountServiceTest {
         String acno = accountService.openRegularAccount(accountRequestOpen);
         long trnAmt1 = 1000000;
         long trnAmt2 = 1000001;
+        TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt1)
+                .build();
+        TradeDto.RequestDeposit request2 = TradeDto.RequestDeposit.builder()
+                .tradeDate(OBDateUtils.getToday())
+                .amount(trnAmt2)
+                .build();
 
         //when
-        long result1 = accountService.deposit(acno, trnAmt1);
-        long result2 = accountService.outAmount(acno, trnAmt2);
+        accountService.deposit(acno, request1);
+        accountService.outAmount(acno, request2);
 
         //then
+        // TODO
     }
 }

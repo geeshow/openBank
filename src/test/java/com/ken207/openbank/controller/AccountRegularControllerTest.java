@@ -1,9 +1,11 @@
 package com.ken207.openbank.controller;
 
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
+import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.service.AccountService;
@@ -13,6 +15,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.hypermedia.LinksSnippet;
+import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 
 import java.util.stream.IntStream;
@@ -194,13 +197,13 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 fieldWithPath("_embedded.responseList[0].subjectCode").description("code of account type"),
                                 fieldWithPath("_embedded.responseList[0].accountStatusCode").description("status of account"),
                                 fieldWithPath("_embedded.responseList[0]._links.self.href").description("link to self."),
+                                fieldWithPathAsSelf(),
+                                fieldWithPathAsProfile(),
                                 fieldWithPath("_links.first.href").description("link to first."),
                                 fieldWithPath("_links.prev.href").description("link to prev."),
-                                fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.next.href").description("link to next."),
                                 fieldWithPath("_links.last.href").description("link to last."),
                                 fieldWithPath("_links.create-account.href").description("link to open account."),
-                                fieldWithPath("_links.profile.href").description("link to profile."),
                                 fieldWithPath("page.size").description("size of one page."),
                                 fieldWithPath("page.totalElements").description("amount of datas."),
                                 fieldWithPath("page.totalPages").description("amount of pages."),
@@ -268,13 +271,32 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 fieldWithPath("balance").description("balance of account"),
                 fieldWithPath("subjectCode").description("code of account type"),
                 fieldWithPath("accountStatusCode").description("status of account"),
-                fieldWithPath("_links.self.href").description("link to self."),
-                fieldWithPath("_links.query-accounts.href").description("link to query accountes."),
-                fieldWithPath("_links.deposit.href").description("link to deposit existing account."),
-                fieldWithPath("_links.withdraw.href").description("link to withdraw existing account."),
-                fieldWithPath("_links.close.href").description("link to close existing account."),
-                fieldWithPath("_links.profile.href").description("link to profile.")
+                fieldWithPathAsSelf(),
+                fieldWithPathAsQuery(),
+                fieldWithPathAsDeposit(),
+                fieldWithPathAsWithdwar(),
+                fieldWithPathAsClose(),
+                fieldWithPathAsProfile()
         );
+    }
+
+    private FieldDescriptor fieldWithPathAsSelf() {
+        return fieldWithPath("_links.self.href").description("link to self.");
+    }
+    private FieldDescriptor fieldWithPathAsQuery() {
+        return fieldWithPath("_links.query-accounts.href").description("link to query accountes.");
+    }
+    private FieldDescriptor fieldWithPathAsDeposit() {
+        return fieldWithPath("_links.deposit.href").description("link to deposit existing account.");
+    }
+    private FieldDescriptor fieldWithPathAsWithdwar() {
+        return fieldWithPath("_links.withdraw.href").description("link to withdraw existing account.");
+    }
+    private FieldDescriptor fieldWithPathAsClose() {
+        return fieldWithPath("_links.close.href").description("link to close existing account.");
+    }
+    private FieldDescriptor fieldWithPathAsProfile() {
+        return fieldWithPath("_links.profile.href").description("link to profile.");
     }
 
     @Test
@@ -297,7 +319,6 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .build();
 
         //when & then
-
         mockMvc.perform(put("/api/account/regular/{accountNum}/deposit", accountNum)
                         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -306,15 +327,14 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("accountNum").exists())
-                .andExpect(jsonPath("regDate").value(regDate))
-                .andExpect(jsonPath("taxationCode").value(taxation.toString()))
-                .andExpect(jsonPath("closeDate").isEmpty())
-                .andExpect(jsonPath("lastIntsDt").value(regDate))
-                .andExpect(jsonPath("balance").value(0))
-                .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR.toString()))
-                .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
-                .andDo(document("get-account",
+                .andExpect(jsonPath("srno").exists())
+                .andExpect(jsonPath("tradeDate").value(tradeDate))
+                .andExpect(jsonPath("bzDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("amount").value(amount))
+                .andExpect(jsonPath("blncBefore").value(0))
+                .andExpect(jsonPath("blncAfter").value(amount))
+                .andExpect(jsonPath("tradeCd").value(TradeCd.DEPOSIT.toString()))
+                .andDo(document("account-deposit",
                         getLinksOfAccount(),
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
@@ -322,7 +342,52 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                         responseHeaders(
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
                         ),
-                        getResponseFieldsOfAccount()
+                        responseFields(
+                                fieldWithPath("srno").description("serial number of trade"),
+                                fieldWithPath("tradeDate").description("trade date as a request"),
+                                fieldWithPath("bzDate").description("real trade date or system date"),
+                                fieldWithPath("amount").description("trade amount"),
+                                fieldWithPath("blncBefore").description("the balance before trade"),
+                                fieldWithPath("blncAfter").description("the balance after trade"),
+                                fieldWithPath("tradeCd").description("type of trade"),
+                                fieldWithPathAsSelf(),
+                                fieldWithPathAsQuery(),
+                                fieldWithPathAsDeposit(),
+                                fieldWithPathAsWithdwar(),
+                                fieldWithPathAsClose(),
+                                fieldWithPathAsProfile()
+                        )
                 ));
+    }
+
+
+    @Test
+    @TestDescription("다건 입금 정상 테스트")
+    public void accountDepositMulti() throws Exception {
+        //given
+        // TODO
+        String tradeDate = "20191215";
+        long amount = 100000;
+        TaxationCode taxation = TaxationCode.REGULAR;
+
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .regDate(tradeDate)
+                .taxationCode(taxation)
+                .build();
+        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+
+        TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
+                .amount(amount)
+                .tradeDate(tradeDate)
+                .build();
+
+        //when & then
+        mockMvc.perform(put("/api/account/regular/{accountNum}/deposit", accountNum)
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(requestDeposit))
+        )
+                .andDo(print())
+                .andExpect(status().isOk());
     }
 }
