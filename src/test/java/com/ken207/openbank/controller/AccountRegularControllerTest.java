@@ -367,7 +367,8 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         // TODO
         String tradeDate = "20191215";
-        long amount = 100000;
+        long amount1 = 100000;
+        long amount2 = 10000;
         TaxationCode taxation = TaxationCode.REGULAR;
 
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
@@ -377,17 +378,27 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         String accountNum = accountService.openRegularAccount(accountRequestOpen);
 
         TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
-                .amount(amount)
+                .amount(amount1)
                 .tradeDate(tradeDate)
                 .build();
+        accountService.deposit(accountNum, requestDeposit);
 
         //when & then
+        requestDeposit.setAmount(amount2);
         mockMvc.perform(put("/api/account/regular/{accountNum}/deposit", accountNum)
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(this.objectMapper.writeValueAsString(requestDeposit))
-        )
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(this.objectMapper.writeValueAsString(requestDeposit))
+                )
                 .andDo(print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("srno").exists())
+                .andExpect(jsonPath("tradeDate").value(tradeDate))
+                .andExpect(jsonPath("bzDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("amount").value(amount2))
+                .andExpect(jsonPath("blncBefore").value(amount1))
+                .andExpect(jsonPath("blncAfter").value(amount1+amount2))
+                .andExpect(jsonPath("tradeCd").value(TradeCd.DEPOSIT.toString()));
     }
 }

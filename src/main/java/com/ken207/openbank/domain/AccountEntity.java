@@ -70,6 +70,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .lastIntsDt(regDate) //최종이자계산일자
                 .taxationCode(taxationCode) //과세구분코드
                 .accountStatusCode(AccountStatusCode.ACTIVE)
+                .lastTrnSrno(0)
                 .balance(0)
                 .blncBefore(0)
                 .tradeAmount(0)
@@ -99,7 +100,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 출금
      */
-    public TradeEntity outAmount(long tradeAmount) {
+    public TradeEntity withdraw(long tradeAmount) {
 
         if ( getPosibleOutAmt() < tradeAmount ) {
             throw new BizRuntimeException("출금가능금액 부족");
@@ -131,6 +132,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private TradeEntity addTradeLog(TradeCd tradeCd) {
 
         TradeEntity tradeEntity = TradeEntity.builder()
+                .srno(++this.lastTrnSrno)
                 .amount(this.tradeAmount)
                 .blncBefore(this.blncBefore)
                 .blncAfter(this.balance)

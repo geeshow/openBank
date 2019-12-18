@@ -104,7 +104,7 @@ public class AccountServiceTest {
 
     @Test
     @TestDescription("정상 입금 테스트")
-    public void inAccount() throws Exception {
+    public void depositAccount() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .regDate(OBDateUtils.getToday())
@@ -135,6 +135,9 @@ public class AccountServiceTest {
         AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
 
         //then
+        assertThat(result1.getSrno()).isEqualTo(2L);
+        assertThat(result2.getSrno()).isEqualTo(3L);
+        assertThat(result3.getSrno()).isEqualTo(4L);
         assertEquals(request1.getAmount(), result1.getBlncAfter());
         assertEquals(trnAmt1+trnAmt2, result2.getBlncAfter());
         assertEquals(trnAmt1+trnAmt2+trnAmt3, result3.getBlncAfter());
@@ -183,8 +186,8 @@ public class AccountServiceTest {
                 .build();
         //when
         TradeEntity result1 = accountService.deposit(acno, request1);
-        TradeEntity result2 = accountService.outAmount(acno, request2);
-        TradeEntity result3 = accountService.outAmount(acno, request3);
+        TradeEntity result2 = accountService.withdraw(acno, request2);
+        TradeEntity result3 = accountService.withdraw(acno, request3);
         AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
 
         //then
@@ -230,9 +233,9 @@ public class AccountServiceTest {
 
         //when
         accountService.deposit(acno, request1);
-        accountService.outAmount(acno, request2);
+        accountService.withdraw(acno, request2);
 
         //then
-        // TODO
+        fail("잔액 이상 출금 오류");
     }
 }

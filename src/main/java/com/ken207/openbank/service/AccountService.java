@@ -6,6 +6,7 @@ import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import javax.persistence.EntityNotFoundException;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final TradeRepository tradeRepository;
     private final CodeGeneratorService codeGeneratorService;
 
     @Transactional
@@ -39,14 +41,16 @@ public class AccountService {
     public TradeEntity deposit(String accountNum, TradeDto.RequestDeposit requestDeposit) {
         AccountEntity account = getAccountEntity(accountNum);
         account.setReckonDt(requestDeposit.getTradeDate());
-        return account.deposit(requestDeposit.getAmount());
+        TradeEntity deposit = account.deposit(requestDeposit.getAmount());
+        return tradeRepository.save(deposit);
     }
 
     @Transactional
-    public TradeEntity outAmount(String accountNum, TradeDto.RequestDeposit requestOut) {
+    public TradeEntity withdraw(String accountNum, TradeDto.RequestDeposit requestOut) {
         AccountEntity account = getAccountEntity(accountNum);
         account.setReckonDt(requestOut.getTradeDate());
-        return account.outAmount(requestOut.getAmount());
+        TradeEntity withdraw = account.withdraw(requestOut.getAmount());
+        return tradeRepository.save(withdraw);
     }
 
     private AccountEntity getAccountEntity(String acno) {

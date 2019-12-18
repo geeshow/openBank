@@ -15,6 +15,7 @@ import static javax.persistence.FetchType.LAZY;
 @AttributeOverride(name = "id",column = @Column(name = "trade_id"))
 public class TradeEntity extends BaseEntity<TradeEntity> {
 
+    @Column(nullable=false, length=8, unique=true)
     private long srno;
     private String tradeDate; // reckon date, request date
     private String bzDate; // real trade date, system date
