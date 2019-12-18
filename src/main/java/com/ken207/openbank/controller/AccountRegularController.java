@@ -147,6 +147,31 @@ public class AccountRegularController {
     }
 
 
+    @PutMapping("/{accountNum}/withdraw")
+    public ResponseEntity accountWithdraw(@PathVariable String accountNum,
+                                         @RequestBody @Valid TradeDto.RequestDeposit requestDeposit,
+                                         Errors errors,
+                                         @CurrentUser MemberEntity currentMember) {
+
+        //update for deposit
+        TradeEntity resultTrade = this.accountService.withdraw(accountNum, requestDeposit);
+
+        //set response data
+        TradeDto.Response response = tradeMapper.entityToResponse(resultTrade);
+
+        //HATEOAS REST API
+        Resource resource = new Resource(response,
+                controllerLinkBuilder.slash(accountNum).slash("withdraw").withSelfRel(),
+                getLinkOfDeposit(accountNum),
+                getLinkOfWithdraw(accountNum),
+                getLinkOfClose(accountNum),
+                getLinkOfQuery(),
+                getLinkOfProfile("#resources-accounts-withdraw")
+        );
+
+        return ResponseEntity.ok().body(resource);
+    }
+
     private Link getLinkOfDeposit(String accountNum) {
         return controllerLinkBuilder.slash(accountNum).slash("deposit").withRel("deposit");
     }

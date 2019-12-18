@@ -183,3 +183,10 @@ operation::get-account[snippets='curl-request,http-request,http-response,respons
 
 operation::account-deposit[snippets='request-fields,curl-request,http-response,links']
 
+[[resources-account-withdraw]]
+=== 계좌 출금 요청
+
+`PUT` 요청을 사용해서 해당 계좌에 출금을 할 수 있다.
+
+operation::account-deposit[snippets='request-fields,curl-request,http-response,links']
+

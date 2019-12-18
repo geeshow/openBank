@@ -109,7 +109,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
         this.blncBefore = this.balance;
         this.balance -= this.tradeAmount;
 
-        return addTradeLog(TradeCd.OUT);
+        return addTradeLog(TradeCd.WITHDRAW);
     }
 
     public long getPosibleOutAmt() {

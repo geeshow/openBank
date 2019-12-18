@@ -8,6 +8,7 @@ import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
+import com.ken207.openbank.exception.BizRuntimeException;
 import com.ken207.openbank.service.AccountService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -393,12 +394,140 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("srno").exists())
+                .andExpect(jsonPath("srno").value(3L))
                 .andExpect(jsonPath("tradeDate").value(tradeDate))
                 .andExpect(jsonPath("bzDate").value(OBDateUtils.getToday()))
                 .andExpect(jsonPath("amount").value(amount2))
                 .andExpect(jsonPath("blncBefore").value(amount1))
                 .andExpect(jsonPath("blncAfter").value(amount1+amount2))
                 .andExpect(jsonPath("tradeCd").value(TradeCd.DEPOSIT.toString()));
+    }
+
+    @Test
+    @TestDescription("정상 출금 테스트")
+    public void accountWithdraw() throws Exception {
+        //given
+        String tradeDate = "20191215";
+        long depositAmount = 100000;
+        long withdrawAmount = 30000;
+        TaxationCode taxation = TaxationCode.REGULAR;
+
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .regDate(tradeDate)
+                .taxationCode(taxation)
+                .build();
+        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+
+        TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
+                .amount(depositAmount)
+                .tradeDate(tradeDate)
+                .build();
+        accountService.deposit(accountNum, requestDeposit);
+
+        //when & then
+        requestDeposit.setAmount(withdrawAmount);
+        mockMvc.perform(put("/api/account/regular/{accountNum}/withdraw", accountNum)
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(requestDeposit))
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("srno").value(3L))
+                .andExpect(jsonPath("tradeDate").value(tradeDate))
+                .andExpect(jsonPath("bzDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("amount").value(withdrawAmount))
+                .andExpect(jsonPath("blncBefore").value(depositAmount))
+                .andExpect(jsonPath("blncAfter").value(depositAmount-withdrawAmount))
+                .andExpect(jsonPath("tradeCd").value(TradeCd.WITHDRAW.toString()))
+                .andDo(document("account-withdraw",
+                        getLinksOfAccount(),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("srno").description("serial number of trade"),
+                                fieldWithPath("tradeDate").description("trade date as a request"),
+                                fieldWithPath("bzDate").description("real trade date or system date"),
+                                fieldWithPath("amount").description("trade amount"),
+                                fieldWithPath("blncBefore").description("the balance before trade"),
+                                fieldWithPath("blncAfter").description("the balance after trade"),
+                                fieldWithPath("tradeCd").description("type of trade"),
+                                fieldWithPathAsSelf(),
+                                fieldWithPathAsQuery(),
+                                fieldWithPathAsDeposit(),
+                                fieldWithPathAsWithdwar(),
+                                fieldWithPathAsClose(),
+                                fieldWithPathAsProfile()
+                        )
+                ));
+    }
+
+    @Test(expected = BizRuntimeException.class)
+    @TestDescription("잔액 초과 출금 오류 테스트")
+    public void accountWithdrawOverBalance() throws Exception {
+        //given
+        String tradeDate = "20191215";
+        long depositAmount = 100000;
+        long withdrawAmount = 130000;
+        TaxationCode taxation = TaxationCode.REGULAR;
+
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .regDate(tradeDate)
+                .taxationCode(taxation)
+                .build();
+        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+
+        TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
+                .amount(depositAmount)
+                .tradeDate(tradeDate)
+                .build();
+        accountService.deposit(accountNum, requestDeposit);
+
+        //when & then
+        requestDeposit.setAmount(withdrawAmount);
+        mockMvc.perform(put("/api/account/regular/{accountNum}/withdraw", accountNum)
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(requestDeposit))
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("srno").value(3L))
+                .andExpect(jsonPath("tradeDate").value(tradeDate))
+                .andExpect(jsonPath("bzDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("amount").value(withdrawAmount))
+                .andExpect(jsonPath("blncBefore").value(depositAmount))
+                .andExpect(jsonPath("blncAfter").value(depositAmount-withdrawAmount))
+                .andExpect(jsonPath("tradeCd").value(TradeCd.WITHDRAW.toString()))
+                .andDo(document("account-withdraw",
+                        getLinksOfAccount(),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("srno").description("serial number of trade"),
+                                fieldWithPath("tradeDate").description("trade date as a request"),
+                                fieldWithPath("bzDate").description("real trade date or system date"),
+                                fieldWithPath("amount").description("trade amount"),
+                                fieldWithPath("blncBefore").description("the balance before trade"),
+                                fieldWithPath("blncAfter").description("the balance after trade"),
+                                fieldWithPath("tradeCd").description("type of trade"),
+                                fieldWithPathAsSelf(),
+                                fieldWithPathAsQuery(),
+                                fieldWithPathAsDeposit(),
+                                fieldWithPathAsWithdwar(),
+                                fieldWithPathAsClose(),
+                                fieldWithPathAsProfile()
+                        )
+                ));
     }
 }
