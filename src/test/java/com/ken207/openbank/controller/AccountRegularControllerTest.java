@@ -467,7 +467,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 ));
     }
 
-    @Test(expected = BizRuntimeException.class)
+    @Test
     @TestDescription("잔액 초과 출금 오류 테스트")
     public void accountWithdrawOverBalance() throws Exception {
         //given
@@ -491,42 +491,19 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //when & then
         requestDeposit.setAmount(withdrawAmount);
         mockMvc.perform(put("/api/account/regular/{accountNum}/withdraw", accountNum)
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(this.objectMapper.writeValueAsString(requestDeposit))
-        )
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(this.objectMapper.writeValueAsString(requestDeposit))
+                )
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
-                .andExpect(jsonPath("srno").value(3L))
-                .andExpect(jsonPath("tradeDate").value(tradeDate))
-                .andExpect(jsonPath("bzDate").value(OBDateUtils.getToday()))
-                .andExpect(jsonPath("amount").value(withdrawAmount))
-                .andExpect(jsonPath("blncBefore").value(depositAmount))
-                .andExpect(jsonPath("blncAfter").value(depositAmount-withdrawAmount))
-                .andExpect(jsonPath("tradeCd").value(TradeCd.WITHDRAW.toString()))
-                .andDo(document("account-withdraw",
-                        getLinksOfAccount(),
-                        requestHeaders(
-                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
-                        ),
-                        responseHeaders(
-                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
-                        ),
+                .andExpect(status().isInternalServerError())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8.toString()))
+                .andExpect(jsonPath("message").value("출금가능금액 부족"))
+                .andExpect(jsonPath("status").value("INTERNAL_SERVER_ERROR"))
+                .andDo(document("errors",
                         responseFields(
-                                fieldWithPath("srno").description("serial number of trade"),
-                                fieldWithPath("tradeDate").description("trade date as a request"),
-                                fieldWithPath("bzDate").description("real trade date or system date"),
-                                fieldWithPath("amount").description("trade amount"),
-                                fieldWithPath("blncBefore").description("the balance before trade"),
-                                fieldWithPath("blncAfter").description("the balance after trade"),
-                                fieldWithPath("tradeCd").description("type of trade"),
-                                fieldWithPathAsSelf(),
-                                fieldWithPathAsQuery(),
-                                fieldWithPathAsDeposit(),
-                                fieldWithPathAsWithdwar(),
-                                fieldWithPathAsClose(),
-                                fieldWithPathAsProfile()
+                                fieldWithPath("message").description("error message"),
+                                fieldWithPath("status").description("result")
                         )
                 ));
     }
