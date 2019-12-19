@@ -12,6 +12,7 @@ import static javax.persistence.FetchType.LAZY;
 @Getter @Setter
 @Builder @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name="Trade")
 @AttributeOverride(name = "id",column = @Column(name = "trade_id"))
 public class TradeEntity extends BaseEntity<TradeEntity> {
 
@@ -26,5 +27,5 @@ public class TradeEntity extends BaseEntity<TradeEntity> {
     @JsonIgnore
     @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id")
-    private AccountEntity accountEntity;
+    private AccountEntity account;
 }

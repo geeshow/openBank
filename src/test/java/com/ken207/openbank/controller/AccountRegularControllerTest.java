@@ -8,7 +8,8 @@ import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
-import com.ken207.openbank.exception.BizRuntimeException;
+import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,11 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     @Autowired
     AccountService accountService;
 
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    TradeRepository tradeRepository;
     @Test
     @TestDescription("보통예금 계좌생성 정상 테스트")
     public void openAccount() throws Exception {
@@ -143,20 +149,15 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         String regDate = "20191215";
         TaxationCode taxation = TaxationCode.REGULAR;
-        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .regDate(regDate)
-                .taxationCode(taxation)
-                .build();
-
-        IntStream.range(0,50).forEach(
-                e -> accountService.openRegularAccount(accountRequestOpen)
+        IntStream.range(0,15).forEach(
+                e -> createAccount(regDate, taxation)
         );
 
         //when & then
         this.mockMvc.perform(get("/api/account/regular")
                     .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                     .param("page", "1")
-                    .param("size", "10")
+                    .param("size", "5")
                     .param("sort", "accountNum,DESC"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -219,11 +220,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         //given
         String regDate = "20191215";
         TaxationCode taxation = TaxationCode.REGULAR;
-        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .regDate(regDate)
-                .taxationCode(taxation)
-                .build();
-        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = createAccount(regDate, taxation);
 
         //when & then
         mockMvc.perform(get("/api/account/regular/{accountNum}", accountNum)
@@ -308,11 +305,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         long amount = 100000;
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .regDate(tradeDate)
-                .taxationCode(taxation)
-                .build();
-        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = createAccount(tradeDate, taxation);
 
         TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
                 .amount(amount)
@@ -366,26 +359,21 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     @TestDescription("다건 입금 정상 테스트")
     public void accountDepositMulti() throws Exception {
         //given
-        // TODO
-        String tradeDate = "20191215";
         long amount1 = 100000;
         long amount2 = 10000;
-        TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .regDate(tradeDate)
-                .taxationCode(taxation)
-                .build();
-        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+        String tradeDate = "20191215";
+        TaxationCode taxation = TaxationCode.REGULAR;
+        String accountNum = createAccount(tradeDate, taxation);
+
+        deposit(tradeDate, amount1, accountNum);
 
         TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
-                .amount(amount1)
+                .amount(amount2)
                 .tradeDate(tradeDate)
                 .build();
-        accountService.deposit(accountNum, requestDeposit);
 
         //when & then
-        requestDeposit.setAmount(amount2);
         mockMvc.perform(put("/api/account/regular/{accountNum}/deposit", accountNum)
                         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -407,30 +395,26 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     @TestDescription("정상 출금 테스트")
     public void accountWithdraw() throws Exception {
         //given
-        String tradeDate = "20191215";
         long depositAmount = 100000;
         long withdrawAmount = 30000;
-        TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .regDate(tradeDate)
-                .taxationCode(taxation)
-                .build();
-        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+        String tradeDate = "20191215";
+        TaxationCode taxation = TaxationCode.REGULAR;
+        String accountNum = createAccount(tradeDate, taxation);
+
+        deposit(tradeDate, depositAmount, accountNum);
 
         TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
-                .amount(depositAmount)
+                .amount(withdrawAmount)
                 .tradeDate(tradeDate)
                 .build();
-        accountService.deposit(accountNum, requestDeposit);
 
         //when & then
-        requestDeposit.setAmount(withdrawAmount);
         mockMvc.perform(put("/api/account/regular/{accountNum}/withdraw", accountNum)
-                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(this.objectMapper.writeValueAsString(requestDeposit))
-        )
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .content(this.objectMapper.writeValueAsString(requestDeposit))
+                )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
@@ -471,25 +455,21 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     @TestDescription("잔액 초과 출금 오류 테스트")
     public void accountWithdrawOverBalance() throws Exception {
         //given
-        String tradeDate = "20191215";
         long depositAmount = 100000;
         long withdrawAmount = 130000;
-        TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .regDate(tradeDate)
-                .taxationCode(taxation)
-                .build();
-        String accountNum = accountService.openRegularAccount(accountRequestOpen);
+        String tradeDate = "20191215";
+        TaxationCode taxation = TaxationCode.REGULAR;
+        String accountNum = createAccount(tradeDate, taxation);
+
+        deposit(tradeDate, depositAmount, accountNum);
 
         TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
-                .amount(depositAmount)
+                .amount(withdrawAmount)
                 .tradeDate(tradeDate)
                 .build();
-        accountService.deposit(accountNum, requestDeposit);
 
         //when & then
-        requestDeposit.setAmount(withdrawAmount);
         mockMvc.perform(put("/api/account/regular/{accountNum}/withdraw", accountNum)
                         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -506,5 +486,135 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 fieldWithPath("status").description("result")
                         )
                 ));
+    }
+
+    private String createAccount(String tradeDate, TaxationCode taxation) {
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .regDate(tradeDate)
+                .taxationCode(taxation)
+                .build();
+        return accountService.openRegularAccount(accountRequestOpen);
+    }
+
+    @Test
+    @TestDescription("거래내역 조회 정상 테스트")
+    public void getTradeList() throws Exception {
+        //given
+        // TODO
+        String tradeDate = "20191015";
+        TaxationCode taxation = TaxationCode.REGULAR;
+
+        String accountNum = createAccount(tradeDate, taxation);
+
+        IntStream.range(1,15).forEach(e -> {
+            deposit(OBDateUtils.addDays(tradeDate, e), e, accountNum);
+        });
+
+        //when & then
+        mockMvc.perform(get("/api/account/regular/{accountNum}/trade", accountNum)
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .param("page", "1")
+                        .param("size", "5")
+                        .param("sort", "srno,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_embedded.responseList[0].srno").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].tradeDate").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].bzDate").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].amount").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].blncBefore").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].blncAfter").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].tradeCd").exists())
+                .andDo(document("query-trade",
+                        links(
+                                linkWithRel("first").description("link to first page"),
+                                linkWithRel("prev").description("link to prev page"),
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("next").description("link to next page"),
+                                linkWithRel("last").description("link to last page"),
+                                linkWithRel("profile").description("link to profile."),
+                                linkWithRel("query-accounts").description("link to query accounts"),
+                                linkWithRel("deposit").description("link to deposit an existing account"),
+                                linkWithRel("withdraw").description("link to withdraw an existing account"),
+                                linkWithRel("close").description("link to close an existing account")
+                        ),
+                        requestParameters(
+                                parameterWithName("page").description("현재 페이지 번호. 0페이지 부터 시작."),
+                                parameterWithName("size").description("한 페이지의 사이즈"),
+                                parameterWithName("sort").description("데이터 정렬. ex)name, DESC")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("_embedded.responseList[0]srno").description("serial number of trade"),
+                                fieldWithPath("_embedded.responseList[0]tradeDate").description("trade date as a request"),
+                                fieldWithPath("_embedded.responseList[0]bzDate").description("real trade date or system date"),
+                                fieldWithPath("_embedded.responseList[0]amount").description("trade amount"),
+                                fieldWithPath("_embedded.responseList[0]blncBefore").description("the balance before trade"),
+                                fieldWithPath("_embedded.responseList[0]blncAfter").description("the balance after trade"),
+                                fieldWithPath("_embedded.responseList[0]tradeCd").description("type of trade"),
+                                fieldWithPath("_links.first.href").description("link to first."),
+                                fieldWithPath("_links.prev.href").description("link to prev."),
+                                fieldWithPath("_links.next.href").description("link to next."),
+                                fieldWithPath("_links.last.href").description("link to last."),
+                                fieldWithPath("page.size").description("size of one page."),
+                                fieldWithPath("page.totalElements").description("amount of datas."),
+                                fieldWithPath("page.totalPages").description("amount of pages."),
+                                fieldWithPath("page.number").description("current page number."),
+                                fieldWithPathAsSelf(),
+                                fieldWithPathAsQuery(),
+                                fieldWithPathAsDeposit(),
+                                fieldWithPathAsWithdwar(),
+                                fieldWithPathAsClose(),
+                                fieldWithPathAsProfile()
+
+                        )
+                ));
+    }
+
+
+    @Test
+    @TestDescription("해당 계좌의 거래내역만 조회되는지 테스트")
+    public void getTradeListWith500() throws Exception {
+        //given
+        // TODO
+        String tradeDate = "20191015";
+        TaxationCode taxation = TaxationCode.REGULAR;
+
+        String accountNum = createAccount(tradeDate, taxation);
+        String otherAccountNum = createAccount(tradeDate, taxation);
+
+        IntStream.range(1,5).forEach(e -> {
+            deposit(OBDateUtils.addDays(tradeDate, e), e, accountNum);
+        });
+
+        IntStream.range(1,10).forEach(e -> {
+            deposit(OBDateUtils.addDays(tradeDate, e), e, otherAccountNum);
+        });
+
+        //when & then
+        mockMvc.perform(get("/api/account/regular/{accountNum}/trade", accountNum)
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "srno,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_embedded.responseList[0].srno").value("5"))
+                .andExpect(jsonPath("_embedded.responseList[4].srno").value("1"))
+                .andExpect(jsonPath("_embedded.responseList[0].bzDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("_embedded.responseList[4].bzDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("_embedded.responseList[5].srno").doesNotExist());
+    }
+
+    private void deposit(String tradeDate, long amount1, String accountNum) {
+        TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
+                .amount(amount1)
+                .tradeDate(tradeDate)
+                .build();
+        accountService.deposit(accountNum, requestDeposit);
     }
 }

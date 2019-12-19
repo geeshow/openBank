@@ -2,6 +2,8 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
+import com.ken207.openbank.common.ResponseResource;
+import com.ken207.openbank.domain.BranchEntity;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.TradeEntity;
@@ -11,9 +13,11 @@ import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.mapper.AccountMapper;
 import com.ken207.openbank.mapper.TradeMapper;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
@@ -41,6 +45,7 @@ public class AccountRegularController {
 
     private final AccountService accountService;
     private final AccountRepository accountRepository;
+    private final TradeRepository tradeRepository;
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(AccountRegularController.class);
     private final AccountMapper accountMapper = AccountMapper.INSTANCE;
     private final TradeMapper tradeMapper = TradeMapper.INSTANCE;
@@ -170,6 +175,37 @@ public class AccountRegularController {
         );
 
         return ResponseEntity.ok().body(resource);
+    }
+
+
+    @GetMapping("/{accountNum}/trade")
+    public ResponseEntity getTradeList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<TradeEntity> assembler,
+                                       @CurrentUser MemberEntity memberEntity) {
+
+        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+
+        //Request Data Validation
+        if ( account == null ) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Page<TradeEntity> page = this.tradeRepository.findByAccount(account, pageable);
+        PagedResources<Resource> pagedResources = assembler.toResource(page,
+                e -> new Resource(
+                        tradeMapper.entityToResponse(e)
+                ));
+
+        pagedResources.add(new Link("/docs/index.html#resources-trade-list").withRel("profile"));
+        //pagedResources.add(linkTo(methodOn(AccountRegularController.class).getTradeList(accountNum, null,null,null)).withSelfRel());
+
+        if ( memberEntity != null ) {
+            pagedResources.add(getLinkOfDeposit(accountNum));
+            pagedResources.add(getLinkOfWithdraw(accountNum));
+            pagedResources.add(getLinkOfClose(accountNum));
+            pagedResources.add(getLinkOfQuery());
+        }
+
+        return ResponseEntity.ok(pagedResources);
     }
 
     private Link getLinkOfDeposit(String accountNum) {

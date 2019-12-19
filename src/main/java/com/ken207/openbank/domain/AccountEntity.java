@@ -16,6 +16,7 @@ import static javax.persistence.FetchType.LAZY;
 @Entity
 @Getter
 @Builder @NoArgsConstructor @AllArgsConstructor
+@Table(name="Account")
 @AttributeOverride(name = "id",column = @Column(name = "account_id"))
 public class AccountEntity extends BaseEntity<AccountEntity> {
 
@@ -139,7 +140,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .tradeCd(tradeCd)
                 .tradeDate(this.getReckonDt())
                 .bzDate(OBDateUtils.getToday())
-                .accountEntity(this)
+                .account(this)
                 .build();
 
         this.tradeEntities.add(tradeEntity);
