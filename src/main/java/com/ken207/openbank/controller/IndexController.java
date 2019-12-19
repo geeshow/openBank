@@ -16,6 +16,7 @@ public class IndexController {
     public ResponseEntity index() {
         //HATEOAS REST API
         ResourceSupport index = new ResourceSupport();
+        index.add(linkTo(AccountRegularController.class).withRel("regular-account"));
         index.add(linkTo(BranchController.class).withRel("branches"));
         index.add(linkTo(CustomerController.class).withRel("customers"));
         index.add(new Link("/docs/index.html#resources-index-access").withRel("profile"));

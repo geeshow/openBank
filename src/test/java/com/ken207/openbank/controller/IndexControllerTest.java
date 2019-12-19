@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
@@ -27,17 +29,22 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class IndexControllerTest extends BaseControllerTest {
 
     @Test
-    public void index() throws Exception {
+    public void indexAccess() throws Exception {
         this.mockMvc.perform(get("/api"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("_links.customers.href").hasJsonPath())
-                .andExpect(jsonPath("_links.branches.href").hasJsonPath())
-                .andDo(document("get-api",
+                .andDo(document("index",
+                        links(
+                                linkWithRel("regular-account").description("link to regular account list."),
+                                linkWithRel("customers").description("link to customer list."),
+                                linkWithRel("branches").description("link to branch list."),
+                                linkWithRel("profile").description("link to profile.")
+                        ),
                         responseHeaders(
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
                         ),
                         responseFields(
+                                fieldWithPath("_links.regular-account.href").description("link to regular account list."),
                                 fieldWithPath("_links.customers.href").description("link to customer list."),
                                 fieldWithPath("_links.branches.href").description("link to branch list."),
                                 fieldWithPath("_links.profile.href").description("link to profile.")

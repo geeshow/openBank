@@ -2,8 +2,6 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
-import com.ken207.openbank.common.ResponseResource;
-import com.ken207.openbank.domain.BranchEntity;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.TradeEntity;
@@ -17,7 +15,6 @@ import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
@@ -36,7 +33,6 @@ import javax.validation.Valid;
 import java.net.URI;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
 @RequiredArgsConstructor
@@ -73,7 +69,7 @@ public class AccountRegularController {
                 getLinkOfDeposit(accountNum),
                 getLinkOfWithdraw(accountNum),
                 getLinkOfClose(accountNum),
-                getLinkOfQuery(),
+                getLinkOfList(),
                 getLinkOfProfile("#resources-accounts-create")
         );
 
@@ -119,7 +115,7 @@ public class AccountRegularController {
                 getLinkOfDeposit(accountNum),
                 getLinkOfWithdraw(accountNum),
                 getLinkOfClose(accountNum),
-                getLinkOfQuery(),
+                getLinkOfList(),
                 getLinkOfProfile("#resources-accounts-get")
         );
 
@@ -144,7 +140,7 @@ public class AccountRegularController {
                 getLinkOfDeposit(accountNum),
                 getLinkOfWithdraw(accountNum),
                 getLinkOfClose(accountNum),
-                getLinkOfQuery(),
+                getLinkOfList(),
                 getLinkOfProfile("#resources-accounts-deposit")
         );
 
@@ -170,7 +166,7 @@ public class AccountRegularController {
                 getLinkOfDeposit(accountNum),
                 getLinkOfWithdraw(accountNum),
                 getLinkOfClose(accountNum),
-                getLinkOfQuery(),
+                getLinkOfList(),
                 getLinkOfProfile("#resources-accounts-withdraw")
         );
 
@@ -202,7 +198,7 @@ public class AccountRegularController {
             pagedResources.add(getLinkOfDeposit(accountNum));
             pagedResources.add(getLinkOfWithdraw(accountNum));
             pagedResources.add(getLinkOfClose(accountNum));
-            pagedResources.add(getLinkOfQuery());
+            pagedResources.add(getLinkOfList());
         }
 
         return ResponseEntity.ok(pagedResources);
@@ -220,7 +216,7 @@ public class AccountRegularController {
         return controllerLinkBuilder.slash(accountNum).slash("close").withRel("close");
     }
 
-    private Link getLinkOfQuery() {
+    private Link getLinkOfList() {
         return controllerLinkBuilder.withRel(("query-accounts"));
     }
 

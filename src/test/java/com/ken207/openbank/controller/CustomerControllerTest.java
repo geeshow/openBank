@@ -1,5 +1,6 @@
 package com.ken207.openbank.controller;
 
+import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.user.MemberRole;
 import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.common.TestDescription;
@@ -26,6 +27,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.IntStream;
 
@@ -103,11 +107,11 @@ public class CustomerControllerTest extends BaseControllerTest  {
                 .andExpect(jsonPath("email").value(email))
                 .andExpect(jsonPath("nation").value(nation))
                 .andExpect(jsonPath("name").value(name))
-                .andDo(document("create-customer",
+                .andDo(document("customer-create",
                         links(
                                 linkWithRel("self").description("link to self"),
-                                linkWithRel("query-customers").description("link to query customers"),
-                                linkWithRel("update-customer").description("link to update an existing customer"),
+                                linkWithRel("customer-list").description("link to query customers"),
+                                linkWithRel("customer-update").description("link to update an existing customer"),
                                 linkWithRel("profile").description("link to profile.")
                         ),
                         requestHeaders(
@@ -133,8 +137,8 @@ public class CustomerControllerTest extends BaseControllerTest  {
                                 fieldWithPath("mngBranchName").description("management branch of new customer"),
                                 fieldWithPath("regEmployeeName").description("registration employee of new customer."),
                                 fieldWithPath("_links.self.href").description("link to self."),
-                                fieldWithPath("_links.query-customers.href").description("link to query customers."),
-                                fieldWithPath("_links.update-customer.href").description("link to update existing customer."),
+                                fieldWithPath("_links.customer-list.href").description("link to query customers."),
+                                fieldWithPath("_links.customer-update.href").description("link to update existing customer."),
                                 fieldWithPath("_links.profile.href").description("link to profile.")
                         )
 
@@ -218,7 +222,7 @@ public class CustomerControllerTest extends BaseControllerTest  {
 
     @Test
     @TestDescription("30개의 고객을 10개씩 두번째 페이지 조회하기")
-    public void queryCustomers() throws Exception {
+    public void customerList() throws Exception {
         //given
         String page = "1";
         String size = "10";
@@ -253,7 +257,7 @@ public class CustomerControllerTest extends BaseControllerTest  {
                 .andExpect(jsonPath("_links.last.href").exists())
                 .andExpect(jsonPath("_links.self.href").exists())
                 .andExpect(jsonPath("_links.profile.href").exists())
-                .andDo(document("query-customers",
+                .andDo(document("customer-list",
                         links(
                             linkWithRel("first").description("link to first page"),
                             linkWithRel("prev").description("link to prev page"),
@@ -298,10 +302,48 @@ public class CustomerControllerTest extends BaseControllerTest  {
         //then
     }
 
-    private void generateCustomer(int index) {
+    private Long generateCustomer(int index) {
         CustomerEntity customerEntity = new CustomerEntity("고객 " + index, "customer" + index + "@gmail.com", "KOREA");
-        customerService.createCustomer(customerEntity, employeeEntity.getId());
+        return customerService.createCustomer(customerEntity, employeeEntity.getId());
     }
 
+    @Test
+    @TestDescription("고객정보 단건 정상 조회")
+    public void getCustomer() throws Exception {
+        //given
+        int index = 500;
+        Long customerId = generateCustomer(index);
 
+        //when & then
+        mockMvc.perform(get("/api/customer/{id}", customerId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("id").exists())
+                .andExpect(jsonPath("name").value("고객 " + index))
+                .andExpect(jsonPath("email").value("customer" + index + "@gmail.com"))
+                .andExpect(jsonPath("nation").value("KOREA"))
+                .andExpect(jsonPath("regBranchName").exists())
+                .andExpect(jsonPath("mngBranchName").exists())
+                .andExpect(jsonPath("regEmployeeName").exists())
+                .andExpect(jsonPath("regDateTime").exists())
+                .andDo(document("get-branch",
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("identifier of customer"),
+                                fieldWithPath("name").description("name of customer"),
+                                fieldWithPath("email").description("email of customer"),
+                                fieldWithPath("nation").description("nation of customer"),
+                                fieldWithPath("regBranchName").description("name of registration branch"),
+                                fieldWithPath("mngBranchName").description("name of management branch"),
+                                fieldWithPath("regEmployeeName").description("name of registration employee"),
+                                fieldWithPath("regDateTime").description("registration time"),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.customer-update.href").description("link to update."),
+                                fieldWithPath("_links.customer-list.href").description("link to list."),
+                                fieldWithPath("_links.profile.href").description("link to profile.")
+                        )))
+        ;
+    }
 }
