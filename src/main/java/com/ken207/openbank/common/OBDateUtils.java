@@ -1,9 +1,6 @@
 package com.ken207.openbank.common;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
 
 public class OBDateUtils {
     public static String getToday() {
@@ -40,5 +37,17 @@ public class OBDateUtils {
         buf.append(dayValue);
 
         return buf.toString();
+    }
+
+    /**
+     *
+     * @param sourceDate
+     * @param targetDate
+     * @return 두 값이 같은 경우 return 0
+     * sourceDate > targetDate 일 경우 return 0 보다 큰 값
+     * sourceDate < targetDate 일 경우 return 0 보다 작은 값
+     */
+    public static int compareDate(String sourceDate, String targetDate) {
+        return sourceDate.compareTo(targetDate);
     }
 }

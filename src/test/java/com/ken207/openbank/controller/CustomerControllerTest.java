@@ -107,7 +107,7 @@ public class CustomerControllerTest extends BaseControllerTest  {
                 .andExpect(jsonPath("email").value(email))
                 .andExpect(jsonPath("nation").value(nation))
                 .andExpect(jsonPath("name").value(name))
-                .andDo(document("customer-create",
+                .andDo(document("create-customer",
                         links(
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("customer-list").description("link to query customers"),
@@ -326,7 +326,7 @@ public class CustomerControllerTest extends BaseControllerTest  {
                 .andExpect(jsonPath("mngBranchName").exists())
                 .andExpect(jsonPath("regEmployeeName").exists())
                 .andExpect(jsonPath("regDateTime").exists())
-                .andDo(document("get-branch",
+                .andDo(document("get-customer",
                         responseHeaders(
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
                         ),

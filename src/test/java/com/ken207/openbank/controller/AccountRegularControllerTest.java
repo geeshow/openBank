@@ -488,6 +488,45 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 ));
     }
 
+
+    @Test
+    @TestDescription("지정일자 거래 오류 테스트 - 지정일 이 후 거래 존재시 오류 발생")
+    public void reckonDepositAfterTrade_500error() throws Exception {
+        //given
+        long depositAmount = 130000;
+        String depositDate = "20191215";
+        long withdrawAmount = 100000;
+        String withdrawDate = "20191210";
+
+        TaxationCode taxation = TaxationCode.REGULAR;
+        String accountNum = createAccount(depositDate, taxation);
+
+        deposit(depositDate, depositAmount, accountNum);
+
+        TradeDto.RequestDeposit requestDeposit = TradeDto.RequestDeposit.builder()
+                .amount(withdrawAmount)
+                .tradeDate(withdrawDate)
+                .build();
+
+        //when & then
+        mockMvc.perform(put("/api/account/regular/{accountNum}/withdraw", accountNum)
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(this.objectMapper.writeValueAsString(requestDeposit))
+        )
+                .andDo(print())
+                .andExpect(status().isInternalServerError())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8.toString()))
+                .andExpect(jsonPath("message").value("지정일 이 후 거래가 존재. 기산일 거래를 요청해야 함."))
+                .andExpect(jsonPath("status").value("INTERNAL_SERVER_ERROR"))
+                .andDo(document("errors",
+                        responseFields(
+                                fieldWithPath("message").description("error message"),
+                                fieldWithPath("status").description("result")
+                        )
+                ));
+    }
+
     private String createAccount(String tradeDate, TaxationCode taxation) {
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .regDate(tradeDate)

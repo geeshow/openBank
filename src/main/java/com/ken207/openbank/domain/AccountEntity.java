@@ -28,6 +28,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private long balance;
     private long loanLimitAmount; //대출한도금액
     private long lastTrnSrno; //최종거래일련번호
+    private String lastTradeDate; //최종거래일자
 
     @Enumerated(EnumType.STRING)
     private SubjectCode subjectCode; //과목코드
@@ -72,6 +73,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .taxationCode(taxationCode) //과세구분코드
                 .accountStatusCode(AccountStatusCode.ACTIVE)
                 .lastTrnSrno(0)
+                .lastTradeDate(regDate)
                 .balance(0)
                 .blncBefore(0)
                 .tradeAmount(0)
@@ -91,6 +93,10 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      */
     public TradeEntity deposit(long tradeAmount) {
 
+        if ( OBDateUtils.compareDate(lastTradeDate, getReckonDt()) > 0 ) {
+            throw new BizRuntimeException("지정일 이 후 거래가 존재. 기산일 거래를 요청해야 함.");
+        }
+
         this.tradeAmount = tradeAmount;
         this.blncBefore = this.balance;
         this.balance += this.tradeAmount;
@@ -102,6 +108,10 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      * 출금
      */
     public TradeEntity withdraw(long tradeAmount) {
+
+        if ( OBDateUtils.compareDate(lastTradeDate, getReckonDt()) > 0 ) {
+            throw new BizRuntimeException("지정일 이 후 거래가 존재. 기산일 거래를 요청해야 함.");
+        }
 
         if ( getPosibleOutAmt() < tradeAmount ) {
             throw new BizRuntimeException("출금가능금액 부족");
@@ -143,6 +153,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .account(this)
                 .build();
 
+        this.lastTradeDate = this.getReckonDt();
         this.tradeEntities.add(tradeEntity);
         return tradeEntity;
     }

@@ -1,10 +1,12 @@
 package com.ken207.openbank.service;
 
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
+import com.ken207.openbank.exception.BizRuntimeException;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +42,23 @@ public class AccountService {
     @Transactional
     public TradeEntity deposit(String accountNum, TradeDto.RequestDeposit requestDeposit) {
         AccountEntity account = getAccountEntity(accountNum);
+
+        if ( OBDateUtils.compareDate(account.getLastTradeDate(), requestDeposit.getTradeDate()) > 0 ) {
+            throw new BizRuntimeException("지정일 이 후 거래가 존재. 기산일 거래를 요청해야 함.");
+        }
+
         account.setReckonDt(requestDeposit.getTradeDate());
         TradeEntity deposit = account.deposit(requestDeposit.getAmount());
         return tradeRepository.save(deposit);
     }
 
     @Transactional
-    public TradeEntity withdraw(String accountNum, TradeDto.RequestDeposit requestOut) {
+    public TradeEntity withdraw(String accountNum, TradeDto.RequestDeposit requestWithdraw) {
         AccountEntity account = getAccountEntity(accountNum);
-        account.setReckonDt(requestOut.getTradeDate());
-        TradeEntity withdraw = account.withdraw(requestOut.getAmount());
+
+
+        account.setReckonDt(requestWithdraw.getTradeDate());
+        TradeEntity withdraw = account.withdraw(requestWithdraw.getAmount());
         return tradeRepository.save(withdraw);
     }
 
