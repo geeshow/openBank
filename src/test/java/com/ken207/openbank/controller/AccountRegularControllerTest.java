@@ -3,7 +3,6 @@ package com.ken207.openbank.controller;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
-import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
@@ -70,7 +69,6 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("closeDate").isEmpty())
                 .andExpect(jsonPath("lastIntsDt").value(regDate))
                 .andExpect(jsonPath("balance").value(0))
-                .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR.toString()))
                 .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("create-account",
                         getLinksOfAccount(),
@@ -169,7 +167,6 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.responseList[0].closeDate").isEmpty())
                 .andExpect(jsonPath("_embedded.responseList[0].lastIntsDt").value(regDate))
                 .andExpect(jsonPath("_embedded.responseList[0].balance").value(0))
-                .andExpect(jsonPath("_embedded.responseList[0].subjectCode").value(SubjectCode.REGULAR.toString()))
                 .andExpect(jsonPath("_embedded.responseList[0].accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("query-accounts",
                         links(
@@ -235,7 +232,6 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("closeDate").isEmpty())
                 .andExpect(jsonPath("lastIntsDt").value(regDate))
                 .andExpect(jsonPath("balance").value(0))
-                .andExpect(jsonPath("subjectCode").value(SubjectCode.REGULAR.toString()))
                 .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("get-account",
                         getLinksOfAccount(),

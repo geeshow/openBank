@@ -31,9 +31,6 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private String lastTradeDate; //최종거래일자
 
     @Enumerated(EnumType.STRING)
-    private SubjectCode subjectCode; //과목코드
-
-    @Enumerated(EnumType.STRING)
     @Default
     private YesNo loanYn = YesNo.N; //대출계좌여부
 
@@ -65,7 +62,6 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      */
     public static AccountEntity openAccount(String accountNum, SubjectCode subjectCode, String regDate, TaxationCode taxationCode) {
         AccountEntity account = AccountEntity.builder()
-                .subjectCode(subjectCode) //과목코드
                 .accountNum(accountNum) //계좌번호
                 .regDate(regDate) //신규일자
                 .reckonDt(regDate) //최종거래일자
