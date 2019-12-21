@@ -28,7 +28,6 @@ public class AccountDto {
         private String lastIntsDt; //최종이자계산일자
         private long balance;
 
-        private SubjectCode subjectCode; //과목코드
         private AccountStatusCode accountStatusCode; //계좌상태코드
     }
 
@@ -42,7 +41,6 @@ public class AccountDto {
                 .lastIntsDt(accountEntity.getLastIntsDt())
                 .balance(accountEntity.getBalance())
                 .accountStatusCode(accountEntity.getAccountStatusCode())
-                .subjectCode(accountEntity.getSubjectCode())
                 .build();
 
     }
