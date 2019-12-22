@@ -22,15 +22,16 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final TradeRepository tradeRepository;
+
     private final CodeGeneratorService codeGeneratorService;
 
     @Transactional
-    public String openRegularAccount(AccountDto.RequestOpen accountRequestOpen) {
-        String accountNum = codeGeneratorService.createAcno(SubjectCode.REGULAR.getSubjectCode());
+    public Long openRegularAccount(AccountDto.RequestOpen accountRequestOpen) {
+        String accountNum = codeGeneratorService.createAccountNumber(SubjectCode.REGULAR.getSubjectCode());
 
         AccountEntity accountEntity = AccountEntity.openAccount(accountNum, SubjectCode.REGULAR, accountRequestOpen.getRegDate(), accountRequestOpen.getTaxationCode());
         AccountEntity saveAccount = accountRepository.save(accountEntity);
-        return saveAccount.getAccountNum();
+        return saveAccount.getId();
     }
 
     @Transactional

@@ -14,12 +14,12 @@ public class CodeGeneratorService {
     private final CodeGeneratorRepository codeGeneratorRepository;
 
     @Transactional
-    public String createAcno(String prefixCode) {
+    public String createAccountNumber(String prefixCode) {
         CodeGenerator code = CodeGenerator.builder()
-                .prefixCode(prefixCode)
                 .build();
         CodeGenerator newAcnoCode = codeGeneratorRepository.save(code);
 
-        return newAcnoCode.getAcno();
+        return newAcnoCode.createAccountNumber(prefixCode);
     }
+
 }

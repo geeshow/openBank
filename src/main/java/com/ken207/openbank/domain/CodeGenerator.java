@@ -14,12 +14,11 @@ import javax.persistence.Id;
 public class CodeGenerator {
     @Id @GeneratedValue
     private Long id;
-    private String prefixCode; //접두코드
-    private String suffixCode; //접미코드
 
-    public String getAcno() {
-        StringBuilder acnoBuilder = new StringBuilder();
-        acnoBuilder.append(prefixCode).append(100000+this.getId());
-        return acnoBuilder.toString();
+    public String createAccountNumber(String prefixCode) {
+        StringBuilder numberBuilder = new StringBuilder();
+        numberBuilder.append(prefixCode).append(100000+this.getId());
+        return numberBuilder.toString();
     }
+
 }

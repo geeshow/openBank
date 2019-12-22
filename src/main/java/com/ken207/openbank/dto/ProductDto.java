@@ -19,4 +19,7 @@ public class ProductDto {
         private String endDate;
         private double basicRate;
     }
+
+    public class Response {
+    }
 }

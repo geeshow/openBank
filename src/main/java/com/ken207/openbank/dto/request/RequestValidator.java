@@ -2,6 +2,7 @@ package com.ken207.openbank.dto.request;
 
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.ProductDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.Errors;
@@ -58,6 +59,16 @@ public class RequestValidator {
             errors.rejectValue("regDate", "wrongValue", "regDate must not be empty.");
         }
 
+        if (errors.hasErrors()) {
+            return HttpStatus.BAD_REQUEST;
+        }
+
+        return HttpStatus.CREATED;
+    }
+
+    public static HttpStatus createProduct(ProductDto.Create createProductDto, Errors errors, MemberEntity currentMember) {
+
+        //check data validation
         if (errors.hasErrors()) {
             return HttpStatus.BAD_REQUEST;
         }

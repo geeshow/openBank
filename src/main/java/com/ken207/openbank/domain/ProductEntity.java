@@ -31,23 +31,20 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
     private String startDate;
     private String endDate;
 
-    @Builder.Default
-    @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "rate_id")
-    private List<RateEntity> basicRate = new ArrayList<>();
+    private RateEntity basicRate;
+
+    @Builder.Default
+    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "rate_id")
+    private List<RateEntity> allBasicRate = new ArrayList<>();
 
     public static ProductEntity createProduct(ProductDto.Create productCreateDto) {
 
         if ( productCreateDto.getEndDate() == null ) {
             productCreateDto.setEndDate("99991231");
         }
-
-        ProductEntity product = ProductEntity.builder()
-                .productCode(productCreateDto.getProductCode())
-                .subjectCode(productCreateDto.getSubjectCode())
-                .startDate(productCreateDto.getStartDate())
-                .endDate(productCreateDto.getEndDate())
-                .build();
 
         RateEntity basicRate = RateEntity.builder()
                 .name("기본이율")
@@ -56,13 +53,21 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
                 .endDate(productCreateDto.getEndDate())
                 .build();
 
+        ProductEntity product = ProductEntity.builder()
+                .productCode(productCreateDto.getProductCode())
+                .subjectCode(productCreateDto.getSubjectCode())
+                .startDate(productCreateDto.getStartDate())
+                .endDate(productCreateDto.getEndDate())
+                .basicRate(basicRate)
+                .build();
+
         product.addRate(basicRate);
 
         return product;
     }
 
     private void addRate(RateEntity rateEntity) {
-        this.basicRate.add(rateEntity);
+        this.allBasicRate.add(rateEntity);
     }
 
     public RateEntity addRate(String changeDate, double changeRate) {
@@ -76,13 +81,13 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
                 .startDate(changeDate)
                 .endDate(endDate)
                 .build();
-        this.basicRate.add(newRateEntity);
-        
+        this.allBasicRate.add(newRateEntity);
+
         return newRateEntity;
 
     }
 
     public RateEntity getLastBasicRate() {
-        return this.basicRate.get(this.basicRate.size() - 1);
+        return this.allBasicRate.get(this.allBasicRate.size() - 1);
     }
 }

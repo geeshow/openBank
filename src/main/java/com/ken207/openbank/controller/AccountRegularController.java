@@ -57,8 +57,8 @@ public class AccountRegularController {
         }
 
         //Create Entity and save to database
-        String accountNum = accountService.openRegularAccount(accountRequestOpen);
-        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        AccountEntity account = accountRepository.findById(accountId).get();
 
         //Set response data
         AccountDto.Response newAccount = accountMapper.accountForResponse(account);
@@ -66,9 +66,9 @@ public class AccountRegularController {
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,
                 controllerLinkBuilder.slash(newAccount.getAccountNum()).withSelfRel(),
-                getLinkOfDeposit(accountNum),
-                getLinkOfWithdraw(accountNum),
-                getLinkOfClose(accountNum),
+                getLinkOfDeposit(account.getAccountNum()),
+                getLinkOfWithdraw(account.getAccountNum()),
+                getLinkOfClose(account.getAccountNum()),
                 getLinkOfList(),
                 getLinkOfProfile("#resources-accounts-create")
         );

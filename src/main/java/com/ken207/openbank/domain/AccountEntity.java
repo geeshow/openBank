@@ -43,6 +43,10 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     @Enumerated(EnumType.STRING)
     private ChnlDvcd regChnlDvcd;
 
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private ProductEntity product;
+
     @Default
     @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_log_id")
