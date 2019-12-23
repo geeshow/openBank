@@ -2,14 +2,20 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
+import com.ken207.openbank.domain.ProductEntity;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
+import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.ProductRepository;
 import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
+import com.ken207.openbank.service.ProductService;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
@@ -19,7 +25,6 @@ import org.springframework.restdocs.hypermedia.LinkDescriptor;
 import org.springframework.restdocs.hypermedia.LinksSnippet;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
-import org.springframework.restdocs.snippet.IgnorableDescriptor;
 
 import java.util.stream.IntStream;
 
@@ -40,17 +45,50 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     AccountService accountService;
 
     @Autowired
+    ProductService productService;
+
+    @Autowired
     AccountRepository accountRepository;
 
     @Autowired
-    TradeRepository tradeRepository;
+    ProductRepository productRepository;
+
+    private final String PRODUCT_CODE = "130999";
+
+    @Before
+    public void setup() {
+        String productName = "온라인 보통예금";
+        String regDate = "20191214";
+        SubjectCode subjectCode = SubjectCode.REGULAR;
+
+        ProductEntity product = productRepository.findByProductCode(PRODUCT_CODE);
+
+        if ( product == null ) {
+            ProductDto.Create createProductDto = ProductDto.Create.builder()
+                    .productCode(PRODUCT_CODE)
+                    .subjectCode(subjectCode)
+                    .name(productName)
+                    .basicRate(1.2)
+                    .startDate(regDate)
+                    .endDate(OBDateUtils.MAX_DATE)
+                    .build();
+            productService.createProduct(createProductDto);
+        }
+
+    }
+
     @Test
     @TestDescription("보통예금 계좌생성 정상 테스트")
     public void openAccount() throws Exception {
         //given
+        String productCode = "130999";
         String regDate = "20191214";
+        String productName = "온라인 보통예금";
+        SubjectCode subjectCode = SubjectCode.REGULAR;
+
         TaxationCode taxation = TaxationCode.REGULAR;
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(productCode)
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
@@ -72,6 +110,9 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("lastIntsDt").value(regDate))
                 .andExpect(jsonPath("balance").value(0))
                 .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
+                .andExpect(jsonPath("productCode").value(productCode))
+                .andExpect(jsonPath("productName").value(productName))
+                .andExpect(jsonPath("subjectCode").value(subjectCode.toString()))
                 .andDo(document("create-account",
                         getLinksOfAccount(),
                         requestHeaders(
@@ -79,6 +120,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
                         ),
                         requestFields(
+                                fieldWithPath("productCode").description("product code of account"),
                                 fieldWithPath("regDate").description("Registration Date of new account"),
                                 fieldWithPath("taxationCode").description("way to tax in interest")
                         ),
@@ -97,6 +139,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         String regDate = "20191214";
         TaxationCode taxation = TaxationCode.REGULAR;
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(PRODUCT_CODE)
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
@@ -121,6 +164,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         String regDate = "";
         TaxationCode taxation = TaxationCode.REGULAR;
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(PRODUCT_CODE)
                 .regDate(regDate)
                 .taxationCode(taxation)
                 .build();
@@ -170,6 +214,9 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.responseList[0].lastIntsDt").value(regDate))
                 .andExpect(jsonPath("_embedded.responseList[0].balance").value(0))
                 .andExpect(jsonPath("_embedded.responseList[0].accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
+                .andExpect(jsonPath("_embedded.responseList[0].productCode").value(PRODUCT_CODE))
+                .andExpect(jsonPath("_embedded.responseList[0].productName").value("온라인 보통예금"))
+                .andExpect(jsonPath("_embedded.responseList[0].subjectCode").value(SubjectCode.REGULAR.toString()))
                 .andDo(document("query-accounts",
                         links(
                                 linkWithRel("first").description("link to first page"),
@@ -195,6 +242,8 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 fieldWithPath("_embedded.responseList[0].taxationCode").description("way to tax in interest"),
                                 fieldWithPath("_embedded.responseList[0].lastIntsDt").description("the last calculated date of account interest"),
                                 fieldWithPath("_embedded.responseList[0].balance").description("balance of account"),
+                                fieldWithPath("_embedded.responseList[0].productCode").description("product code of account"),
+                                fieldWithPath("_embedded.responseList[0].productName").description("name of product"),
                                 fieldWithPath("_embedded.responseList[0].subjectCode").description("code of account type"),
                                 fieldWithPath("_embedded.responseList[0].accountStatusCode").description("status of account"),
                                 fieldWithPath("_embedded.responseList[0]._links.self.href").description("link to self."),
@@ -255,6 +304,8 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 fieldWithPath("taxationCode").description("way to tax in interest"),
                 fieldWithPath("lastIntsDt").description("the last calculated date of account interest"),
                 fieldWithPath("balance").description("balance of account"),
+                fieldWithPath("productCode").description("product code of account"),
+                fieldWithPath("productName").description("name of product"),
                 fieldWithPath("subjectCode").description("code of account type"),
                 fieldWithPath("accountStatusCode").description("status of account"),
                 fieldWithPathAsSelf(),
@@ -533,6 +584,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
 
     private String createAccount(String tradeDate, TaxationCode taxation) {
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(PRODUCT_CODE)
                 .regDate(tradeDate)
                 .taxationCode(taxation)
                 .build();

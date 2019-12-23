@@ -2,14 +2,9 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
-import com.ken207.openbank.domain.enums.TaxationCode;
-import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.ProductDto;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,7 +12,6 @@ import org.springframework.restdocs.hypermedia.LinksSnippet;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 
-import static org.junit.Assert.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;

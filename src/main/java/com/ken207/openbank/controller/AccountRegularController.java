@@ -4,6 +4,7 @@ import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.ProductEntity;
 import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
@@ -11,6 +12,7 @@ import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.mapper.AccountMapper;
 import com.ken207.openbank.mapper.TradeMapper;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.ProductRepository;
 import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -42,9 +44,11 @@ public class AccountRegularController {
     private final AccountService accountService;
     private final AccountRepository accountRepository;
     private final TradeRepository tradeRepository;
+    private final ProductRepository productRepository;
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(AccountRegularController.class);
     private final AccountMapper accountMapper = AccountMapper.INSTANCE;
     private final TradeMapper tradeMapper = TradeMapper.INSTANCE;
+
 
     @PostMapping
     public ResponseEntity createAccount(@RequestBody @Valid AccountDto.RequestOpen accountRequestOpen, Errors errors,
@@ -56,12 +60,17 @@ public class AccountRegularController {
             return new ResponseEntity(new ErrorsResource(errors), httpStatus);
         }
 
+        ProductEntity productEntity = productRepository.findByProductCode(accountRequestOpen.getProductCode());
+
         //Create Entity and save to database
         Long accountId = accountService.openRegularAccount(accountRequestOpen);
         AccountEntity account = accountRepository.findById(accountId).get();
 
         //Set response data
         AccountDto.Response newAccount = accountMapper.accountForResponse(account);
+        newAccount.setProductCode(productEntity.getProductCode());
+        newAccount.setProductName(productEntity.getName());
+        newAccount.setSubjectCode(productEntity.getSubjectCode());
 
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,
@@ -83,6 +92,7 @@ public class AccountRegularController {
     public ResponseEntity queryAccounts(Pageable pageable, PagedResourcesAssembler<AccountEntity> assembler,
                                         @CurrentUser MemberEntity memberEntity) {
         Page<AccountEntity> page = this.accountRepository.findAll(pageable);
+        //Page<AccountEntity> page = this.accountService.getAccountList(pageable);
         PagedResources<Resource> pagedResources = assembler.toResource(page,
                 e -> new Resource(accountMapper.accountForResponse(e),
                         controllerLinkBuilder.slash(e.getAccountNum()).withSelfRel()

@@ -2,35 +2,46 @@ package com.ken207.openbank.service;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.ProductEntity;
 import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.exception.BizRuntimeException;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.ProductRepository;
 import com.ken207.openbank.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AccountService {
 
+    private final ProductRepository productRepository;
     private final AccountRepository accountRepository;
     private final TradeRepository tradeRepository;
-
     private final CodeGeneratorService codeGeneratorService;
 
     @Transactional
     public Long openRegularAccount(AccountDto.RequestOpen accountRequestOpen) {
+
+        ProductEntity productEntity = productRepository.findByProductCode(accountRequestOpen.getProductCode());
+
         String accountNum = codeGeneratorService.createAccountNumber(SubjectCode.REGULAR.getSubjectCode());
 
-        AccountEntity accountEntity = AccountEntity.openAccount(accountNum, SubjectCode.REGULAR, accountRequestOpen.getRegDate(), accountRequestOpen.getTaxationCode());
+        AccountEntity accountEntity = AccountEntity.openAccount(productEntity, accountNum, accountRequestOpen.getRegDate(), accountRequestOpen.getTaxationCode());
+
         AccountEntity saveAccount = accountRepository.save(accountEntity);
+
         return saveAccount.getId();
     }
 
@@ -71,4 +82,9 @@ public class AccountService {
         return account;
     }
 
+    public Page<AccountEntity> getAccountList(Pageable pageable) {
+        Page<AccountEntity> page = this.accountRepository.findAll(pageable);
+        page.stream().forEach(o -> o.getProduct().getName());
+        return page;
+    }
 }

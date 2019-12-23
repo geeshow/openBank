@@ -37,6 +37,7 @@ public class AccountServiceTest {
         //given
         String regDate = OBDateUtils.getToday();
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode("130999")
                 .regDate(regDate)
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -61,6 +62,7 @@ public class AccountServiceTest {
         //given
         String regDate = "20101010";
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode("130999")
                 .regDate(regDate)
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -83,6 +85,7 @@ public class AccountServiceTest {
     public void changePassword() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode("130999")
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -108,6 +111,7 @@ public class AccountServiceTest {
     public void depositAccount() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode("130999")
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -167,6 +171,7 @@ public class AccountServiceTest {
     public void outAccount() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode("130999")
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -220,6 +225,7 @@ public class AccountServiceTest {
     public void outAccount_BizRuntimeException() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode("130999")
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();

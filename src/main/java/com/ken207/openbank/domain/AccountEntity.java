@@ -64,7 +64,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      * 신규
      * @return
      */
-    public static AccountEntity openAccount(String accountNum, SubjectCode subjectCode, String regDate, TaxationCode taxationCode) {
+    public static AccountEntity openAccount(ProductEntity productEntity, String accountNum, String regDate, TaxationCode taxationCode) {
         AccountEntity account = AccountEntity.builder()
                 .accountNum(accountNum) //계좌번호
                 .regDate(regDate) //신규일자
@@ -77,6 +77,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .balance(0)
                 .blncBefore(0)
                 .tradeAmount(0)
+                .product(productEntity)
                 .build();
 
         account.addTradeLog(TradeCd.OPEN);

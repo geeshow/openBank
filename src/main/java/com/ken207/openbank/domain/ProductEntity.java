@@ -1,6 +1,5 @@
 package com.ken207.openbank.domain;
 
-import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.ProductDto;
 import lombok.AllArgsConstructor;
@@ -9,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 

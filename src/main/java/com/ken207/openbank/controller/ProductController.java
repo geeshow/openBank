@@ -78,11 +78,11 @@ public class ProductController {
 
     }
 
-    private Link getLinkToAdjust(String productCode) {
-        return controllerLinkBuilder.slash(productCode).withRel("adjust");
+    private Link getLinkToAdjust(String code) {
+        return controllerLinkBuilder.slash(code).withRel("adjust");
     }
 
-    private Link getLinkToCreate(String productCode) {
+    private Link getLinkToCreate(String code) {
         return controllerLinkBuilder.withRel("create");
     }
 }
