@@ -42,8 +42,8 @@ public class AccountServiceTest {
                 .build();
 
         //when
-        String acno = accountService.openRegularAccount(accountRequestOpen);
-        AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        AccountEntity accountEntity = accountRepository.findById(accountId).get();
 
         //then
         assertThat(accountEntity.getAccountNum().contains("1310000"));
@@ -66,8 +66,8 @@ public class AccountServiceTest {
                 .build();
 
         //when
-        String acno = accountService.openRegularAccount(accountRequestOpen);
-        AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        AccountEntity accountEntity = accountRepository.findById(accountId).get();
 
         //then
         assertThat(accountEntity.getAccountNum().contains("1310000"));
@@ -86,19 +86,20 @@ public class AccountServiceTest {
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
-        String acno = accountService.openRegularAccount(accountRequestOpen);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        AccountEntity accountEntity = accountRepository.findById(accountId).get();
 
         //when
         String newPassword = "1234";
-        accountService.setPassword(acno, newPassword);
-        AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
+        accountService.setPassword(accountEntity.getAccountNum(), newPassword);
+        AccountEntity accountAfterChange = accountRepository.findById(accountEntity.getId()).get();
 
         //then
         assertEquals(OBDateUtils.getToday(), accountEntity.getRegDate());
         assertEquals(OBDateUtils.getToday(), accountEntity.getLastIntsDt());
         assertEquals(OBDateUtils.getToday(), accountEntity.getReckonDt());
-        assertEquals(newPassword, accountEntity.getPassword());
-        assertEquals(0, accountEntity.getBalance());
+        assertEquals(newPassword, accountAfterChange.getPassword());
+        assertEquals(0, accountAfterChange.getBalance());
     }
 
 
@@ -110,7 +111,8 @@ public class AccountServiceTest {
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
-        String acno = accountService.openRegularAccount(accountRequestOpen);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = accountRepository.findById(accountId).get().getAccountNum();
 
         int trnAmt1 = 30000;
         int trnAmt2 = 200000;
@@ -129,10 +131,10 @@ public class AccountServiceTest {
                 .build();
 
         //when
-        TradeEntity result1 = accountService.deposit(acno, request1);
-        TradeEntity result2 = accountService.deposit(acno, request2);
-        TradeEntity result3 = accountService.deposit(acno, request3);
-        AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
+        TradeEntity result1 = accountService.deposit(accountNum, request1);
+        TradeEntity result2 = accountService.deposit(accountNum, request2);
+        TradeEntity result3 = accountService.deposit(accountNum, request3);
+        AccountEntity accountEntity = accountRepository.findByAccountNum(accountNum);
 
         //then
         assertThat(result1.getSrno()).isEqualTo(2L);
@@ -168,7 +170,9 @@ public class AccountServiceTest {
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
-        String acno = accountService.openRegularAccount(accountRequestOpen);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = accountRepository.findById(accountId).get().getAccountNum();
+
         long trnAmt1 = 1000000;
         long trnAmt2 = 30000;
         long trnAmt3 = trnAmt1 - trnAmt2;
@@ -185,10 +189,10 @@ public class AccountServiceTest {
                 .amount(trnAmt3)
                 .build();
         //when
-        TradeEntity result1 = accountService.deposit(acno, request1);
-        TradeEntity result2 = accountService.withdraw(acno, request2);
-        TradeEntity result3 = accountService.withdraw(acno, request3);
-        AccountEntity accountEntity = accountRepository.findByAccountNum(acno);
+        TradeEntity result1 = accountService.deposit(accountNum, request1);
+        TradeEntity result2 = accountService.withdraw(accountNum, request2);
+        TradeEntity result3 = accountService.withdraw(accountNum, request3);
+        AccountEntity accountEntity = accountRepository.findByAccountNum(accountNum);
 
         //then
         assertEquals(trnAmt1, result1.getBlncAfter());
@@ -219,7 +223,9 @@ public class AccountServiceTest {
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
-        String acno = accountService.openRegularAccount(accountRequestOpen);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = accountRepository.findById(accountId).get().getAccountNum();
+
         long trnAmt1 = 1000000;
         long trnAmt2 = 1000001;
         TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
@@ -232,8 +238,8 @@ public class AccountServiceTest {
                 .build();
 
         //when
-        accountService.deposit(acno, request1);
-        accountService.withdraw(acno, request2);
+        accountService.deposit(accountNum, request1);
+        accountService.withdraw(accountNum, request2);
 
         //then
         fail("잔액 이상 출금 오류");

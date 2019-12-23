@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.hypermedia.LinkDescriptor;
 import org.springframework.restdocs.hypermedia.LinksSnippet;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.ResponseFieldsSnippet;
+import org.springframework.restdocs.snippet.IgnorableDescriptor;
 
 import java.util.stream.IntStream;
 
@@ -176,7 +178,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 linkWithRel("next").description("link to next page"),
                                 linkWithRel("last").description("link to last page"),
                                 linkWithRel("create-account").description("link to open account."),
-                                linkWithRel("profile").description("link to profile.")
+                                linkWithRelAsProfile()
                         ),
                         requestParameters(
                                 parameterWithName("page").description("현재 페이지 번호. 0페이지 부터 시작."),
@@ -245,16 +247,6 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 ));
     }
 
-    private LinksSnippet getLinksOfAccount() {
-        return links(
-                linkWithRel("self").description("link to self"),
-                linkWithRel("query-accounts").description("link to query accounts"),
-                linkWithRel("deposit").description("link to deposit an existing account"),
-                linkWithRel("withdraw").description("link to withdraw an existing account"),
-                linkWithRel("close").description("link to close an existing account"),
-                linkWithRel("profile").description("link to profile."));
-    }
-
     private ResponseFieldsSnippet getResponseFieldsOfAccount() {
         return responseFields(
                 fieldWithPath("accountNum").description("Number of new account"),
@@ -274,6 +266,16 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         );
     }
 
+    private LinksSnippet getLinksOfAccount() {
+        return links(
+                linkWithRel("self").description("link to self"),
+                linkWithRelAsList(),
+                linkWithRel("deposit").description("link to deposit an existing account"),
+                linkWithRel("withdraw").description("link to withdraw an existing account"),
+                linkWithRel("close").description("link to close an existing account"),
+                linkWithRelAsProfile());
+    }
+
     private FieldDescriptor fieldWithPathAsSelf() {
         return fieldWithPath("_links.self.href").description("link to self.");
     }
@@ -291,6 +293,12 @@ public class AccountRegularControllerTest extends BaseControllerTest {
     }
     private FieldDescriptor fieldWithPathAsProfile() {
         return fieldWithPath("_links.profile.href").description("link to profile.");
+    }
+    private LinkDescriptor linkWithRelAsList() {
+        return linkWithRel("query-accounts").description("link to query accounts");
+    }
+    private LinkDescriptor linkWithRelAsProfile() {
+        return linkWithRel("profile").description("link to profile.");
     }
 
     @Test
@@ -528,7 +536,8 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .regDate(tradeDate)
                 .taxationCode(taxation)
                 .build();
-        return accountService.openRegularAccount(accountRequestOpen);
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        return accountRepository.findById(accountId).get().getAccountNum();
     }
 
     @Test
@@ -568,8 +577,8 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("next").description("link to next page"),
                                 linkWithRel("last").description("link to last page"),
-                                linkWithRel("profile").description("link to profile."),
-                                linkWithRel("query-accounts").description("link to query accounts"),
+                                linkWithRelAsProfile(),
+                                linkWithRelAsList(),
                                 linkWithRel("deposit").description("link to deposit an existing account"),
                                 linkWithRel("withdraw").description("link to withdraw an existing account"),
                                 linkWithRel("close").description("link to close an existing account")

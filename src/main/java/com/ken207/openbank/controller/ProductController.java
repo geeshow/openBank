@@ -2,18 +2,14 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
-import com.ken207.openbank.common.ResponseResource;
-import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.domain.ProductEntity;
-import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.mapper.ProductMapper;
 import com.ken207.openbank.repository.ProductRepository;
 import com.ken207.openbank.service.ProductService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
@@ -57,13 +53,13 @@ public class ProductController {
         ProductEntity newProduct = productRepository.findById(productId).get();
 
         //Set response data
-        ProductDto.Response response = productMapper.entityToDto(newProduct);
+        ProductDto.Create response = productMapper.entityToDto(newProduct);
 
         //HATEOAS REST API
         Resource responseResource = new Resource(response,
                 controllerLinkBuilder.slash(newProduct.getProductCode()).withSelfRel(),
                 getLinkToCreate(newProduct.getProductCode()),
-                getLinkToUpdate(newProduct.getProductCode()),
+                getLinkToAdjust(newProduct.getProductCode()),
                 getLinkToList(),
                 getLinkOfProfile("#resources-products-create")
         );
@@ -82,8 +78,8 @@ public class ProductController {
 
     }
 
-    private Link getLinkToUpdate(String productCode) {
-        return controllerLinkBuilder.slash(productCode).withRel("update");
+    private Link getLinkToAdjust(String productCode) {
+        return controllerLinkBuilder.slash(productCode).withRel("adjust");
     }
 
     private Link getLinkToCreate(String productCode) {

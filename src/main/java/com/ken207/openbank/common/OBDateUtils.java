@@ -3,6 +3,7 @@ package com.ken207.openbank.common;
 import java.time.LocalDate;
 
 public class OBDateUtils {
+    public static String MAX_DATE = "99991231";
     public static String getToday() {
         return parseString(LocalDate.now());
     }

@@ -23,6 +23,7 @@ import static javax.persistence.FetchType.LAZY;
 @AttributeOverride(name = "id",column = @Column(name = "product_id"))
 public class ProductEntity extends BaseEntity<ProductEntity> {
 
+    private String name;
     private String productCode;
 
     @Enumerated(EnumType.STRING)
@@ -34,11 +35,6 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "rate_id")
     private RateEntity basicRate;
-
-    @Builder.Default
-    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "rate_id")
-    private List<RateEntity> allBasicRate = new ArrayList<>();
 
     public static ProductEntity createProduct(ProductDto.Create productCreateDto) {
 
@@ -54,6 +50,7 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
                 .build();
 
         ProductEntity product = ProductEntity.builder()
+                .name(productCreateDto.getName())
                 .productCode(productCreateDto.getProductCode())
                 .subjectCode(productCreateDto.getSubjectCode())
                 .startDate(productCreateDto.getStartDate())
@@ -61,33 +58,33 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
                 .basicRate(basicRate)
                 .build();
 
-        product.addRate(basicRate);
+//        product.addRate(basicRate);
 
         return product;
     }
 
-    private void addRate(RateEntity rateEntity) {
-        this.allBasicRate.add(rateEntity);
-    }
-
-    public RateEntity addRate(String changeDate, double changeRate) {
-
-        RateEntity rateEntity = getLastBasicRate();
-        String endDate = rateEntity.getEndDate();
-        rateEntity.setEndDate(OBDateUtils.addDays(changeDate, -1));
-
-        RateEntity newRateEntity = RateEntity.builder()
-                .rate(changeRate)
-                .startDate(changeDate)
-                .endDate(endDate)
-                .build();
-        this.allBasicRate.add(newRateEntity);
-
-        return newRateEntity;
-
-    }
-
-    public RateEntity getLastBasicRate() {
-        return this.allBasicRate.get(this.allBasicRate.size() - 1);
-    }
+//    private void addRate(RateEntity rateEntity) {
+//        this.allBasicRate.add(rateEntity);
+//    }
+//
+//    public RateEntity addRate(String changeDate, double changeRate) {
+//
+//        RateEntity rateEntity = getLastBasicRate();
+//        String endDate = rateEntity.getEndDate();
+//        rateEntity.setEndDate(OBDateUtils.addDays(changeDate, -1));
+//
+//        RateEntity newRateEntity = RateEntity.builder()
+//                .rate(changeRate)
+//                .startDate(changeDate)
+//                .endDate(endDate)
+//                .build();
+//        this.allBasicRate.add(newRateEntity);
+//
+//        return newRateEntity;
+//
+//    }
+//
+//    public RateEntity getLastBasicRate() {
+//        return this.allBasicRate.get(this.allBasicRate.size() - 1);
+//    }
 }

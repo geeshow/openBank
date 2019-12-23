@@ -13,8 +13,6 @@ public interface ProductMapper {
 
     ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
-    @Mapping(source = "regBranchEntity.name", target="regBranchName")
-    @Mapping(source = "mngBranchEntity.name", target="mngBranchName")
-    @Mapping(source = "regEmployeeEntity.name", target="regEmployeeName")
-    ProductDto.Response entityToDto(ProductEntity productEntity);
+    @Mapping(source = "basicRate.rate", target="basicRate")
+    ProductDto.Create entityToDto(ProductEntity productEntity);
 }
