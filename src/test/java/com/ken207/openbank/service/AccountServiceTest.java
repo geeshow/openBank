@@ -3,13 +3,18 @@ package com.ken207.openbank.service;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.ProductEntity;
 import com.ken207.openbank.domain.TradeEntity;
+import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.exception.BizRuntimeException;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.ProductRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +36,43 @@ public class AccountServiceTest {
     @Autowired
     AccountRepository accountRepository;
 
+    @Autowired
+    ProductRepository productRepository;
+
+    @Autowired
+    ProductService productService;
+
+    private final String PRODUCT_CODE = "130999";
+
+    @Before
+    public void setup() {
+        String productName = "온라인 보통예금";
+        String regDate = "20191214";
+        SubjectCode subjectCode = SubjectCode.REGULAR;
+
+        ProductEntity product = productRepository.findByProductCode(PRODUCT_CODE);
+
+        if ( product == null ) {
+            ProductDto.Create createProductDto = ProductDto.Create.builder()
+                    .productCode(PRODUCT_CODE)
+                    .subjectCode(subjectCode)
+                    .name(productName)
+                    .basicRate(1.2)
+                    .startDate(regDate)
+                    .endDate(OBDateUtils.MAX_DATE)
+                    .build();
+            productService.createProduct(createProductDto);
+        }
+
+    }
+
     @Test
     @TestDescription("보통예금 계좌 정상 신규 테스트")
     public void openAccount() throws Exception {
         //given
         String regDate = OBDateUtils.getToday();
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .productCode("130999")
+                .productCode(PRODUCT_CODE)
                 .regDate(regDate)
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -62,7 +97,7 @@ public class AccountServiceTest {
         //given
         String regDate = "20101010";
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .productCode("130999")
+                .productCode(PRODUCT_CODE)
                 .regDate(regDate)
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -85,7 +120,7 @@ public class AccountServiceTest {
     public void changePassword() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .productCode("130999")
+                .productCode(PRODUCT_CODE)
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -111,7 +146,7 @@ public class AccountServiceTest {
     public void depositAccount() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .productCode("130999")
+                .productCode(PRODUCT_CODE)
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -171,7 +206,7 @@ public class AccountServiceTest {
     public void outAccount() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .productCode("130999")
+                .productCode(PRODUCT_CODE)
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();
@@ -225,7 +260,7 @@ public class AccountServiceTest {
     public void outAccount_BizRuntimeException() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
-                .productCode("130999")
+                .productCode(PRODUCT_CODE)
                 .regDate(OBDateUtils.getToday())
                 .taxationCode(TaxationCode.REGULAR)
                 .build();

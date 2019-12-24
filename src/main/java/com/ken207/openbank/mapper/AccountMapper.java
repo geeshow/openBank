@@ -15,5 +15,6 @@ public interface AccountMapper {
     @Mapping(source = "product.productCode", target="productCode")
     @Mapping(source = "product.name", target="productName")
     @Mapping(source = "product.subjectCode", target="subjectCode")
+    @Mapping(source = "product.basicRate.rate", target="basicRate")
     AccountDto.Response accountForResponse(AccountEntity accountEntity);
 }

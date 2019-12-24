@@ -104,6 +104,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("accountNum").exists())
+                .andExpect(jsonPath("basicRate").exists())
                 .andExpect(jsonPath("regDate").value(regDate))
                 .andExpect(jsonPath("taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("closeDate").isEmpty())
@@ -208,6 +209,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("page").exists())
                 .andExpect(jsonPath("_embedded.responseList[0]._links.self").exists())
                 .andExpect(jsonPath("_embedded.responseList[0].accountNum").exists())
+                .andExpect(jsonPath("_embedded.responseList[0].basicRate").exists())
                 .andExpect(jsonPath("_embedded.responseList[0].regDate").value(regDate))
                 .andExpect(jsonPath("_embedded.responseList[0].taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("_embedded.responseList[0].closeDate").isEmpty())
@@ -236,7 +238,8 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
                         ),
                         responseFields(
-                                fieldWithPath("_embedded.responseList[0].accountNum").description("Number of new account"),
+                                fieldWithPath("_embedded.responseList[0].accountNum").description("identification number of account"),
+                                fieldWithPath("_embedded.responseList[0].basicRate").description("interest rate of this account"),
                                 fieldWithPath("_embedded.responseList[0].regDate").description("Registration Date of new account"),
                                 fieldWithPath("_embedded.responseList[0].closeDate").description("Close Date of account"),
                                 fieldWithPath("_embedded.responseList[0].taxationCode").description("way to tax in interest"),
@@ -278,6 +281,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("accountNum").exists())
+                .andExpect(jsonPath("basicRate").exists())
                 .andExpect(jsonPath("regDate").value(regDate))
                 .andExpect(jsonPath("taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("closeDate").isEmpty())
@@ -298,7 +302,8 @@ public class AccountRegularControllerTest extends BaseControllerTest {
 
     private ResponseFieldsSnippet getResponseFieldsOfAccount() {
         return responseFields(
-                fieldWithPath("accountNum").description("Number of new account"),
+                fieldWithPath("accountNum").description("identification number of new account"),
+                fieldWithPath("basicRate").description("interest rate of this account"),
                 fieldWithPath("regDate").description("Registration Date of new account"),
                 fieldWithPath("closeDate").description("Close Date of account"),
                 fieldWithPath("taxationCode").description("way to tax in interest"),

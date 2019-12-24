@@ -68,9 +68,6 @@ public class AccountRegularController {
 
         //Set response data
         AccountDto.Response newAccount = accountMapper.accountForResponse(account);
-        newAccount.setProductCode(productEntity.getProductCode());
-        newAccount.setProductName(productEntity.getName());
-        newAccount.setSubjectCode(productEntity.getSubjectCode());
 
         //HATEOAS REST API
         Resource responseResource = new Resource(newAccount,

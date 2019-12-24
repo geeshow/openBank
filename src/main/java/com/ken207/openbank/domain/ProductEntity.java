@@ -2,12 +2,14 @@ package com.ken207.openbank.domain;
 
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.ProductDto;
+import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -29,7 +31,7 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
     private String startDate;
     private String endDate;
 
-    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "rate_id")
     private RateEntity basicRate;
 

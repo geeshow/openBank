@@ -31,7 +31,7 @@ public class ProductServiceTest {
     @TestDescription("상품 신규 정상 테스트")
     public void createProduct() throws Exception {
         //given
-        String name = "온라인 보토예금";
+        String name = "온라인 보통예금";
         String productCode = "130088";
         SubjectCode subjectCode = SubjectCode.REGULAR;
         double rate = 1.2;
@@ -59,7 +59,6 @@ public class ProductServiceTest {
         assertEquals(startDate, newProduct.getStartDate());
         assertEquals(endDate, newProduct.getEndDate());
     }
-
 
     @Test(expected = BizRuntimeException.class)
     @TestDescription("상품 신규 중복 코드 오류 테스트")
@@ -93,4 +92,5 @@ public class ProductServiceTest {
         //then
         fail("오류 발생 해야함.");
     }
+
 }

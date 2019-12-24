@@ -26,6 +26,7 @@ public class AccountDto {
         private String productCode;
         private String productName;
         private SubjectCode subjectCode;
+        private double basicRate;
 
         private String regDate; //신규일자
         private TaxationCode taxationCode; //과세구분코드

@@ -47,6 +47,10 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     @JoinColumn(name = "product_id")
     private ProductEntity product;
 
+    @ManyToOne
+    @JoinColumn(name = "rate_id")
+    private RateEntity basicRate;
+
     @Default
     @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_log_id")
@@ -78,6 +82,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .blncBefore(0)
                 .tradeAmount(0)
                 .product(productEntity)
+                .basicRate(productEntity.getBasicRate())
                 .build();
 
         account.addTradeLog(TradeCd.OPEN);

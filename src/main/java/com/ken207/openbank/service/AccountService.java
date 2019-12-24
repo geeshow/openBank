@@ -36,6 +36,10 @@ public class AccountService {
 
         ProductEntity productEntity = productRepository.findByProductCode(accountRequestOpen.getProductCode());
 
+        if ( productEntity == null ) {
+            throw new BizRuntimeException("존재하지 않는 상품 코드 입니다. 상품코드:"+accountRequestOpen.getProductCode());
+        }
+
         String accountNum = codeGeneratorService.createAccountNumber(SubjectCode.REGULAR.getSubjectCode());
 
         AccountEntity accountEntity = AccountEntity.openAccount(productEntity, accountNum, accountRequestOpen.getRegDate(), accountRequestOpen.getTaxationCode());

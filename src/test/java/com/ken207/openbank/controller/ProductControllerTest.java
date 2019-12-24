@@ -30,7 +30,7 @@ public class ProductControllerTest extends BaseControllerTest {
     public void createProduct() throws Exception {
         //given
         String productName = "온라인 보통예금";
-        String productCode = "130001";
+        String productCode = "130123";
         SubjectCode subjectCode = SubjectCode.REGULAR;
         Double rate = 1.2;
         String startDate = OBDateUtils.getToday();
