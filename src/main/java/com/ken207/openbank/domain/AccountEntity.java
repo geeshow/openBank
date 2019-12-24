@@ -10,6 +10,7 @@ import javax.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -73,7 +74,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .accountNum(accountNum) //계좌번호
                 .regDate(regDate) //신규일자
                 .reckonDt(regDate) //최종거래일자
-                .lastIntsDt(regDate) //최종이자계산일자
+                .lastIntsDt(OBDateUtils.MIN_DATE) //최종이자계산일자
                 .taxationCode(taxationCode) //과세구분코드
                 .accountStatusCode(AccountStatusCode.ACTIVE)
                 .lastTrnSrno(0)
@@ -139,10 +140,32 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     }
 
     /**
+     * 이자지급
+     */
+    public void payInterest(InterestEntity interest) {
+        List<TradeEntity> tradeList = this.tradeEntities.stream()
+                .filter(o -> o.isLaterOrSameThen(this.lastIntsDt)).collect(Collectors.toList());
+
+    }
+
+    /**
      * 해지
      */
-    public void closeAmount() {
+    public TradeEntity closeAccount(InterestEntity interest) {
+        if ( this.balance != 0 ) {
+            throw new BizRuntimeException("계좌의 잔액이 존재 함.");
+        }
+        else if ( OBDateUtils.isNotSameDate(this.getLastIntsDt(), this.reckonDt) ) {
+            throw new BizRuntimeException("이자 지급 후 해지 해야 함.");
+        }
+        else if ( YesNo.Y.equals(this.loanYn) ) {
+            throw new BizRuntimeException("대출 설정된 계좌.");
+        }
 
+        this.closeDate = this.reckonDt;
+        this.accountStatusCode = AccountStatusCode.CLOSE;
+
+        return addTradeLog(TradeCd.CLOSE);
     }
 
 

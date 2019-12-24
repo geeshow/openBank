@@ -3,6 +3,7 @@ package com.ken207.openbank.common;
 import java.time.LocalDate;
 
 public class OBDateUtils {
+    public static String MIN_DATE = "19550101";
     public static String MAX_DATE = "99991231";
     public static String getToday() {
         return parseString(LocalDate.now());
@@ -50,5 +51,25 @@ public class OBDateUtils {
      */
     public static int compareDate(String sourceDate, String targetDate) {
         return sourceDate.compareTo(targetDate);
+    }
+
+    /**
+     *
+     * @param sourceDate
+     * @param targetDate
+     * @return 두 값이 같은 경우 return true
+     */
+    public static boolean isSameDate(String sourceDate, String targetDate) {
+        return sourceDate.compareTo(targetDate) == 0;
+    }
+
+    /**
+     *
+     * @param sourceDate
+     * @param targetDate
+     * @return 두 값이 다를 경우 return true
+     */
+    public static boolean isNotSameDate(String sourceDate, String targetDate) {
+        return sourceDate.compareTo(targetDate) != 0;
     }
 }

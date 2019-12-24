@@ -2,6 +2,7 @@ package com.ken207.openbank.service;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.InterestEntity;
 import com.ken207.openbank.domain.ProductEntity;
 import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.domain.enums.SubjectCode;
@@ -19,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Service
 @Transactional(readOnly = true)
@@ -78,8 +78,8 @@ public class AccountService {
         return tradeRepository.save(withdraw);
     }
 
-    private AccountEntity getAccountEntity(String acno) {
-        AccountEntity account = accountRepository.findByAccountNum(acno);
+    private AccountEntity getAccountEntity(String accountNum) {
+        AccountEntity account = accountRepository.findByAccountNum(accountNum);
         if (account == null) {
             throw new EntityNotFoundException("존재하지 않는 계좌번호 입니다.");
         }
@@ -90,5 +90,20 @@ public class AccountService {
         Page<AccountEntity> page = this.accountRepository.findAll(pageable);
         page.stream().forEach(o -> o.getProduct().getName());
         return page;
+    }
+
+    @Transactional
+    public TradeEntity closeAccount(String accountNum, String reckonDate) {
+        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), account.getLastIntsDt());
+
+        InterestEntity interest = InterestEntity.builder()
+                .accountEntity(account)
+                .basicRate(account.getBasicRate().getRate())
+                .reckonDate(reckonDate)
+                .fromDate(account.getLastIntsDt())
+                .tradeEntities(tradeListForInterest)
+                .build();
+        return account.closeAccount(interest);
     }
 }
