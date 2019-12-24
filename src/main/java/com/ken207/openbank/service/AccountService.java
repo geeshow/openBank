@@ -95,7 +95,7 @@ public class AccountService {
     @Transactional
     public TradeEntity closeAccount(String accountNum, String reckonDate) {
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
-        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), account.getLastIntsDt());
+        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThan(account.getId(), account.getLastIntsDt());
 
         InterestEntity interest = InterestEntity.builder()
                 .accountEntity(account)

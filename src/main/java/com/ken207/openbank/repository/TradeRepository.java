@@ -16,4 +16,7 @@ public interface TradeRepository extends JpaRepository<TradeEntity, Long> {
     List<TradeEntity> findByBzDateGreaterThan(String lastIntsDt);
 
     List<TradeEntity> findByAccountIdAndBzDateGreaterThan(Long accountId, String lastIntsDt);
+
+    List<TradeEntity> findByAccountIdAndTradeDateGreaterThan(Long accountId, String tradeDate);
+
 }
