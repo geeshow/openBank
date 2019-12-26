@@ -72,4 +72,56 @@ public class OBDateUtils {
     public static boolean isNotSameDate(String sourceDate, String targetDate) {
         return sourceDate.compareTo(targetDate) != 0;
     }
+
+    /**
+     * Compare date between sourceDate and baseDate
+     * date pattern : yyyymmdd
+     * true : sourceDate <= baseDate
+     * @param sourceDate
+     * @param baseDate
+     * @return It is true, if sourceDate is early or same then baseDate, otherwise it is false
+     */
+    public static boolean isLeftEarlierOrSame(String sourceDate, String baseDate) {
+        return OBDateUtils.compareDate(sourceDate, baseDate) <= 0;
+    }
+
+    /**
+     * Compare date between sourceDate and baseDate
+     * date pattern : yyyymmdd
+     * true : sourceDate < baseDate
+     * @param sourceDate
+     * @param baseDate
+     * @return It is true, if sourceDate is early then baseDate, otherwise it is false
+     */
+    public static boolean isLeftEarlier(String sourceDate, String baseDate) {
+        return OBDateUtils.compareDate(sourceDate, baseDate) < 0;
+    }
+
+    /**
+     * Compare date between sourceDate and baseDate
+     * date pattern : yyyymmdd
+     * true : sourceDate >= baseDate
+     * @param sourceDate
+     * @param baseDate
+     * @return It is true, if sourceDate is later or same then baseDate, otherwise it is false
+     */
+    public static boolean isLeftLaterOrSame(String sourceDate, String baseDate) {
+        return OBDateUtils.compareDate(sourceDate, baseDate) >= 0;
+    }
+
+    /**
+     * Compare date between sourceDate and baseDate
+     * date pattern : yyyymmdd
+     * true : sourceDate > baseDate
+     * @param sourceDate
+     * @param baseDate
+     * @return It is true, if sourceDate is later then baseDate, otherwise it is false
+     */
+    public static boolean isLeftLater(String sourceDate, String baseDate) {
+        return OBDateUtils.compareDate(sourceDate, baseDate) > 0;
+    }
+
+    public static boolean isBetween(String sourceDate, String fromDate, String toDate) {
+        return isLeftLaterOrSame(sourceDate, fromDate) && isLeftEarlierOrSame(sourceDate, toDate);
+    }
 }
