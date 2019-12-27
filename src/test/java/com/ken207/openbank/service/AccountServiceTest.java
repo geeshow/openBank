@@ -84,7 +84,7 @@ public class AccountServiceTest {
         //then
         assertThat(accountEntity.getAccountNum().contains("1310000"));
         assertEquals(OBDateUtils.getToday(), accountEntity.getRegDate());
-        assertEquals(OBDateUtils.getToday(), accountEntity.getLastIntsDt());
+        assertEquals(OBDateUtils.MIN_DATE, accountEntity.getLastIntsDt());
         assertEquals(OBDateUtils.getToday(), accountEntity.getReckonDt());
         assertEquals(TaxationCode.REGULAR, accountEntity.getTaxationCode());
         assertEquals(0, accountEntity.getBalance());
@@ -109,7 +109,7 @@ public class AccountServiceTest {
         //then
         assertThat(accountEntity.getAccountNum().contains("1310000"));
         assertEquals(regDate, accountEntity.getRegDate());
-        assertEquals(regDate, accountEntity.getLastIntsDt());
+        assertEquals(OBDateUtils.MIN_DATE, accountEntity.getLastIntsDt());
         assertEquals(regDate, accountEntity.getReckonDt());
         assertEquals(TaxationCode.REGULAR, accountEntity.getTaxationCode());
         assertEquals(0, accountEntity.getBalance());
@@ -134,7 +134,7 @@ public class AccountServiceTest {
 
         //then
         assertEquals(OBDateUtils.getToday(), accountEntity.getRegDate());
-        assertEquals(OBDateUtils.getToday(), accountEntity.getLastIntsDt());
+        assertEquals(OBDateUtils.MIN_DATE, accountEntity.getLastIntsDt());
         assertEquals(OBDateUtils.getToday(), accountEntity.getReckonDt());
         assertEquals(newPassword, accountAfterChange.getPassword());
         assertEquals(0, accountAfterChange.getBalance());

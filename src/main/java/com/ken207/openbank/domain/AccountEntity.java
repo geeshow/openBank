@@ -142,10 +142,15 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 이자지급
      */
-    public void payInterest(InterestEntity interest) {
-        List<TradeEntity> tradeList = this.tradeEntities.stream()
-                .filter(o -> o.isLaterOrSameThen(this.lastIntsDt)).collect(Collectors.toList());
+    public TradeEntity payInterest(InterestEntity interest) {
+        List<InterestDetailEntity> calculrate = interest.calculrate();
 
+        this.lastIntsDt = interest.getToDate();
+        this.tradeAmount = interest.getInterestInPay();
+        this.blncBefore = this.balance;
+        this.balance -= this.tradeAmount + this.tradeAmount;
+
+        return addTradeLog(TradeCd.INTEREST);
     }
 
     /**

@@ -12,6 +12,7 @@ import com.ken207.openbank.exception.BizRuntimeException;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.ProductRepository;
 import com.ken207.openbank.repository.TradeRepository;
+import com.ken207.openbank.repository.query.TradeQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -29,6 +32,7 @@ public class AccountService {
     private final ProductRepository productRepository;
     private final AccountRepository accountRepository;
     private final TradeRepository tradeRepository;
+    private final TradeQueryRepository tradeQueryRepository;
     private final CodeGeneratorService codeGeneratorService;
 
     @Transactional
@@ -93,9 +97,9 @@ public class AccountService {
     }
 
     @Transactional
-    public TradeEntity closeAccount(String accountNum, String reckonDate) {
+    public TradeEntity payInterest(String accountNum, String reckonDate) {
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
-        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThan(account.getId(), account.getLastIntsDt());
+        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(account.getId(), account.getLastIntsDt());
 
         InterestEntity interest = InterestEntity.builder()
                 .accountEntity(account)
@@ -103,6 +107,22 @@ public class AccountService {
                 .reckonDate(reckonDate)
                 .fromDate(account.getLastIntsDt())
                 .tradeEntities(tradeListForInterest)
+                .build();
+
+        return account.payInterest(interest);
+    }
+
+    @Transactional
+    public TradeEntity closeAccount(String accountNum, String reckonDate) {
+
+        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+        Map<String, Long> dailyBalance = tradeQueryRepository.getDailyBalanceFrom(account.getId(), account.getLastIntsDt());
+
+        InterestEntity interest = InterestEntity.builder()
+                .accountEntity(account)
+                .basicRate(account.getBasicRate().getRate())
+                .reckonDate(reckonDate)
+                .fromDate(account.getLastIntsDt())
                 .build();
         return account.closeAccount(interest);
     }

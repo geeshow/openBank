@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Getter
@@ -27,8 +26,7 @@ public class InterestDetailEntity extends BaseEntity<InterestDetailEntity> {
     @JoinColumn(name = "interest_id")
     private InterestEntity interest;
 
-    @OneToOne
-    @JoinColumn(name = "account_log_id")
-    private TradeEntity relevantTrade;
+    private void setToDate() {
 
+    }
 }
