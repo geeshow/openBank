@@ -1,6 +1,8 @@
 package com.ken207.openbank.common;
 
 import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
 
 public class OBDateUtils {
     public static String MIN_DATE = "19550101";
@@ -19,6 +21,9 @@ public class OBDateUtils {
         int year = Integer.parseInt(date.substring(0,4));
         int month = Integer.parseInt(date.substring(4,6));
         int dayOfMonth = Integer.parseInt(date.substring(6,8));
+
+        Date a = new Date();
+
         return LocalDate.of(year, month, dayOfMonth);
     }
 
@@ -123,5 +128,24 @@ public class OBDateUtils {
 
     public static boolean isBetween(String sourceDate, String fromDate, String toDate) {
         return isLeftLaterOrSame(sourceDate, fromDate) && isLeftEarlierOrSame(sourceDate, toDate);
+    }
+
+    public static int getNumberOfDays(String from, String to) {
+        int yearOfFrom = Integer.parseInt(from.substring(0,4));
+        int monthOfFrom = Integer.parseInt(from.substring(4,6)) - 1;
+        int dayOfFrom = Integer.parseInt(from.substring(6,8));
+
+        int yearOfTo = Integer.parseInt(to.substring(0,4));
+        int monthOfTo = Integer.parseInt(to.substring(4,6)) - 1;
+        int dayOfTo = Integer.parseInt(to.substring(6,8));
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(yearOfFrom, monthOfFrom, dayOfFrom);
+        long timeInMillisFrom = calendar.getTimeInMillis();
+
+        calendar.set(yearOfTo, monthOfTo, dayOfTo);
+        long timeInMillisTo = calendar.getTimeInMillis();
+        Double result = Math.ceil((timeInMillisTo - timeInMillisFrom) / (24 * 60 * 60 * 1000));
+        return result.intValue();
     }
 }
