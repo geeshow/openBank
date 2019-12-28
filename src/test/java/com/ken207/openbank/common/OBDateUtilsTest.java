@@ -153,4 +153,37 @@ public class OBDateUtilsTest {
         Assert.assertEquals(29, result10);
         Assert.assertEquals(28, result11);
     }
+
+
+
+    @Test
+    public void getNumberOfDaysInclude() throws Exception {
+        //given
+
+        //when
+        int result1 = OBDateUtils.getNumberOfDaysInclude("20190101", "20190101");
+        int result2 = OBDateUtils.getNumberOfDaysInclude("20190101", "20190102");
+        int result3 = OBDateUtils.getNumberOfDaysInclude("20190331", "20190401");
+        int result4 = OBDateUtils.getNumberOfDaysInclude("20190102", "20190101");
+        int result5 = OBDateUtils.getNumberOfDaysInclude("20190401", "20190331");
+        int result6 = OBDateUtils.getNumberOfDaysInclude("20190401", "20200401");
+        int result7 = OBDateUtils.getNumberOfDaysInclude("20200401", "20210401");
+        int result8 = OBDateUtils.getNumberOfDaysInclude("20200401", "20200501");
+        int result9 = OBDateUtils.getNumberOfDaysInclude("20200501", "20200601");
+        int result10 = OBDateUtils.getNumberOfDaysInclude("20200201", "20200301");
+        int result11 = OBDateUtils.getNumberOfDaysInclude("20190201", "20190301");
+
+        //then
+        Assert.assertEquals(1, result1);
+        Assert.assertEquals(2, result2);
+        Assert.assertEquals(2, result3);
+        Assert.assertEquals(2, result4);
+        Assert.assertEquals(2, result5);
+        Assert.assertEquals(367, result6);
+        Assert.assertEquals(366, result7);
+        Assert.assertEquals(31, result8);
+        Assert.assertEquals(32, result9);
+        Assert.assertEquals(30, result10);
+        Assert.assertEquals(29, result11);
+    }
 }
