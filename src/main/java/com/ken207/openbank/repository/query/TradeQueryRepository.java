@@ -18,7 +18,7 @@ public class TradeQueryRepository {
     private final TradeRepository tradeRepository;
 
     public Map<String, Long> getDailyBalanceFrom(Long accountId, String lastInterestPayDate) {
-        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(accountId, lastInterestPayDate);
+        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(accountId, lastInterestPayDate);
 
         return tradeListForInterest.stream().collect(Collectors.toMap(TradeEntity::getBzDate, TradeEntity::getBlncAfter));
     }

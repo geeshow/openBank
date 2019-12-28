@@ -10,7 +10,6 @@ import javax.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -56,6 +55,11 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_log_id")
     private List<TradeEntity> tradeEntities = new ArrayList<>();
+
+    @Default
+    @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "interest_id")
+    private List<InterestEntity> interestEntities = new ArrayList<>();
 
     @Transient
     private String reckonDt; //기산일자
@@ -142,13 +146,23 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 이자지급
      */
-    public TradeEntity payInterest(InterestEntity interest) {
-        List<InterestDetailEntity> calculrate = interest.calculrate();
+    public TradeEntity payInterest(List<TradeEntity> tradeListForInterest) {
+        InterestEntity interest = InterestEntity.builder()
+                .accountEntity(this)
+                .basicRate(this.getBasicRate().getRate())
+                .reckonDate(this.getReckonDt())
+                .fromDate(this.getLastIntsDt())
+                .build();
+
+        interest.makeInterestDetail(tradeListForInterest);
+
 
         this.lastIntsDt = interest.getToDate();
         this.tradeAmount = interest.getInterestInPay();
         this.blncBefore = this.balance;
         this.balance -= this.tradeAmount + this.tradeAmount;
+
+        this.interestEntities.add(interest);
 
         return addTradeLog(TradeCd.INTEREST);
     }
@@ -203,4 +217,5 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
 
         return reckonDt;
     }
+
 }

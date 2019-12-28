@@ -1,6 +1,7 @@
 package com.ken207.openbank.domain;
 
 import com.ken207.openbank.common.OBDateUtils;
+import com.ken207.openbank.domain.enums.PeriodType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,8 +10,6 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -35,35 +34,33 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     @JoinColumn(name = "account_id")
     private AccountEntity accountEntity;
 
-    @Transient
-    private List<TradeEntity> tradeEntities = new ArrayList<>();
+    public List<InterestDetailEntity> calculate() {
 
-    public List<InterestDetailEntity> calculrate() {
-
-        List<InterestDetailEntity> result = new ArrayList<InterestDetailEntity>();
+        List<InterestDetailEntity> result = new ArrayList<>();
         return result;
     }
 
-    public List<InterestDetailEntity> makeInterestDetail() {
-        Map<String, Long> dailyBalances = tradeEntities.stream().collect(Collectors.toMap(TradeEntity::getBzDate, TradeEntity::getBlncAfter));
+    public List<InterestDetailEntity> makeInterestDetail(List<TradeEntity> tradeListForInterest) {
 
-        List<InterestDetailEntity> interestDetailList = new ArrayList<>();
-        String preBizDate;
-        dailyBalances.forEach((tradeDate, balance) -> {
-            if ( !interestDetailList.isEmpty() ) {
-                InterestDetailEntity interestDetailEntity = interestDetailList.get(interestDetailList.size() - 1);
+        String flagBzDate = this.toDate;
+        for (TradeEntity trade: tradeListForInterest) {
+            if ( OBDateUtils.isLeftEarlier(trade.getBzDate(), flagBzDate) ) {
+                InterestDetailEntity interestDetail = InterestDetailEntity.builder()
+                        .interestRate(this.basicRate)
+                        .balance(trade.getBlncAfter())
+                        .fromDate(trade.getBzDate())
+                        .toDate(flagBzDate)
+                        .build();
 
+                interestDetail.setPeriodType(PeriodType.DAILY);
+                interestDetail.calculate();
+                interestDetails.add(interestDetail);
+
+                flagBzDate = OBDateUtils.addDays(trade.getBzDate(), -1);
             }
-            InterestDetailEntity build = InterestDetailEntity.builder()
-                    .applyRate(this.basicRate)
-                    .balance(balance)
-                    .fromDate(tradeDate)
-                    .months(0)
-                    .build();
-            interestDetailList.add(build);
-        });
+        }
 
-        return interestDetailList;
+        return interestDetails;
     }
 
     public long getInterestInPay() {

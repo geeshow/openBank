@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -99,17 +98,12 @@ public class AccountService {
     @Transactional
     public TradeEntity payInterest(String accountNum, String reckonDate) {
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
-        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(account.getId(), account.getLastIntsDt());
+        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), account.getLastIntsDt());
 
-        InterestEntity interest = InterestEntity.builder()
-                .accountEntity(account)
-                .basicRate(account.getBasicRate().getRate())
-                .reckonDate(reckonDate)
-                .fromDate(account.getLastIntsDt())
-                .tradeEntities(tradeListForInterest)
-                .build();
+        account.setReckonDt(reckonDate);
 
-        return account.payInterest(interest);
+
+        return account.payInterest(tradeListForInterest);
     }
 
     @Transactional

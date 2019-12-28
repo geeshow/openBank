@@ -118,11 +118,11 @@ public class TradeRepositoryTest {
             deposit(OBDateUtils.addDays(tradeDate, e), e, otherAccount.getAccountNum());
         });
         //when
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(account.getId(), tradeDate);
-        List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(account.getId(), OBDateUtils.addDays(tradeDate, -1));
-        List<TradeEntity> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(account.getId(), OBDateUtils.addDays(tradeDate, 1));
-        List<TradeEntity> tradeList4 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(account.getId(), OBDateUtils.getToday());
-        List<TradeEntity> tradeList2_1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoAsc(otherAccount.getId(),tradeDate);
+        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), tradeDate);
+        List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.addDays(tradeDate, -1));
+        List<TradeEntity> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.addDays(tradeDate, 1));
+        List<TradeEntity> tradeList4 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.getToday());
+        List<TradeEntity> tradeList2_1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(otherAccount.getId(),tradeDate);
 
         //then
         assertEquals(9, tradeList1.size());
