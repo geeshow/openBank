@@ -29,4 +29,9 @@ public class TradeEntity extends BaseEntity<TradeEntity> {
     @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id")
     private AccountEntity account;
+
+    @Override
+    public int compareTo(TradeEntity tradeEntity) {
+        return Long.compare(this.getSrno(), tradeEntity.getSrno());
+    }
 }

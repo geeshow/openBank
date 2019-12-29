@@ -28,35 +28,36 @@ public class InterestDetailEntity extends BaseEntity<InterestDetailEntity> {
     private double interest;
     private double tax;
 
-    @Enumerated(EnumType.STRING)
-    private PeriodType periodType;
-
     @ManyToOne
     @JoinColumn(name = "interest_id")
     private InterestEntity interestEntity;
 
-    public void setPeriodType(PeriodType periodType) {
-        this.periodType = periodType;
-
-        if ( periodType == PeriodType.DAILY ) {
-            months = 0;
-            days = OBDateUtils.getNumberOfDaysInclude(this.fromDate, this.toDate);
-        }
-        else if ( periodType == PeriodType.MONTHLY ) {
-
-        }
-        else if ( periodType == PeriodType.MON_DAILY ) {
-
-        }
-    }
-
-    public void calculate() {
+    /**
+     * 일수이자계산
+     * @return 이자 = 잔액 * 이율 * 일수 / 100 / 365
+     */
+    public double calculateByDays() {
         BigDecimal balanceBig = new BigDecimal(balance);
         BigDecimal interestRateBig = new BigDecimal(interestRate);
         BigDecimal daysBig = new BigDecimal(days);
         BigDecimal number100ForRate = new BigDecimal(100);
         BigDecimal daysOfYear = new BigDecimal(365);
-        BigDecimal interestBig = balanceBig.multiply(interestRateBig).multiply(daysBig).divide(number100ForRate).divide(daysOfYear);
-        this.interest = interestBig.doubleValue();
+        BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate).multiply(daysBig).divide(daysOfYear);
+        return interestBig.doubleValue();
+    }
+
+
+    /**
+     * 월수이자계산
+     * @return 이자 = 잔액 * 이율 * 일수 / 100 / 365
+     */
+    public double calculateByMonths() {
+        BigDecimal balanceBig = new BigDecimal(balance);
+        BigDecimal interestRateBig = new BigDecimal(interestRate);
+        BigDecimal monthsBig = new BigDecimal(months);
+        BigDecimal number100ForRate = new BigDecimal(100);
+        BigDecimal monthsOfYear = new BigDecimal(12);
+        BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate).multiply(monthsBig).divide(monthsOfYear);
+        return interestBig.doubleValue();
     }
 }

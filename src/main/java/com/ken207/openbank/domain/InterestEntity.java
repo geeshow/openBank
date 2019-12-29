@@ -2,6 +2,7 @@ package com.ken207.openbank.domain;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.PeriodType;
+import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,7 +10,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -26,44 +29,134 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     private double basicRate;
     private double interest;
 
+    @Enumerated(EnumType.STRING)
+    private PeriodType periodType;
+
+    @Builder.Default
     @OneToMany
     @JoinColumn(name = "interest_detail_id")
-    private List<InterestDetailEntity> interestDetails;
+    private List<InterestDetailEntity> interestDetails = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "account_id")
     private AccountEntity accountEntity;
 
-    public List<InterestDetailEntity> calculate() {
+    @Transient
+    private List<TradeEntity> tradeListForInterest; //이자계산용 거래내역
 
-        List<InterestDetailEntity> result = new ArrayList<>();
-        return result;
+    @Transient
+    private boolean isSorted = false;
+
+    //==연관관계 메서드==//
+    public void setAccountEntity(AccountEntity accountEntity) {
+        this.accountEntity = accountEntity;
+        this.accountEntity.getInterestEntities().add(this);
     }
 
-    public List<InterestDetailEntity> makeInterestDetail(List<TradeEntity> tradeListForInterest) {
+    public static InterestEntity createInterest(AccountEntity account) {
+        InterestEntity interest = InterestEntity.builder()
+                .basicRate(account.getBasicRate().getRate())
+                .reckonDate(account.getReckonDt())
+                .build();
 
-        String flagBzDate = this.toDate;
-        for (TradeEntity trade: tradeListForInterest) {
-            if ( OBDateUtils.isLeftEarlier(trade.getBzDate(), flagBzDate) ) {
-                InterestDetailEntity interestDetail = InterestDetailEntity.builder()
-                        .interestRate(this.basicRate)
-                        .balance(trade.getBlncAfter())
-                        .fromDate(trade.getBzDate())
-                        .toDate(flagBzDate)
-                        .build();
+        interest.setAccountEntity(account);
 
-                interestDetail.setPeriodType(PeriodType.DAILY);
-                interestDetail.calculate();
-                interestDetails.add(interestDetail);
+        return interest;
+    }
 
-                flagBzDate = OBDateUtils.addDays(trade.getBzDate(), -1);
-            }
+    public void setPeriod(String fromDate, String toDate, PeriodType periodType) {
+        this.fromDate = fromDate;
+        this.toDate = toDate;
+        this.periodType = periodType;
+    }
+
+    public void setTradeListForInterest(List<TradeEntity> tradeListForInterest) {
+        this.tradeListForInterest = tradeListForInterest;
+    }
+
+    /**
+     * 거래내역 최근거래 -> 오래된 거래 순서로 정렬
+     */
+    public void sortedTradeList() {
+        //거래내역은 거래일시의 역순이어야 함.
+        this.tradeListForInterest = this.tradeListForInterest.stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+        isSorted = true;
+    }
+
+    /**
+     * 거래내역을 이용해 이자계산 상세 내역을 생성
+     */
+    public void makeInterestDetail() {
+
+        if ( isSorted ) {
+            throw new BizRuntimeException("이자계산을 위한 거래내역은 정렬을 먼저 해야함. 정렬 메소드 : sortedTradeList()");
         }
 
-        return interestDetails;
+        String flagTradeDate = this.toDate;
+        for (TradeEntity trade: tradeListForInterest) {
+
+            InterestDetailEntity interestDetail = InterestDetailEntity.builder()
+                    .interestRate(this.basicRate)
+                    .balance(trade.getBlncAfter())
+                    .fromDate(trade.getTradeDate())
+                    .toDate(flagTradeDate)
+                    .build();
+
+            interestDetails.add(interestDetail);
+
+            flagTradeDate = OBDateUtils.addDays(trade.getTradeDate(), -1);
+        }
     }
 
-    public long getInterestInPay() {
-        return Double.valueOf(Math.ceil(interest)).longValue();
+
+    public void calculate() {
+        if ( this.periodType == PeriodType.DAILY) {
+            interestDetails.stream().forEach(o -> {
+                o.calculateByDays();
+            });
+        }
+        else {
+            interestDetails.stream().forEach(o -> {
+                o.calculateByMonths();
+            });
+        }
+    }
+
+
+    public long getInterestSum() {
+        Double interestSum = interestDetails.stream().collect(Collectors.summingDouble(InterestDetailEntity::getInterest));
+        return Double.valueOf(Math.ceil(interestSum)).longValue();
+    }
+
+    /**
+     * 일별로 마감 잔액 구하기.
+     * 이자계산시 하루 중 변동된 잔액은 필요가 없으므로 일별로 마지막 거래만 남겨서 이자계산을 한다.
+     */
+    public void remainLastTradeOfDays() {
+
+        if ( isSorted ) {
+            throw new BizRuntimeException("이자계산을 위한 거래내역은 정렬을 먼저 해야함. 정렬 메소드 : sortedTradeList()");
+        }
+
+        var ref = new Object() {
+            String finalFlagTradeDate = toDate;
+        };
+
+        this.tradeListForInterest = tradeListForInterest.stream()
+                .filter(trade -> {
+                    if (OBDateUtils.isLeftLater(trade.getTradeDate(), ref.finalFlagTradeDate)) {
+                        return false;
+                    } else if (OBDateUtils.isLeftEarlier(trade.getTradeDate(), this.fromDate)) {
+                        return false;
+                    }
+
+                    ref.finalFlagTradeDate = OBDateUtils.addDays(trade.getTradeDate(), -1);
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public TradeEntity payInterest() {
+        return this.accountEntity.payInterest(this);
     }
 }

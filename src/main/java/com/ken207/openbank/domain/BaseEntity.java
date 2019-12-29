@@ -37,5 +37,4 @@ public abstract class BaseEntity<T extends BaseEntity<?>> implements Comparable<
         if(this == o) return 0;
         return Long.compare(this.getId(), o.getId());
     }
-
 }

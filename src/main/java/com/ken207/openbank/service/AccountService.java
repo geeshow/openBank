@@ -5,6 +5,7 @@ import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.InterestEntity;
 import com.ken207.openbank.domain.ProductEntity;
 import com.ken207.openbank.domain.TradeEntity;
+import com.ken207.openbank.domain.enums.PeriodType;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.TradeDto;
@@ -96,14 +97,37 @@ public class AccountService {
     }
 
     @Transactional
-    public TradeEntity payInterest(String accountNum, String reckonDate) {
-        AccountEntity account = accountRepository.findByAccountNum(accountNum);
-        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), account.getLastIntsDt());
+    public TradeEntity payInterest(String accountNum, String untilDate, String reckonDate) {
 
+        AccountEntity account = accountRepository.findByAccountNum(accountNum);
         account.setReckonDt(reckonDate);
 
+        //이자계산용 거래내역 조회
+        //최종이자계산일 기준으로 이후 거래내역을 모두 조회
+        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), account.getLastIntsDt());
 
-        return account.payInterest(tradeListForInterest);
+        //InterestEntity 생성, AccountEntity 연관관계설정
+        InterestEntity interest = InterestEntity.createInterest(account);
+
+        //이자계산 대상 거래내역 등록
+        interest.setTradeListForInterest(tradeListForInterest);
+
+        //이자계산 기간, 방법 설정 -> 일수로 이자계산.
+        interest.setPeriod(account.getLastIntsDt(), untilDate, PeriodType.DAILY);
+
+        //거래를 역순으로 정렬
+        interest.sortedTradeList();
+
+        // 거래내역 필터
+        interest.remainLastTradeOfDays();
+
+        // 거래내역을 이자계산내역으로 변경
+        interest.makeInterestDetail();
+
+        // 이자계산내역으로 이자계산 실행.
+        interest.calculate();
+
+        return interest.payInterest();
     }
 
     @Transactional

@@ -24,7 +24,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private String password; //비밀번호
     private String regDate; //신규일자
     private String closeDate; //해지일자
-    private String lastIntsDt; //최종이자계산일자
+    private String lastIntsDt; //최종이자계산일자. 이자계산기간의 마지막날(from ~ to에서 to에 해당)
     private long balance;
     private long loanLimitAmount; //대출한도금액
     private long lastTrnSrno; //최종거래일련번호
@@ -146,23 +146,12 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 이자지급
      */
-    public TradeEntity payInterest(List<TradeEntity> tradeListForInterest) {
-        InterestEntity interest = InterestEntity.builder()
-                .accountEntity(this)
-                .basicRate(this.getBasicRate().getRate())
-                .reckonDate(this.getReckonDt())
-                .fromDate(this.getLastIntsDt())
-                .build();
-
-        interest.makeInterestDetail(tradeListForInterest);
-
+    public TradeEntity payInterest(InterestEntity interest) {
 
         this.lastIntsDt = interest.getToDate();
-        this.tradeAmount = interest.getInterestInPay();
+        this.tradeAmount = interest.getInterestSum();
         this.blncBefore = this.balance;
         this.balance -= this.tradeAmount + this.tradeAmount;
-
-        this.interestEntities.add(interest);
 
         return addTradeLog(TradeCd.INTEREST);
     }

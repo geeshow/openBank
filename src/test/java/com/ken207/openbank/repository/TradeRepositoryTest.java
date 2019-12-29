@@ -85,6 +85,7 @@ public class TradeRepositoryTest {
         IntStream.range(1,5).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e, otherAccount.getAccountNum());
         });
+
         //when
         List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), tradeDate);
         List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), OBDateUtils.addDays(tradeDate, 1));
@@ -94,6 +95,8 @@ public class TradeRepositoryTest {
 
         //then
         assertEquals(10, tradeList1.size());
+        assertEquals(1, tradeList1.get(0).getSrno());
+        assertEquals(10, tradeList1.get(tradeList1.size()-1).getSrno());
         assertEquals(10, tradeList2.size());
         assertEquals(0, tradeList3.size());
         assertEquals(0, tradeList4.size());
@@ -103,7 +106,7 @@ public class TradeRepositoryTest {
 
     @Test
     @TestDescription("기산일 거래(TradeDate) 조건으로 조회하는 쿼리 테스트")
-    public void findByAccountIdAndTradeDateGreaterThan() throws Exception {
+    public void findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc() throws Exception {
         //given
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
@@ -117,6 +120,7 @@ public class TradeRepositoryTest {
         IntStream.range(1,5).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e, otherAccount.getAccountNum());
         });
+
         //when
         List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), tradeDate);
         List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.addDays(tradeDate, -1));
@@ -126,7 +130,11 @@ public class TradeRepositoryTest {
 
         //then
         assertEquals(9, tradeList1.size());
+        assertEquals(10, tradeList1.get(0).getSrno());
+        assertEquals(2, tradeList1.get(tradeList1.size()-1).getSrno());
         assertEquals(10, tradeList2.size());
+        assertEquals(10, tradeList2.get(0).getSrno());
+        assertEquals(1, tradeList2.get(tradeList2.size()-1).getSrno());
         assertEquals(8, tradeList3.size());
         assertEquals(0, tradeList4.size());
         assertEquals(4, tradeList2_1.size());

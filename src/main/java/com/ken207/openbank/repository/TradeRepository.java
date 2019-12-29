@@ -2,6 +2,7 @@ package com.ken207.openbank.repository;
 
 import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.TradeEntity;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
