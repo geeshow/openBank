@@ -78,7 +78,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .accountNum(accountNum) //계좌번호
                 .regDate(regDate) //신규일자
                 .reckonDt(regDate) //최종거래일자
-                .lastIntsDt(OBDateUtils.MIN_DATE) //최종이자계산일자
+                .lastIntsDt(OBDateUtils.addDays(regDate, -1)) //최종이자계산일자
                 .taxationCode(taxationCode) //과세구분코드
                 .accountStatusCode(AccountStatusCode.ACTIVE)
                 .lastTrnSrno(0)
@@ -149,9 +149,9 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     public TradeEntity payInterest(InterestEntity interest) {
 
         this.lastIntsDt = interest.getToDate();
-        this.tradeAmount = interest.getInterestSum();
+        this.tradeAmount = interest.getInterest();
         this.blncBefore = this.balance;
-        this.balance -= this.tradeAmount + this.tradeAmount;
+        this.balance += this.tradeAmount;
 
         return addTradeLog(TradeCd.INTEREST);
     }

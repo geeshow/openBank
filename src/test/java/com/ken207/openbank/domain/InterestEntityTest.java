@@ -5,6 +5,7 @@ import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.domain.enums.PeriodType;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
+import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.dto.TradeDto;
@@ -22,9 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
@@ -289,23 +288,66 @@ public class InterestEntityTest {
         //then
         assertEquals(6, interestDetails1.size());
         assertEquals(1, interestDetails1.get(0).getDays());
+        assertEquals(165000, interestDetails1.get(0).getBalance());
+        assertEquals(5.42, interestDetails1.get(0).getInterest(), 0.01);
         assertEquals(1, interestDetails1.get(1).getDays());
         assertEquals(1, interestDetails1.get(2).getDays());
         assertEquals(1, interestDetails2.get(0).getDays());
-        assertEquals(11, interestDetails3.get(0).getDays());
+        assertEquals(165000, interestDetails2.get(0).getBalance());
+        assertEquals(5.42, interestDetails2.get(0).getInterest(), 0.01);
+        assertEquals(12, interestDetails3.get(0).getDays());
+        assertEquals("20191024", interestDetails3.get(0).getFromDate());
+        assertEquals("20191104", interestDetails3.get(0).getToDate());
+        assertEquals(495000, interestDetails3.get(0).getBalance());
+        assertEquals(195.28, interestDetails3.get(0).getInterest(), 0.01);
+    }
 
-        assertEquals(0, interestDetails1.get(0).getInterest(), 0);
-        assertEquals("20191020", interestDetails1.get(0).getFromDate());
-        assertEquals("20191020", interestDetails1.get(0).getToDate());
-        assertEquals(30, interestDetails1.get(0).getBalance());
-        assertEquals(20, interestDetails1.get(1).getBalance());
-        assertEquals(12, interestDetails1.get(2).getBalance());
-        assertEquals(6, interestDetails1.get(3).getBalance());
-        assertEquals(2, interestDetails1.get(4).getBalance());
-        assertEquals(0, interestDetails1.get(5).getBalance());
-        assertEquals(account.getBasicRate().getRate(), interestDetails1.get(0).getInterestRate(), 0);
-        assertEquals(5, interestDetails2.size());
-        assertEquals(9, interestDetails3.size());
+
+    @Test
+    @TestDescription("이자지급 테스트")
+    public void payInterest() throws Exception {
+        //given
+        String tradeDate = "20191015";
+        TaxationCode taxation = TaxationCode.REGULAR;
+
+        AccountEntity account = createAccount(tradeDate, taxation);
+
+        IntStream.range(1,10).forEach(e -> {
+            deposit(OBDateUtils.addDays(tradeDate, e), e*1000, account.getAccountNum());
+            deposit(OBDateUtils.addDays(tradeDate, e), e*10000, account.getAccountNum());
+        });
+
+        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        InterestEntity interest1 = InterestEntity.createInterest(account);
+
+        //when
+        account.setReckonDt(OBDateUtils.getToday());
+
+        interest1.setTradeListForInterest(tradeList1);
+
+        interest1.setPeriod(OBDateUtils.addDays(tradeDate,1), OBDateUtils.addDays(tradeDate, 20), PeriodType.DAILY);
+
+        interest1.remainLastTradeOfDays();
+
+        interest1.makeInterestDetail();
+
+        interest1.calculate();
+
+        long interestSum1 = interest1.getInterest();
+
+        TradeEntity resultTrade = interest1.payInterest();
+
+        TradeEntity tradeEntity = account.getTradeEntities().get(account.getTradeEntities().size() - 1);
+
+        //then
+        assertEquals(tradeEntity, resultTrade);
+        assertEquals(239, interestSum1);
+        assertEquals("20191104", account.getLastIntsDt());
+        assertEquals(OBDateUtils.getToday(), account.getLastTradeDate());
+        assertEquals(495239, account.getBalance());
+        assertEquals(239, tradeEntity.getAmount());
+        assertEquals(495000, tradeEntity.getBlncBefore());
+        assertEquals(TradeCd.INTEREST, tradeEntity.getTradeCd());
     }
 
     private AccountEntity createAccount(String tradeDate, TaxationCode taxation) {

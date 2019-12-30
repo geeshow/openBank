@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 @Entity
 @Getter
@@ -37,15 +38,21 @@ public class InterestDetailEntity extends BaseEntity<InterestDetailEntity> {
      * @return 이자 = 잔액 * 이율 * 일수 / 100 / 365
      */
     public double calculateByDays() {
+        setDays();
+
         BigDecimal balanceBig = new BigDecimal(balance);
         BigDecimal interestRateBig = new BigDecimal(interestRate);
         BigDecimal daysBig = new BigDecimal(days);
         BigDecimal number100ForRate = new BigDecimal(100);
         BigDecimal daysOfYear = new BigDecimal(365);
-        BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate).multiply(daysBig).divide(daysOfYear);
-        return interestBig.doubleValue();
+        BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate, MathContext.DECIMAL64).multiply(daysBig).divide(daysOfYear, MathContext.DECIMAL64);
+        this.interest = interestBig.doubleValue();
+        return this.interest;
     }
 
+    public void setDays() {
+        this.days = OBDateUtils.getNumberOfDaysInclude(fromDate, toDate);
+    }
 
     /**
      * 월수이자계산
@@ -57,7 +64,8 @@ public class InterestDetailEntity extends BaseEntity<InterestDetailEntity> {
         BigDecimal monthsBig = new BigDecimal(months);
         BigDecimal number100ForRate = new BigDecimal(100);
         BigDecimal monthsOfYear = new BigDecimal(12);
-        BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate).multiply(monthsBig).divide(monthsOfYear);
-        return interestBig.doubleValue();
+        BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate, MathContext.DECIMAL64).multiply(monthsBig).divide(monthsOfYear, MathContext.DECIMAL64);
+        this.interest = interestBig.doubleValue();
+        return this.interest;
     }
 }

@@ -27,7 +27,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     private String fromDate;
     private String toDate;
     private double basicRate;
-    private double interest;
+    private long interest;
 
     @Enumerated(EnumType.STRING)
     private PeriodType periodType;
@@ -120,12 +120,8 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
                 o.calculateByMonths();
             });
         }
-    }
-
-
-    public long getInterestSum() {
         Double interestSum = interestDetails.stream().collect(Collectors.summingDouble(InterestDetailEntity::getInterest));
-        return Double.valueOf(Math.ceil(interestSum)).longValue();
+        this.interest = Double.valueOf(Math.ceil(interestSum)).longValue();
     }
 
     /**

@@ -113,7 +113,7 @@ public class AccountService {
         interest.setTradeListForInterest(tradeListForInterest);
 
         //이자계산 기간, 방법 설정 -> 일수로 이자계산.
-        interest.setPeriod(account.getLastIntsDt(), untilDate, PeriodType.DAILY);
+        interest.setPeriod(OBDateUtils.addDays(account.getLastIntsDt(), 1), untilDate, PeriodType.DAILY);
 
         //거래를 역순으로 정렬
         interest.sortedTradeList();
