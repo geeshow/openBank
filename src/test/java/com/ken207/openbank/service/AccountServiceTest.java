@@ -322,6 +322,86 @@ public class AccountServiceTest {
 
         //when
         TradeEntity tradeEntity1 = accountService.payInterest(accountNum, "20191231", "20200101");
+        AccountEntity accountEntity = accountRepository.findById(accountId).get();
+        List<InterestEntity> interestEntities = accountEntity.getInterestEntities();
+
+        InterestEntity interestEntity1 = interestEntities.get(0);
+
+        List<InterestDetailEntity> interestDetails1 = interestEntity1.getInterestDetails();
+
+        //then
+        assertEquals(TradeCd.INTEREST, tradeEntity1.getTradeCd());
+        assertEquals("20200101", tradeEntity1.getTradeDate());
+        assertEquals(1530000, tradeEntity1.getBlncBefore());
+        assertEquals(42720, tradeEntity1.getAmount());
+        assertEquals(1572720, tradeEntity1.getBlncAfter());
+
+        assertEquals(1, interestEntities.size());
+        assertEquals(1.2, interestEntity1.getBasicRate(), 0);
+        assertEquals(42720, interestEntity1.getInterest());
+        assertEquals("20170101", interestEntity1.getFromDate());
+        assertEquals("20191231", interestEntity1.getToDate());
+        assertEquals(PeriodType.DAILY, interestEntity1.getPeriodType());
+
+        assertEquals(3, interestDetails1.size());
+
+        assertEquals(18360, interestDetails1.get(0).getInterest(), 0.01);
+        assertEquals("20190101", interestDetails1.get(0).getFromDate());
+        assertEquals("20191231", interestDetails1.get(0).getToDate());
+        assertEquals(1530000, interestDetails1.get(0).getBalance());
+        assertEquals(365, interestDetails1.get(0).getDays());
+        assertEquals(0, interestDetails1.get(0).getMonths());
+
+        assertEquals(12360, interestDetails1.get(1).getInterest(), 0.01);
+        assertEquals("20180101", interestDetails1.get(1).getFromDate());
+        assertEquals("20181231", interestDetails1.get(1).getToDate());
+        assertEquals(1030000, interestDetails1.get(1).getBalance());
+        assertEquals(365, interestDetails1.get(1).getDays());
+        assertEquals(0, interestDetails1.get(1).getMonths());
+
+        assertEquals(12000, interestDetails1.get(2).getInterest(), 0.01);
+        assertEquals("20170101", interestDetails1.get(2).getFromDate());
+        assertEquals("20171231", interestDetails1.get(2).getToDate());
+        assertEquals(1000000, interestDetails1.get(2).getBalance());
+        assertEquals(365, interestDetails1.get(2).getDays());
+        assertEquals(0, interestDetails1.get(2).getMonths());
+    }
+
+    @Test
+    @TestDescription("정상 이자지급 테스트")
+    public void payInterestMulti() throws Exception {
+        //given
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(PRODUCT_CODE)
+                .regDate("20170101")
+                .taxationCode(TaxationCode.REGULAR)
+                .build();
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = accountRepository.findById(accountId).get().getAccountNum();
+
+        long trnAmt1 = 1000000;
+        long trnAmt2 = 30000;
+        long trnAmt3 = 500000;
+        TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20170101")
+                .amount(trnAmt1)
+                .build();
+        TradeDto.RequestDeposit request2 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20180101")
+                .amount(trnAmt2)
+                .build();
+        TradeDto.RequestDeposit request3 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20190101")
+                .amount(trnAmt3)
+                .build();
+
+        TradeEntity result1 = accountService.deposit(accountNum, request1);
+        TradeEntity result2 = accountService.deposit(accountNum, request2);
+        TradeEntity result3 = accountService.deposit(accountNum, request3);
+
+
+        //when
+        TradeEntity tradeEntity1 = accountService.payInterest(accountNum, "20191231", "20200101");
         TradeEntity tradeEntity2 = accountService.payInterest(accountNum, "20201231", "20210101");
         AccountEntity accountEntity = accountRepository.findById(accountId).get();
         List<InterestEntity> interestEntities = accountEntity.getInterestEntities();
@@ -389,5 +469,4 @@ public class AccountServiceTest {
         assertEquals(365, interestDetails1.get(2).getDays());
         assertEquals(0, interestDetails1.get(2).getMonths());
     }
-
 }

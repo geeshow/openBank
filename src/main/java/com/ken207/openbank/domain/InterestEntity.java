@@ -88,7 +88,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
      */
     public void makeInterestDetail() {
 
-        if ( isSorted ) {
+        if ( !isSorted ) {
             throw new BizRuntimeException("이자계산을 위한 거래내역은 정렬을 먼저 해야함. 정렬 메소드 : sortedTradeList()");
         }
 
@@ -130,7 +130,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
      */
     public void remainLastTradeOfDays() {
 
-        if ( isSorted ) {
+        if ( !isSorted ) {
             throw new BizRuntimeException("이자계산을 위한 거래내역은 정렬을 먼저 해야함. 정렬 메소드 : sortedTradeList()");
         }
 
