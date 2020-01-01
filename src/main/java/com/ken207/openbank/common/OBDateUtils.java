@@ -5,8 +5,10 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class OBDateUtils {
-    public static String MIN_DATE = "19550101";
-    public static String MAX_DATE = "99991231";
+    public static final String MIN_DATE = "19550101";
+    public static final String MAX_DATE = "99991231";
+
+
     public static String getToday() {
         return parseString(LocalDate.now());
     }
@@ -14,6 +16,13 @@ public class OBDateUtils {
     public static String addDays(String date, long days) {
         return parseString(
                 parseLocalDate(date).plusDays(days)
+        );
+    }
+
+    public static String
+    addDaysFromNow(long days) {
+        return parseString(
+                parseLocalDate(getToday()).plusDays(days)
         );
     }
 
