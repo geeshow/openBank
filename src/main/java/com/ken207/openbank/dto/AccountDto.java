@@ -38,17 +38,4 @@ public class AccountDto {
         private AccountStatusCode accountStatusCode; //계좌상태코드
     }
 
-    public static Response transform(AccountEntity accountEntity) {
-
-        return Response.builder()
-                .regDate(accountEntity.getRegDate())
-                .taxationCode(accountEntity.getTaxationCode())
-                .accountNum(accountEntity.getAccountNum())
-                .closeDate(accountEntity.getCloseDate())
-                .lastIntsDt(accountEntity.getLastIntsDt())
-                .balance(accountEntity.getBalance())
-                .accountStatusCode(accountEntity.getAccountStatusCode())
-                .build();
-
-    }
 }

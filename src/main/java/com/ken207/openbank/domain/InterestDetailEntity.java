@@ -1,5 +1,6 @@
 package com.ken207.openbank.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.PeriodType;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -29,7 +32,8 @@ public class InterestDetailEntity extends BaseEntity<InterestDetailEntity> {
     private double interest;
     private double tax;
 
-    @ManyToOne
+    @JsonIgnore
+    @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "interest_id")
     private InterestEntity interestEntity;
 

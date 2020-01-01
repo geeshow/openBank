@@ -1,5 +1,6 @@
 package com.ken207.openbank.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.PeriodType;
 import com.ken207.openbank.exception.BizRuntimeException;
@@ -33,11 +34,11 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     private PeriodType periodType;
 
     @Builder.Default
-    @OneToMany
-    @JoinColumn(name = "interest_detail_id")
+    @OneToMany(mappedBy = "interestEntity", cascade = CascadeType.ALL)
     private List<InterestDetailEntity> interestDetails = new ArrayList<>();
 
-    @OneToOne
+    @JsonIgnore
+    @ManyToOne
     @JoinColumn(name = "account_id")
     private AccountEntity accountEntity;
 
@@ -89,7 +90,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     public void makeInterestDetail() {
 
         if ( !isSorted ) {
-            throw new BizRuntimeException("이자계산을 위한 거래내역은 정렬을 먼저 해야함. 정렬 메소드 : sortedTradeList()");
+            sortedTradeList();
         }
 
         String flagTradeDate = this.toDate;
@@ -131,7 +132,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     public void remainLastTradeOfDays() {
 
         if ( !isSorted ) {
-            throw new BizRuntimeException("이자계산을 위한 거래내역은 정렬을 먼저 해야함. 정렬 메소드 : sortedTradeList()");
+            sortedTradeList();
         }
 
         var ref = new Object() {
@@ -152,7 +153,8 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
                 .collect(Collectors.toList());
     }
 
-    public TradeEntity payInterest() {
+    public TradeEntity payInterest(String reckonDate) {
+        this.accountEntity.setReckonDt(reckonDate);
         return this.accountEntity.payInterest(this);
     }
 }

@@ -52,13 +52,11 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private RateEntity basicRate;
 
     @Default
-    @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "account_log_id")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<TradeEntity> tradeEntities = new ArrayList<>();
 
     @Default
-    @OneToMany(fetch = LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "interest_id")
+    @OneToMany(mappedBy = "accountEntity", cascade = CascadeType.ALL)
     private List<InterestEntity> interestEntities = new ArrayList<>();
 
     @Transient
