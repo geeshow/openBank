@@ -96,11 +96,12 @@ public class AccountService {
         return page;
     }
 
+
     @Transactional
-    public TradeEntity payInterest(String accountNum, String untilDate, String reckonDate) {
+    public InterestEntity getInterest(String accountNum, String untilDate) {
 
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
-        account.setReckonDt(reckonDate);
+        account.setReckonDt(untilDate);
 
         //이자계산용 거래내역 조회
         //최종이자계산일 기준으로 이후 거래내역을 모두 조회
@@ -127,7 +128,16 @@ public class AccountService {
         // 이자계산내역으로 이자계산 실행.
         interest.calculate();
 
-        return interest.payInterest();
+        return interest;
+    }
+
+    @Transactional
+    public TradeEntity payInterest(String accountNum, String untilDate, String reckonDate) {
+
+        InterestEntity interest = this.getInterest(accountNum, untilDate);
+        TradeEntity tradeEntity = interest.payInterest(reckonDate);
+        accountRepository.save(tradeEntity.getAccount());
+        return tradeEntity;
     }
 
     @Transactional

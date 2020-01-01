@@ -12,7 +12,6 @@ import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.ProductRepository;
-import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
 import com.ken207.openbank.service.ProductService;
 import org.junit.Before;
@@ -108,7 +107,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("regDate").value(regDate))
                 .andExpect(jsonPath("taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("closeDate").isEmpty())
-                .andExpect(jsonPath("lastIntsDt").value(OBDateUtils.MIN_DATE))
+                .andExpect(jsonPath("lastIntsDt").value(OBDateUtils.addDays(regDate, -1)))
                 .andExpect(jsonPath("balance").value(0))
                 .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andExpect(jsonPath("productCode").value(productCode))
@@ -213,7 +212,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.responseList[0].regDate").value(regDate))
                 .andExpect(jsonPath("_embedded.responseList[0].taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("_embedded.responseList[0].closeDate").isEmpty())
-                .andExpect(jsonPath("_embedded.responseList[0].lastIntsDt").value(OBDateUtils.MIN_DATE))
+                .andExpect(jsonPath("_embedded.responseList[0].lastIntsDt").value(OBDateUtils.addDays(regDate, -1)))
                 .andExpect(jsonPath("_embedded.responseList[0].balance").value(0))
                 .andExpect(jsonPath("_embedded.responseList[0].accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andExpect(jsonPath("_embedded.responseList[0].productCode").value(PRODUCT_CODE))
@@ -285,7 +284,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("regDate").value(regDate))
                 .andExpect(jsonPath("taxationCode").value(taxation.toString()))
                 .andExpect(jsonPath("closeDate").isEmpty())
-                .andExpect(jsonPath("lastIntsDt").value(OBDateUtils.MIN_DATE))
+                .andExpect(jsonPath("lastIntsDt").value(OBDateUtils.addDays(regDate, -1)))
                 .andExpect(jsonPath("balance").value(0))
                 .andExpect(jsonPath("accountStatusCode").value(AccountStatusCode.ACTIVE.toString()))
                 .andDo(document("get-account",

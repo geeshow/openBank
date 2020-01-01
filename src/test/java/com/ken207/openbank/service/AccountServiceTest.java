@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -315,10 +316,9 @@ public class AccountServiceTest {
                 .amount(trnAmt3)
                 .build();
 
-        TradeEntity result1 = accountService.deposit(accountNum, request1);
-        TradeEntity result2 = accountService.deposit(accountNum, request2);
-        TradeEntity result3 = accountService.deposit(accountNum, request3);
-
+        accountService.deposit(accountNum, request1);
+        accountService.deposit(accountNum, request2);
+        accountService.deposit(accountNum, request3);
 
         //when
         TradeEntity tradeEntity1 = accountService.payInterest(accountNum, "20191231", "20200101");
@@ -395,10 +395,9 @@ public class AccountServiceTest {
                 .amount(trnAmt3)
                 .build();
 
-        TradeEntity result1 = accountService.deposit(accountNum, request1);
-        TradeEntity result2 = accountService.deposit(accountNum, request2);
-        TradeEntity result3 = accountService.deposit(accountNum, request3);
-
+        accountService.deposit(accountNum, request1);
+        accountService.deposit(accountNum, request2);
+        accountService.deposit(accountNum, request3);
 
         //when
         TradeEntity tradeEntity1 = accountService.payInterest(accountNum, "20191231", "20200101");
@@ -448,10 +447,10 @@ public class AccountServiceTest {
         assertEquals(366, interestDetails2.get(0).getDays());
         assertEquals(0, interestDetails2.get(0).getMonths());
 
-        assertEquals(12000, interestDetails1.get(0).getInterest(), 0.01);
-        assertEquals("20170101", interestDetails1.get(0).getFromDate());
-        assertEquals("20171231", interestDetails1.get(0).getToDate());
-        assertEquals(1000000, interestDetails1.get(0).getBalance());
+        assertEquals(18360, interestDetails1.get(0).getInterest(), 0.01);
+        assertEquals("20190101", interestDetails1.get(0).getFromDate());
+        assertEquals("20191231", interestDetails1.get(0).getToDate());
+        assertEquals(1530000, interestDetails1.get(0).getBalance());
         assertEquals(365, interestDetails1.get(0).getDays());
         assertEquals(0, interestDetails1.get(0).getMonths());
 
@@ -462,10 +461,10 @@ public class AccountServiceTest {
         assertEquals(365, interestDetails1.get(1).getDays());
         assertEquals(0, interestDetails1.get(1).getMonths());
 
-        assertEquals(18360, interestDetails1.get(2).getInterest(), 0.01);
-        assertEquals("20180101", interestDetails1.get(2).getFromDate());
-        assertEquals("20181231", interestDetails1.get(2).getToDate());
-        assertEquals(1530000, interestDetails1.get(2).getBalance());
+        assertEquals(12000, interestDetails1.get(2).getInterest(), 0.01);
+        assertEquals("20170101", interestDetails1.get(2).getFromDate());
+        assertEquals("20171231", interestDetails1.get(2).getToDate());
+        assertEquals(1000000, interestDetails1.get(2).getBalance());
         assertEquals(365, interestDetails1.get(2).getDays());
         assertEquals(0, interestDetails1.get(2).getMonths());
     }

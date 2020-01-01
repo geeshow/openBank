@@ -321,8 +321,6 @@ public class InterestEntityTest {
         InterestEntity interest1 = InterestEntity.createInterest(account);
 
         //when
-        account.setReckonDt(OBDateUtils.getToday());
-
         interest1.setTradeListForInterest(tradeList1);
 
         interest1.setPeriod(OBDateUtils.addDays(tradeDate,1), OBDateUtils.addDays(tradeDate, 20), PeriodType.DAILY);
@@ -335,7 +333,7 @@ public class InterestEntityTest {
 
         long interestSum1 = interest1.getInterest();
 
-        TradeEntity resultTrade = interest1.payInterest();
+        TradeEntity resultTrade = interest1.payInterest(OBDateUtils.getToday());
 
         TradeEntity tradeEntity = account.getTradeEntities().get(account.getTradeEntities().size() - 1);
 
