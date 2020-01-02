@@ -196,3 +196,12 @@ operation::account-withdraw[snippets='request-body,curl-request,http-response,li
 `GET` 요청을 사용해서 해당 계좌의 거래내역을 조회 할 수 있다.
 
 operation::query-trade[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
+
+[[resources-interest-check]]
+=== 이자 금액 예상 조회
+
+`GET` 요청을 사용해서 해당 계좌의 거래내역을 조회 할 수 있다.
+
+operation::check-interest[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
+
+
