@@ -5,17 +5,23 @@ import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.InterestEntity;
 import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.dto.InterestDto;
 import com.ken207.openbank.mapper.AccountMapper;
 import com.ken207.openbank.mapper.InterestMapper;
 import com.ken207.openbank.mapper.TradeMapper;
 import com.ken207.openbank.repository.AccountRepository;
+import com.ken207.openbank.repository.InterestRepository;
 import com.ken207.openbank.repository.ProductRepository;
 import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -33,8 +39,65 @@ public class InterestController {
 
     private final AccountService accountService;
     private final AccountRepository accountRepository;
-    private final ControllerLinkBuilder controllerLinkBuilder = linkTo(AccountRegularController.class);
+    private final InterestRepository interestRepository;
+    private final ControllerLinkBuilder controllerLinkBuilder = linkTo(InterestController.class);
     private final InterestMapper interestMapper = InterestMapper.INSTANCE;
+
+    @GetMapping("/{accountNum}/log")
+    public ResponseEntity getInterestList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<InterestEntity> assembler,
+                                       @CurrentUser MemberEntity memberEntity) {
+
+        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+
+        //Request Data Validation
+        if ( account == null ) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Page<InterestEntity> page = this.interestRepository.findByAccount(account, pageable);
+
+        PagedResources<Resource> pagedResources = assembler.toResource(page,
+                e -> new Resource(
+                        interestMapper.entityToDtoForList(e),
+                        getLinkOfDetail(accountNum, e.getId())
+                ));
+
+        pagedResources.add(new Link("/docs/index.html#resources-interest-list").withRel("profile"));
+        pagedResources.add(controllerLinkBuilder.slash(accountNum).withSelfRel());
+        pagedResources.add(getLinkOfList(accountNum));
+        pagedResources.add(getLinkOfCheck(accountNum, OBDateUtils.getToday()));
+        pagedResources.add(getLinkOfIndex(accountNum));
+
+        return ResponseEntity.ok(pagedResources);
+    }
+//
+//    @GetMapping("/{accountNum}/log/{interestId}")
+//    public ResponseEntity getInterestList(@PathVariable String accountNum,
+//                                          @PathVariable Long interestId,
+//                                          @CurrentUser MemberEntity memberEntity) {
+//
+//        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+//
+//        //Request Data Validation
+//        if ( account == null ) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        Page<InterestEntity> page = this.interestRepository.findByAccount(account, pageable);
+//
+//        PagedResources<Resource> pagedResources = assembler.toResource(page,
+//                e -> new Resource(
+//                        interestMapper.entityToDtoForList(e),
+//                        getLinkOfCheck(accountNum, e.getReckonDate())
+//                ));
+//
+//        pagedResources.add(new Link("/docs/index.html#resources-trade-list").withRel("profile"));
+//        pagedResources.add(controllerLinkBuilder.slash(accountNum).withSelfRel());
+//        pagedResources.add(getLinkOfList(accountNum));
+//        pagedResources.add(getLinkOfCheck(accountNum, OBDateUtils.getToday()));
+//
+//        return ResponseEntity.ok(pagedResources);
+//    }
 
     @GetMapping("/{accountNum}/{until}")
     public ResponseEntity checkInterest(@PathVariable String accountNum,
@@ -58,7 +121,7 @@ public class InterestController {
 
         //HATEOAS REST API
         Resource resource = new Resource(response,
-                controllerLinkBuilder.slash(response.getAccountNum()).withSelfRel(),
+                controllerLinkBuilder.slash(accountNum).slash(until).withSelfRel(),
                 getLinkOfCheck(accountNum, until),
                 getLinkOfReceive(accountNum, until),
                 getLinkOfList(accountNum),
@@ -68,8 +131,12 @@ public class InterestController {
         return ResponseEntity.ok().body(resource);
     }
 
+    private Link getLinkOfIndex(String accountNum) {
+        return controllerLinkBuilder.slash(accountNum).withRel("interest-index");
+    }
+
     private Link getLinkOfCheck(String accountNum, String untilDate) {
-        return controllerLinkBuilder.slash(accountNum).slash(untilDate).withRel("check");
+        return controllerLinkBuilder.slash(accountNum).slash(untilDate).withRel("interest-calculate");
     }
 
     private Link getLinkOfReceive(String accountNum, String untilDate) {
@@ -77,7 +144,11 @@ public class InterestController {
     }
 
     private Link getLinkOfList(String accountNum) {
-        return controllerLinkBuilder.slash(accountNum).withRel("received-list");
+        return controllerLinkBuilder.slash(accountNum).slash("log").withRel("interest-list");
+    }
+
+    private Link getLinkOfDetail(String accountNum, Long interestId) {
+        return controllerLinkBuilder.slash(accountNum).slash("log").slash(interestId).withRel("interest-detail");
     }
 
     private Link getLinkOfProfile(String resourceUri) {

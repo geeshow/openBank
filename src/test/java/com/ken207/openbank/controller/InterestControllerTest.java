@@ -111,8 +111,8 @@ public class InterestControllerTest extends BaseControllerTest {
 
         //when & then
         mockMvc.perform(get("/api/interest/{accountNum}/{until}", accountNum, untilDate)
-                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-                )
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+        )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
@@ -161,6 +161,106 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("details[0].days").description("calculate period in day"),
                                 fieldWithPath("details[0].interest").description("result of interest in this period."),
                                 fieldWithPath("details[0].tax").description("result of tax in this period."),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.check.href").description("link to check how much the interest is."),
+                                fieldWithPath("_links.receive.href").description("link to withdraw interest from an existing account."),
+                                fieldWithPath("_links.received-list.href").description("link to received interest list."),
+                                fieldWithPath("_links.profile.href").description("link to self.")
+                        )
+                ));
+    }
+
+    @Test
+    @TestDescription("이자계산 결과 목록 조회 정상 테스트")
+    public void getInterestList() throws Exception {
+        //given
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(PRODUCT_CODE)
+                .regDate("20170101")
+                .taxationCode(TaxationCode.REGULAR)
+                .build();
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = accountRepository.findById(accountId).get().getAccountNum();
+
+        long trnAmt1 = 1000000;
+        long trnAmt2 = 30000;
+        long trnAmt3 = 500000;
+        TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20170101")
+                .amount(trnAmt1)
+                .build();
+        TradeDto.RequestDeposit request2 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20180101")
+                .amount(trnAmt2)
+                .build();
+        TradeDto.RequestDeposit request3 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20190101")
+                .amount(trnAmt3)
+                .build();
+
+        accountService.deposit(accountNum, request1);
+        accountService.payInterest(accountNum, "20170701", "20170701");
+        accountService.payInterest(accountNum, "20180101", "20180101");
+        accountService.deposit(accountNum, request2);
+        accountService.payInterest(accountNum, "20180701", "20180701");
+        accountService.payInterest(accountNum, "20190101", "20190101");
+        accountService.deposit(accountNum, request3);
+        accountService.payInterest(accountNum, "20190701", "20190701");
+        accountService.payInterest(accountNum, "20200101", "20200101");
+        accountService.payInterest(accountNum, "20200701", "20200701");
+        accountService.payInterest(accountNum, "20210101", "20210101");
+        accountService.payInterest(accountNum, "20210701", "20210701");
+        accountService.payInterest(accountNum, "20220101", "20220101");
+        accountService.payInterest(accountNum, "20220701", "20220701");
+        accountService.payInterest(accountNum, "20230101", "20230101");
+
+        AccountEntity account = accountRepository.findById(accountId).get();
+
+        //when & then
+        mockMvc.perform(get("/api/interest/{accountNum}/log", accountNum)
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+                        .param("page", "0")
+                        .param("size", "5")
+                        .param("sort", "srno,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+
+                .andExpect(jsonPath("list[0].interestId").exists())
+                .andExpect(jsonPath("list[0].accountNum").value(accountNum))
+                .andExpect(jsonPath("list[0].lastIntsDt").value("20170630"))
+                .andExpect(jsonPath("list[0].balance").value(trnAmt1))
+                .andExpect(jsonPath("list[0].fromDate").value(0))
+                .andExpect(jsonPath("list[0].toDate").value(1530000))
+                .andExpect(jsonPath("list[0].basicRate").value(1.2))
+                .andExpect(jsonPath("list[0].interest").value(6017))
+                .andExpect(jsonPath("list[0].periodType").value(PeriodType.DAILY.toString()))
+                .andDo(document("interest-check",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("interest-list").description("이자계산내역을 확인하는 링크 주소"),
+                                linkWithRel("interest-detail").description("이자계산결과 상세 정보를 확인하는 링크 주소"),
+                                linkWithRel("interest-calculate").description("지정된 날짜까지 이자를 계산/결과를 확인하는 링크 주소"),
+                                linkWithRel("interest-index").description("이자관련 첫 화면 링크 주소"),
+                                linkWithRelAsProfile()
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("list[0].interestId").description("이자계산 상세 정보 기본키."),
+                                fieldWithPath("list[0].accountNum").description("해당 이자계산 결과의 계좌번호"),
+                                fieldWithPath("list[0].lastIntsDt").description("최종 이자계산 일자."),
+                                fieldWithPath("list[0].balance").description("이자계산 적용 잔액."),
+                                fieldWithPath("list[0].fromDate").description("이자계산 시작일자."),
+                                fieldWithPath("list[0].toDate").description("이자계산 종료일자."),
+                                fieldWithPath("list[0].basicRate").description("계좌의 기본 이율."),
+                                fieldWithPath("list[0].interest").description("계산 결과 이자."),
+                                fieldWithPath("list[0].periodType").description("이자계산의 기간 산정 방법. 일수, 월수, 일/월수"),
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.check.href").description("link to check how much the interest is."),
                                 fieldWithPath("_links.receive.href").description("link to withdraw interest from an existing account."),

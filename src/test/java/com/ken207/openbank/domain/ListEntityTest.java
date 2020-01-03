@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-public class InterestEntityTest {
+public class ListEntityTest {
 
     @Autowired
     AccountService accountService;

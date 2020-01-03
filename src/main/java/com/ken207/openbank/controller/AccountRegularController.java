@@ -223,7 +223,6 @@ public class AccountRegularController {
                 ));
 
         pagedResources.add(new Link("/docs/index.html#resources-trade-list").withRel("profile"));
-        //pagedResources.add(linkTo(methodOn(AccountRegularController.class).getTradeList(accountNum, null,null,null)).withSelfRel());
 
         if ( memberEntity != null ) {
             pagedResources.add(getLinkOfDeposit(accountNum));
