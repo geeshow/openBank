@@ -91,14 +91,14 @@ em,i{font-style:italic;line-height:inherit}
 strong,b{font-weight:bold;line-height:inherit}
 small{font-size:60%;line-height:inherit}
 code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
-ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;dto-style-position:outside;font-family:inherit}
 ul,ol,ul.no-bullet,ol.no-bullet{margin-left:1.5em}
 ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
-ul.circle{list-style-type:circle}
-ul.disc{list-style-type:disc}
-ul.no-bullet{list-style:none}
+ul.square li ul,ul.circle li ul,ul.disc li ul{dto-style:inherit}
+ul.square{dto-style-type:square}
+ul.circle{dto-style-type:circle}
+ul.disc{dto-style-type:disc}
+ul.no-bullet{dto-style:none}
 ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
 dl dt{margin-bottom:.3125em;font-weight:bold}
 dl dd{margin-bottom:1.25em}
@@ -158,7 +158,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toc>ul{margin-left:.125em}
 #toc ul.sectlevel0>li>a{font-style:italic}
 #toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
-#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;dto-style-type:none}
 #toc li{line-height:1.3334;margin-top:.3334em}
 #toc a{text-decoration:none}
 #toc a:active{text-decoration:underline}
@@ -281,21 +281,21 @@ ul li ol{margin-left:1.5em}
 dl dd{margin-left:1.125em}
 dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
 ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
-ul.unstyled,ol.unnumbered,ul.checklist,ul.none{list-style-type:none}
+ul.unstyled,ol.unnumbered,ul.checklist,ul.none{dto-style-type:none}
 ul.unstyled,ol.unnumbered,ul.checklist{margin-left:.625em}
 ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1em;font-size:.85em}
 ul.checklist li>p:first-child>input[type="checkbox"]:first-child{width:1em;position:relative;top:1px}
-ul.inline{margin:0 auto .625em auto;margin-left:-1.375em;margin-right:0;padding:0;list-style:none;overflow:hidden}
-ul.inline>li{list-style:none;float:left;margin-left:1.375em;display:block}
+ul.inline{margin:0 auto .625em auto;margin-left:-1.375em;margin-right:0;padding:0;dto-style:none;overflow:hidden}
+ul.inline>li{dto-style:none;float:left;margin-left:1.375em;display:block}
 ul.inline>li>*{display:block}
 .unstyled dl dt{font-weight:400;font-style:normal}
-ol.arabic{list-style-type:decimal}
-ol.decimal{list-style-type:decimal-leading-zero}
-ol.loweralpha{list-style-type:lower-alpha}
-ol.upperalpha{list-style-type:upper-alpha}
-ol.lowerroman{list-style-type:lower-roman}
-ol.upperroman{list-style-type:upper-roman}
-ol.lowergreek{list-style-type:lower-greek}
+ol.arabic{dto-style-type:decimal}
+ol.decimal{dto-style-type:decimal-leading-zero}
+ol.loweralpha{dto-style-type:lower-alpha}
+ol.upperalpha{dto-style-type:upper-alpha}
+ol.lowerroman{dto-style-type:lower-roman}
+ol.upperroman{dto-style-type:upper-roman}
+ol.lowergreek{dto-style-type:lower-greek}
 .hdlist>table,.colist>table{border:0;background:none}
 .hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
 td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
@@ -451,7 +451,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#resources-customers">고객</a>
 <ul class="sectlevel2">
-<li><a href="#resources-customers-list">고객 목록 조회</a>
+<li><a href="#resources-customers-dto">고객 목록 조회</a>
 <ul class="sectlevel3">
 <li><a href="#resources-customers-list_response_fields">Response fields</a></li>
 <li><a href="#resources-customers-list_curl_request">Example request</a></li>
@@ -660,7 +660,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>고객 리소스는 고객정보를 만들거나 조회할 때 사용한다.</p>
 </div>
 <div class="sect2">
-<h3 id="resources-customers-list"><a class="link" href="#resources-customers-list">고객 목록 조회</a></h3>
+<h3 id="resources-customers-dto"><a class="link" href="#resources-customers-dto">고객 목록 조회</a></h3>
 <div class="paragraph">
 <p><code>GET</code> 요청을 사용하여 서비스의 모든 고객정보를 조회할 수 있다.</p>
 </div>

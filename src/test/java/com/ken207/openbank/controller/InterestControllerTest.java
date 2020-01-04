@@ -162,9 +162,9 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("details[0].interest").description("result of interest in this period."),
                                 fieldWithPath("details[0].tax").description("result of tax in this period."),
                                 fieldWithPath("_links.self.href").description("link to self."),
-                                fieldWithPath("_links.check.href").description("link to check how much the interest is."),
+                                fieldWithPath("_links.interest-calculate.href").description("link to check how much the interest is."),
                                 fieldWithPath("_links.receive.href").description("link to withdraw interest from an existing account."),
-                                fieldWithPath("_links.received-list.href").description("link to received interest list."),
+                                fieldWithPath("_links.interest-list.href").description("link to received interest list."),
                                 fieldWithPath("_links.profile.href").description("link to self.")
                         )
                 ));
@@ -199,48 +199,50 @@ public class InterestControllerTest extends BaseControllerTest {
                 .build();
 
         accountService.deposit(accountNum, request1);
-        accountService.payInterest(accountNum, "20170701", "20170701");
-        accountService.payInterest(accountNum, "20180101", "20180101");
+        accountService.payInterest(accountNum, "20170630", "20170701");
+        accountService.payInterest(accountNum, "20171231", "20180101");
         accountService.deposit(accountNum, request2);
-        accountService.payInterest(accountNum, "20180701", "20180701");
-        accountService.payInterest(accountNum, "20190101", "20190101");
+        accountService.payInterest(accountNum, "20180630", "20180701");
+        accountService.payInterest(accountNum, "20191231", "20190101");
         accountService.deposit(accountNum, request3);
-        accountService.payInterest(accountNum, "20190701", "20190701");
-        accountService.payInterest(accountNum, "20200101", "20200101");
-        accountService.payInterest(accountNum, "20200701", "20200701");
-        accountService.payInterest(accountNum, "20210101", "20210101");
-        accountService.payInterest(accountNum, "20210701", "20210701");
-        accountService.payInterest(accountNum, "20220101", "20220101");
-        accountService.payInterest(accountNum, "20220701", "20220701");
-        accountService.payInterest(accountNum, "20230101", "20230101");
+        accountService.payInterest(accountNum, "20190630", "20190701");
+        accountService.payInterest(accountNum, "20201231", "20200101");
+        accountService.payInterest(accountNum, "20200630", "20200701");
+        accountService.payInterest(accountNum, "20211231", "20210101");
+        accountService.payInterest(accountNum, "20210630", "20210701");
+        accountService.payInterest(accountNum, "20221231", "20220101");
+        accountService.payInterest(accountNum, "20220630", "20220701");
+        accountService.payInterest(accountNum, "20231231", "20230101");
 
         AccountEntity account = accountRepository.findById(accountId).get();
 
         //when & then
         mockMvc.perform(get("/api/interest/{accountNum}/log", accountNum)
                         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-                        .param("page", "0")
+                        .param("page", "1")
                         .param("size", "5")
-                        .param("sort", "srno,DESC")
+                        .param("sort", "id,ASC")
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
-
-                .andExpect(jsonPath("list[0].interestId").exists())
-                .andExpect(jsonPath("list[0].accountNum").value(accountNum))
-                .andExpect(jsonPath("list[0].lastIntsDt").value("20170630"))
-                .andExpect(jsonPath("list[0].balance").value(trnAmt1))
-                .andExpect(jsonPath("list[0].fromDate").value(0))
-                .andExpect(jsonPath("list[0].toDate").value(1530000))
-                .andExpect(jsonPath("list[0].basicRate").value(1.2))
-                .andExpect(jsonPath("list[0].interest").value(6017))
-                .andExpect(jsonPath("list[0].periodType").value(PeriodType.DAILY.toString()))
+                .andExpect(jsonPath("_embedded.dtoList[0].id").exists())
+                .andExpect(jsonPath("_embedded.dtoList[0].accountNum").value(accountNum))
+                .andExpect(jsonPath("_embedded.dtoList[0].fromDate").value("20190701"))
+                .andExpect(jsonPath("_embedded.dtoList[0].toDate").value("20201231"))
+                .andExpect(jsonPath("_embedded.dtoList[0].basicRate").value(1.2))
+                .andExpect(jsonPath("_embedded.dtoList[0].interest").value(28338))
+                .andExpect(jsonPath("_embedded.dtoList[0].periodType").value(PeriodType.DAILY.toString()))
+                .andExpect(jsonPath("_embedded.dtoList[0]._links.interest-detail.href").exists())
                 .andDo(document("interest-check",
                         links(
+                                linkWithRel("first").description("link to first page"),
+                                linkWithRel("prev").description("link to prev page"),
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("next").description("link to next page"),
+                                linkWithRel("last").description("link to last page"),
                                 linkWithRel("self").description("link to self"),
                                 linkWithRel("interest-list").description("이자계산내역을 확인하는 링크 주소"),
-                                linkWithRel("interest-detail").description("이자계산결과 상세 정보를 확인하는 링크 주소"),
                                 linkWithRel("interest-calculate").description("지정된 날짜까지 이자를 계산/결과를 확인하는 링크 주소"),
                                 linkWithRel("interest-index").description("이자관련 첫 화면 링크 주소"),
                                 linkWithRelAsProfile()
@@ -252,19 +254,26 @@ public class InterestControllerTest extends BaseControllerTest {
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
                         ),
                         responseFields(
-                                fieldWithPath("list[0].interestId").description("이자계산 상세 정보 기본키."),
-                                fieldWithPath("list[0].accountNum").description("해당 이자계산 결과의 계좌번호"),
-                                fieldWithPath("list[0].lastIntsDt").description("최종 이자계산 일자."),
-                                fieldWithPath("list[0].balance").description("이자계산 적용 잔액."),
-                                fieldWithPath("list[0].fromDate").description("이자계산 시작일자."),
-                                fieldWithPath("list[0].toDate").description("이자계산 종료일자."),
-                                fieldWithPath("list[0].basicRate").description("계좌의 기본 이율."),
-                                fieldWithPath("list[0].interest").description("계산 결과 이자."),
-                                fieldWithPath("list[0].periodType").description("이자계산의 기간 산정 방법. 일수, 월수, 일/월수"),
+                                fieldWithPath("_links.first.href").description("link to first."),
+                                fieldWithPath("_links.prev.href").description("link to prev."),
+                                fieldWithPath("_links.next.href").description("link to next."),
+                                fieldWithPath("_links.last.href").description("link to last."),
+                                fieldWithPath("page.size").description("size of one page."),
+                                fieldWithPath("page.totalElements").description("amount of datas."),
+                                fieldWithPath("page.totalPages").description("amount of pages."),
+                                fieldWithPath("page.number").description("current page number."),
+                                fieldWithPath("_embedded.dtoList[0].id").description("이자계산 상세 정보 기본키."),
+                                fieldWithPath("_embedded.dtoList[0].accountNum").description("해당 이자계산 결과의 계좌번호"),
+                                fieldWithPath("_embedded.dtoList[0].fromDate").description("이자계산 시작일자."),
+                                fieldWithPath("_embedded.dtoList[0].toDate").description("이자계산 종료일자."),
+                                fieldWithPath("_embedded.dtoList[0].basicRate").description("계좌의 기본 이율."),
+                                fieldWithPath("_embedded.dtoList[0].interest").description("계산 결과 이자."),
+                                fieldWithPath("_embedded.dtoList[0].periodType").description("이자계산의 기간 산정 방법. 일수, 월수, 일/월수"),
+                                fieldWithPath("_embedded.dtoList[0]._links.interest-detail.href").description("이자계산결과의 상세 정보 링크"),
                                 fieldWithPath("_links.self.href").description("link to self."),
-                                fieldWithPath("_links.check.href").description("link to check how much the interest is."),
-                                fieldWithPath("_links.receive.href").description("link to withdraw interest from an existing account."),
-                                fieldWithPath("_links.received-list.href").description("link to received interest list."),
+                                fieldWithPath("_links.interest-index.href").description("이자관련 첫 화면 링크 주소."),
+                                fieldWithPath("_links.interest-calculate.href").description("link to check how much the interest is."),
+                                fieldWithPath("_links.interest-list.href").description("link to received interest list."),
                                 fieldWithPath("_links.profile.href").description("link to self.")
                         )
                 ));
@@ -273,9 +282,9 @@ public class InterestControllerTest extends BaseControllerTest {
     private LinksSnippet getLinksOfInterest() {
         return links(
                 linkWithRel("self").description("link to self"),
-                linkWithRel("check").description("link to check how much the interest is"),
+                linkWithRel("interest-calculate").description("link to check how much the interest is"),
                 linkWithRel("receive").description("link to withdraw interest from an existing account"),
-                linkWithRel("received-list").description("link to received interest list"),
+                linkWithRel("interest-list").description("link to received interest list"),
                 linkWithRelAsProfile());
     }
 

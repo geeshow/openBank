@@ -5,15 +5,10 @@ import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.InterestEntity;
 import com.ken207.openbank.domain.MemberEntity;
-import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.dto.InterestDto;
-import com.ken207.openbank.mapper.AccountMapper;
 import com.ken207.openbank.mapper.InterestMapper;
-import com.ken207.openbank.mapper.TradeMapper;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.InterestRepository;
-import com.ken207.openbank.repository.ProductRepository;
-import com.ken207.openbank.repository.TradeRepository;
 import com.ken207.openbank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,7 +40,7 @@ public class InterestController {
 
     @GetMapping("/{accountNum}/log")
     public ResponseEntity getInterestList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<InterestEntity> assembler,
-                                       @CurrentUser MemberEntity memberEntity) {
+                                       @CurrentUser MemberEntity currentMember) {
 
         AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
 
@@ -63,7 +58,6 @@ public class InterestController {
                 ));
 
         pagedResources.add(new Link("/docs/index.html#resources-interest-list").withRel("profile"));
-        pagedResources.add(controllerLinkBuilder.slash(accountNum).withSelfRel());
         pagedResources.add(getLinkOfList(accountNum));
         pagedResources.add(getLinkOfCheck(accountNum, OBDateUtils.getToday()));
         pagedResources.add(getLinkOfIndex(accountNum));

@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-public class ListEntityTest {
+public class DtoEntityTest {
 
     @Autowired
     AccountService accountService;
@@ -94,7 +94,7 @@ public class ListEntityTest {
         //then
         assertEquals(1, accountEntity.getInterestEntities().size());
         assertEquals(interest, accountEntity.getInterestEntities().get(0));
-        assertEquals(interest.getAccountEntity(), accountEntity);
+        assertEquals(interest.getAccount(), accountEntity);
     }
 
     @Test

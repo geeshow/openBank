@@ -149,7 +149,7 @@ public class AccountService {
         Map<String, Long> dailyBalance = tradeQueryRepository.getDailyBalanceFrom(account.getId(), account.getLastIntsDt());
 
         InterestEntity interest = InterestEntity.builder()
-                .accountEntity(account)
+                .account(account)
                 .basicRate(account.getBasicRate().getRate())
                 .reckonDate(reckonDate)
                 .fromDate(account.getLastIntsDt())

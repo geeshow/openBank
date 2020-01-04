@@ -10,11 +10,12 @@ import org.mapstruct.factory.Mappers;
 public interface InterestMapper {
     InterestMapper INSTANCE = Mappers.getMapper(InterestMapper.class);
 
-    @Mapping(source = "accountEntity.accountNum", target="accountNum")
-    @Mapping(source = "accountEntity.lastIntsDt", target="lastIntsDt")
-    @Mapping(source = "accountEntity.balance", target="balance")
+    @Mapping(source = "account.accountNum", target="accountNum")
+    @Mapping(source = "account.lastIntsDt", target="lastIntsDt")
+    @Mapping(source = "account.balance", target="balance")
     @Mapping(source = "interestDetails", target="details")
     InterestDto.Response entityToDto(InterestEntity interestEntity);
 
-    InterestDto.List entityToDtoForList(InterestEntity interestEntity);
+    @Mapping(source = "account.accountNum", target="accountNum")
+    InterestDto.Dto entityToDtoForList(InterestEntity interestEntity);
 }

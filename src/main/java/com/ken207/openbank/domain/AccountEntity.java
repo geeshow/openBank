@@ -11,8 +11,6 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.FetchType.LAZY;
-
 @Entity
 @Getter
 @Builder @NoArgsConstructor @AllArgsConstructor
@@ -56,7 +54,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private List<TradeEntity> tradeEntities = new ArrayList<>();
 
     @Default
-    @OneToMany(mappedBy = "accountEntity", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<InterestEntity> interestEntities = new ArrayList<>();
 
     @Transient

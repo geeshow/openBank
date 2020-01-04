@@ -3,7 +3,6 @@ package com.ken207.openbank.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.PeriodType;
-import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,10 +14,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Entity
 @Getter
-@Builder
-@NoArgsConstructor
+@Builder @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="Interest")
 @AttributeOverride(name = "id",column = @Column(name = "interest_id"))
@@ -38,9 +38,9 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     private List<InterestDetailEntity> interestDetails = new ArrayList<>();
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id")
-    private AccountEntity accountEntity;
+    private AccountEntity account;
 
     @Transient
     private List<TradeEntity> tradeListForInterest; //이자계산용 거래내역
@@ -49,9 +49,9 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     private boolean isSorted = false;
 
     //==연관관계 메서드==//
-    public void setAccountEntity(AccountEntity accountEntity) {
-        this.accountEntity = accountEntity;
-        this.accountEntity.getInterestEntities().add(this);
+    public void setAccount(AccountEntity account) {
+        this.account = account;
+        this.account.getInterestEntities().add(this);
     }
 
     public static InterestEntity createInterest(AccountEntity account) {
@@ -60,7 +60,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
                 .reckonDate(account.getReckonDt())
                 .build();
 
-        interest.setAccountEntity(account);
+        interest.setAccount(account);
 
         return interest;
     }
@@ -154,7 +154,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     }
 
     public TradeEntity payInterest(String reckonDate) {
-        this.accountEntity.setReckonDt(reckonDate);
-        return this.accountEntity.payInterest(this);
+        this.account.setReckonDt(reckonDate);
+        return this.account.payInterest(this);
     }
 }
