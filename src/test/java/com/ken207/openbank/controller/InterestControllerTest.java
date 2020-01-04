@@ -76,7 +76,7 @@ public class InterestControllerTest extends BaseControllerTest {
 
     @Test
     @TestDescription("이자계산 결과 조회 정상 테스트")
-    public void checkInterest() throws Exception {
+    public void calculateInterest() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .productCode(PRODUCT_CODE)
@@ -134,7 +134,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("details[0].days").value(365))
                 .andExpect(jsonPath("details[0].interest").value(18360))
                 .andExpect(jsonPath("details[0].tax").value(0))
-                .andDo(document("interest-check",
+                .andDo(document("interest-calculate",
                         getLinksOfInterest(),
                         requestHeaders(
                                 headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
@@ -234,7 +234,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.dtoList[0].interest").value(28338))
                 .andExpect(jsonPath("_embedded.dtoList[0].periodType").value(PeriodType.DAILY.toString()))
                 .andExpect(jsonPath("_embedded.dtoList[0]._links.interest-detail.href").exists())
-                .andDo(document("interest-check",
+                .andDo(document("interest-list",
                         links(
                                 linkWithRel("first").description("link to first page"),
                                 linkWithRel("prev").description("link to prev page"),

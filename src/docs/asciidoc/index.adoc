@@ -12,6 +12,10 @@
 [[overview]]
 = 개요
 
+본 프로젝트는 금융권에서 사용되는 계정계 업무를 오픈 소스화 하기 위한 프로젝트다.
+기본적으로 Restful API를 제공하며, Restful을 이용한 Front-end를 기획 중이다.
+Java 12, H2, Spring-Boot를 이용한다.
+
 [[overview-http-verbs]]
 == HTTP 동사
 
@@ -197,19 +201,19 @@ operation::account-withdraw[snippets='request-body,curl-request,http-response,li
 
 operation::query-trade[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
 
-[[resources-interest-check]]
+[[resources-interest-calculate]]
 === 이자 금액 예상 조회
 
-`GET` 요청을 사용해서 해당 계좌의 거래내역을 조회 할 수 있다.
+`GET` 요청을 사용해서 해당 계좌의 이자계산을 조회 할 수 있다.
 
-operation::check-interest[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
+operation::interest-calculate[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
 
-[[resources-interest-dto]]
-=== 계좌 거래내역 조회
+[[resources-interest-list]]
+=== 이자지급 내역 조회
 
-`GET` 요청을 사용해서 해당 계좌의 거래내역을 조회 할 수 있다.
+`GET` 요청을 사용해서 해당 계좌의 이자지급내역을 조회 할 수 있다.
 
-operation::get-interest-dto[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
+operation::interest-list[snippets='curl-request,http-request,http-response,response-body,response-fields,response-headers,links']
 
 
 

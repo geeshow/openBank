@@ -172,7 +172,6 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
         return addTradeLog(TradeCd.CLOSE);
     }
 
-
     private TradeEntity addTradeLog(TradeCd tradeCd) {
 
         TradeEntity tradeEntity = TradeEntity.builder()
