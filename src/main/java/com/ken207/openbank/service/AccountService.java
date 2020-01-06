@@ -96,8 +96,7 @@ public class AccountService {
         return page;
     }
 
-
-    @Transactional
+    @Transactional(readOnly = true)
     public InterestEntity getInterest(String accountNum, String untilDate) {
 
         //원장조회

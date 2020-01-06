@@ -26,9 +26,9 @@ public class InterestDto {
         private String fromDate;
         private String toDate;
         private double basicRate;
-        private long interest;
+        private long expectedInterest;
         private PeriodType periodType;
-        private java.util.List<InterestDetailEntity> details;
+        private java.util.List<InterestDetailDto> details;
     }
 
     @Builder

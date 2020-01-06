@@ -75,7 +75,109 @@ public class InterestControllerTest extends BaseControllerTest {
 
 
     @Test
-    @TestDescription("이자계산 결과 조회 정상 테스트")
+    @TestDescription("이자계산 인덱스 페이지 조회 테스트")
+    public void indexInterest() throws Exception {
+        //given
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(PRODUCT_CODE)
+                .regDate("20170101")
+                .taxationCode(TaxationCode.REGULAR)
+                .build();
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = accountRepository.findById(accountId).get().getAccountNum();
+
+        String untilDate = OBDateUtils.getToday();
+        long trnAmt1 = 1000000;
+        long trnAmt2 = 30000;
+        long trnAmt3 = 500000;
+        TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20170101")
+                .amount(trnAmt1)
+                .build();
+        TradeDto.RequestDeposit request2 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20180101")
+                .amount(trnAmt2)
+                .build();
+        TradeDto.RequestDeposit request3 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20190101")
+                .amount(trnAmt3)
+                .build();
+
+        accountService.deposit(accountNum, request1);
+        accountService.deposit(accountNum, request2);
+        accountService.deposit(accountNum, request3);
+
+        AccountEntity account = accountRepository.findById(accountId).get();
+
+        //when & then
+        mockMvc.perform(get("/api/interest/{accountNum}", accountNum)
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("accountNum").value(accountNum))
+                .andExpect(jsonPath("lastIntsDt").value(account.getLastIntsDt()))
+                .andExpect(jsonPath("balance").value(account.getBalance()))
+                .andExpect(jsonPath("fromDate").value(OBDateUtils.addDays(account.getLastIntsDt(),1)))
+                .andExpect(jsonPath("toDate").value(OBDateUtils.addDays(untilDate,-1)))
+                .andExpect(jsonPath("basicRate").value(account.getBasicRate().getRate()))
+                .andExpect(jsonPath("expectedInterest").exists())
+                .andExpect(jsonPath("periodType").value(PeriodType.DAILY.toString()))
+                .andExpect(jsonPath("details[0].id").doesNotExist())
+                .andExpect(jsonPath("details[0].fromDate").value("20190101"))
+                .andExpect(jsonPath("details[0].toDate").value(OBDateUtils.addDays(untilDate, -1)))
+                .andExpect(jsonPath("details[0].interestRate").value(1.2))
+                .andExpect(jsonPath("details[0].taxRate").value(0))
+                .andExpect(jsonPath("details[0].balance").value(1530000))
+                .andExpect(jsonPath("details[0].months").value(0))
+                .andExpect(jsonPath("details[0].days").exists())
+                .andExpect(jsonPath("details[0].interest").exists())
+                .andExpect(jsonPath("details[0].tax").exists())
+                .andDo(document("interest-index",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("interest-calculate").description("link to check how much the interest is"),
+                                linkWithRel("receive").description("link to withdraw interest from an existing account"),
+                                linkWithRel("interest-list").description("link to received interest list"),
+                                linkWithRelAsProfile())
+                        ,
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("accountNum").description("identification number of new account."),
+                                fieldWithPath("lastIntsDt").description("the last calculated date of account interest."),
+                                fieldWithPath("balance").description("balance of account."),
+                                fieldWithPath("fromDate").description("start date of interest to calculate."),
+                                fieldWithPath("toDate").description("end date of interest to calculate."),
+                                fieldWithPath("basicRate").description("interest rate of this account."),
+                                fieldWithPath("expectedInterest").description("result of interest."),
+                                fieldWithPath("periodType").description("method of calculate about period, such as daily, monthly"),
+                                fieldWithPath("details[0].fromDate").description("start date of interest to calculate."),
+                                fieldWithPath("details[0].toDate").description("end date of interest to calculate."),
+                                fieldWithPath("details[0].interestRate").description("interest rate of this account."),
+                                fieldWithPath("details[0].taxRate").description("tax rate of this account."),
+                                fieldWithPath("details[0].balance").description("balance of account at the time"),
+                                fieldWithPath("details[0].months").description("calculate period in month"),
+                                fieldWithPath("details[0].days").description("calculate period in day"),
+                                fieldWithPath("details[0].interest").description("result of interest in this period."),
+                                fieldWithPath("details[0].tax").description("result of tax in this period."),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.interest-calculate.href").description("link to check how much the interest is."),
+                                fieldWithPath("_links.receive.href").description("link to withdraw interest from an existing account."),
+                                fieldWithPath("_links.interest-list.href").description("link to received interest list."),
+                                fieldWithPath("_links.profile.href").description("link to self.")
+                        )
+                ));
+    }
+
+
+    @Test
+    @TestDescription("지정일 이자계산 후 예상 이자 조회 정상 테스트")
     public void calculateInterest() throws Exception {
         //given
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
@@ -122,9 +224,9 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("fromDate").value(OBDateUtils.addDays(account.getLastIntsDt(),1)))
                 .andExpect(jsonPath("toDate").value(OBDateUtils.addDays(untilDate,-1)))
                 .andExpect(jsonPath("basicRate").value(account.getBasicRate().getRate()))
-                .andExpect(jsonPath("interest").value(42720))
+                .andExpect(jsonPath("expectedInterest").value(42720))
                 .andExpect(jsonPath("periodType").value(PeriodType.DAILY.toString()))
-                .andExpect(jsonPath("details[0].id").exists())
+                .andExpect(jsonPath("details[0].id").doesNotExist())
                 .andExpect(jsonPath("details[0].fromDate").value("20190101"))
                 .andExpect(jsonPath("details[0].toDate").value("20191231"))
                 .andExpect(jsonPath("details[0].interestRate").value(1.2))
@@ -149,9 +251,8 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("toDate").description("end date of interest to calculate."),
                                 fieldWithPath("basicRate").description("interest rate of this account."),
-                                fieldWithPath("interest").description("result of interest."),
+                                fieldWithPath("expectedInterest").description("이자 계산으로 계산된 예상 지급 이자."),
                                 fieldWithPath("periodType").description("method of calculate about period, such as daily, monthly"),
-                                fieldWithPath("details[0].id").description("identification number about interest detail information."),
                                 fieldWithPath("details[0].fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("details[0].toDate").description("end date of interest to calculate."),
                                 fieldWithPath("details[0].interestRate").description("interest rate of this account."),
@@ -162,8 +263,9 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("details[0].interest").description("result of interest in this period."),
                                 fieldWithPath("details[0].tax").description("result of tax in this period."),
                                 fieldWithPath("_links.self.href").description("link to self."),
-                                fieldWithPath("_links.interest-calculate.href").description("link to check how much the interest is."),
-                                fieldWithPath("_links.receive.href").description("link to withdraw interest from an existing account."),
+                                fieldWithPath("_links.interest-index.href").description("이자계산 기본 링크."),
+                                fieldWithPath("_links.interest-calculate.href").description("지정일 기준 이자 예상 조회 링크"),
+                                fieldWithPath("_links.receive.href").description("지정 계좌 이자 출금 처리 링크"),
                                 fieldWithPath("_links.interest-list.href").description("link to received interest list."),
                                 fieldWithPath("_links.profile.href").description("link to self.")
                         )
@@ -242,6 +344,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 linkWithRel("next").description("link to next page"),
                                 linkWithRel("last").description("link to last page"),
                                 linkWithRel("self").description("link to self"),
+                                linkWithRel("interest-index").description("이자계산 기본 링크 주소."),
                                 linkWithRel("interest-list").description("이자계산내역을 확인하는 링크 주소"),
                                 linkWithRel("interest-calculate").description("지정된 날짜까지 이자를 계산/결과를 확인하는 링크 주소"),
                                 linkWithRel("interest-index").description("이자관련 첫 화면 링크 주소"),
@@ -271,7 +374,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("_embedded.dtoList[0].periodType").description("이자계산의 기간 산정 방법. 일수, 월수, 일/월수"),
                                 fieldWithPath("_embedded.dtoList[0]._links.interest-detail.href").description("이자계산결과의 상세 정보 링크"),
                                 fieldWithPath("_links.self.href").description("link to self."),
-                                fieldWithPath("_links.interest-index.href").description("이자관련 첫 화면 링크 주소."),
+                                fieldWithPath("_links.interest-index.href").description("이자계산 기본 링크 주소."),
                                 fieldWithPath("_links.interest-calculate.href").description("link to check how much the interest is."),
                                 fieldWithPath("_links.interest-list.href").description("link to received interest list."),
                                 fieldWithPath("_links.profile.href").description("link to self.")
@@ -282,6 +385,7 @@ public class InterestControllerTest extends BaseControllerTest {
     private LinksSnippet getLinksOfInterest() {
         return links(
                 linkWithRel("self").description("link to self"),
+                linkWithRel("interest-index").description("이자계산 기본 링크."),
                 linkWithRel("interest-calculate").description("link to check how much the interest is"),
                 linkWithRel("receive").description("link to withdraw interest from an existing account"),
                 linkWithRel("interest-list").description("link to received interest list"),

@@ -13,6 +13,7 @@ public interface InterestMapper {
     @Mapping(source = "account.accountNum", target="accountNum")
     @Mapping(source = "account.lastIntsDt", target="lastIntsDt")
     @Mapping(source = "account.balance", target="balance")
+    @Mapping(source = "interest", target="expectedInterest")
     @Mapping(source = "interestDetails", target="details")
     InterestDto.Response entityToDto(InterestEntity interestEntity);
 
