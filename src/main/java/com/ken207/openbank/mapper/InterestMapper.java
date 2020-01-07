@@ -18,5 +18,9 @@ public interface InterestMapper {
     InterestDto.Response entityToDto(InterestEntity interestEntity);
 
     @Mapping(source = "account.accountNum", target="accountNum")
+    @Mapping(source = "interestDetails", target="details")
+    InterestDto.ResponseDetail entityToDetail(InterestEntity interestEntity);
+
+    @Mapping(source = "account.accountNum", target="accountNum")
     InterestDto.Dto entityToDtoForList(InterestEntity interestEntity);
 }

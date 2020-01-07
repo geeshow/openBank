@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -50,7 +51,7 @@ public class InterestDetailEntity extends BaseEntity<InterestDetailEntity> {
         BigDecimal number100ForRate = new BigDecimal(100);
         BigDecimal daysOfYear = new BigDecimal(365);
         BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate, MathContext.DECIMAL64).multiply(daysBig).divide(daysOfYear, MathContext.DECIMAL64);
-        this.interest = interestBig.doubleValue();
+        this.interest = interestBig.setScale(3, RoundingMode.DOWN).doubleValue();
         return this.interest;
     }
 

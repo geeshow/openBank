@@ -57,7 +57,6 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     public static InterestEntity createInterest(AccountEntity account) {
         InterestEntity interest = InterestEntity.builder()
                 .basicRate(account.getBasicRate().getRate())
-                .reckonDate(account.getReckonDt())
                 .build();
 
         interest.setAccount(account);
@@ -97,6 +96,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
         for (TradeEntity trade: tradeListForInterest) {
 
             InterestDetailEntity interestDetail = InterestDetailEntity.builder()
+                    .interestEntity(this)
                     .interestRate(this.basicRate)
                     .balance(trade.getBlncAfter())
                     .fromDate(trade.getTradeDate())
@@ -154,6 +154,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     }
 
     public TradeEntity payInterest(String reckonDate) {
+        this.reckonDate = reckonDate;
         this.account.setReckonDt(reckonDate);
         return this.account.payInterest(this);
     }

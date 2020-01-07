@@ -34,6 +34,22 @@ public class InterestDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class ResponseDetail {
+        private String accountNum; //계좌번호
+        private String reckonDate;
+        private String fromDate;
+        private String toDate;
+        private double basicRate;
+        private long interest;
+        private PeriodType periodType;
+        private java.util.List<InterestDetailEntity> details;
+    }
+
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Getter @Setter
     public static class Dto {
         private Long id;

@@ -101,7 +101,6 @@ public class AccountService {
 
         //원장조회
         AccountEntity account = accountRepository.findByAccountNum(accountNum);
-        account.setReckonDt(untilDate);
 
         //이자계산용 거래내역 조회
         //최종이자계산일 기준으로 이후 거래내역을 모두 조회

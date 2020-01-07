@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
@@ -59,10 +61,36 @@ public class InterestController {
 
         pagedResources.add(new Link("/docs/index.html#resources-interest-list").withRel("profile"));
         pagedResources.add(getLinkOfList(accountNum));
-        pagedResources.add(getLinkOfCheck(accountNum, OBDateUtils.getToday()));
         pagedResources.add(getLinkOfIndex(accountNum));
 
         return ResponseEntity.ok(pagedResources);
+    }
+
+    @GetMapping("/{accountNum}/log/{detailId}")
+    public ResponseEntity getInterestDetail(@PathVariable String accountNum,
+                                            @PathVariable Long detailId,
+                                          @CurrentUser MemberEntity currentMember) {
+
+        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+
+        //Request Data Validation
+        if ( account == null ) {
+            return ResponseEntity.notFound().build();
+        }
+
+        InterestEntity interestEntity = this.interestRepository.findById(detailId).get();
+
+        InterestDto.ResponseDetail responseDetail = interestMapper.entityToDetail(interestEntity);
+
+        //HATEOAS REST API
+        Resource resource = new Resource(responseDetail,
+                controllerLinkBuilder.slash(accountNum).slash("log").slash(interestEntity.getId()).withSelfRel(),
+                getLinkOfIndex(accountNum),
+                getLinkOfList(accountNum),
+                getLinkOfProfile("#resources-interest-detail")
+        );
+
+        return ResponseEntity.ok(resource);
     }
 //
 //    @GetMapping("/{accountNum}/log/{interestId}")
