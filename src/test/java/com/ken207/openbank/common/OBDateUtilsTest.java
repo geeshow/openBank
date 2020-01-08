@@ -154,8 +154,6 @@ public class OBDateUtilsTest {
         Assert.assertEquals(28, result11);
     }
 
-
-
     @Test
     public void getNumberOfDaysInclude() throws Exception {
         //given
@@ -185,5 +183,18 @@ public class OBDateUtilsTest {
         Assert.assertEquals(32, result9);
         Assert.assertEquals(30, result10);
         Assert.assertEquals(29, result11);
+    }
+
+    @Test
+    public void getYesterday() throws Exception {
+        //given
+        String today = OBDateUtils.getToday();
+        String addDayResult = OBDateUtils.addDays(today, -1);
+
+        //when
+        String yesterday = OBDateUtils.getYesterday();
+
+        //then
+        Assert.assertEquals(addDayResult, yesterday);
     }
 }

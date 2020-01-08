@@ -13,6 +13,12 @@ public class OBDateUtils {
         return parseString(LocalDate.now());
     }
 
+    public static String getYesterday() {
+        return parseString(
+                LocalDate.now().plusDays(-1)
+        );
+    }
+
     public static String addDays(String date, long days) {
         return parseString(
                 parseLocalDate(date).plusDays(days)
