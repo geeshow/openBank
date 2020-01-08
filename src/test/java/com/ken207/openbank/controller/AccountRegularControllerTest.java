@@ -94,10 +94,11 @@ public class AccountRegularControllerTest extends BaseControllerTest {
 
         //when & then
         mockMvc.perform(post("/api/account/regular")
-                .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .accept(MediaTypes.HAL_JSON)
-                .content(objectMapper.writeValueAsString(accountRequestOpen)))
+                        .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(accountRequestOpen))
+                )
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(header().exists(HttpHeaders.LOCATION))

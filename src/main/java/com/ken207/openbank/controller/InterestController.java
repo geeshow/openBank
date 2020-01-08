@@ -5,8 +5,11 @@ import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.InterestEntity;
 import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.dto.InterestDto;
+import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.mapper.InterestMapper;
+import com.ken207.openbank.mapper.TradeMapper;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.InterestRepository;
 import com.ken207.openbank.service.AccountService;
@@ -20,10 +23,7 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -39,6 +39,7 @@ public class InterestController {
     private final InterestRepository interestRepository;
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(InterestController.class);
     private final InterestMapper interestMapper = InterestMapper.INSTANCE;
+    private final TradeMapper tradeMapper = TradeMapper.INSTANCE;
 
     @GetMapping("/{accountNum}/log")
     public ResponseEntity getInterestList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<InterestEntity> assembler,
@@ -92,34 +93,34 @@ public class InterestController {
 
         return ResponseEntity.ok(resource);
     }
-//
-//    @GetMapping("/{accountNum}/log/{interestId}")
-//    public ResponseEntity getInterestList(@PathVariable String accountNum,
-//                                          @PathVariable Long interestId,
-//                                          @CurrentUser MemberEntity memberEntity) {
-//
-//        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
-//
-//        //Request Data Validation
-//        if ( account == null ) {
-//            return ResponseEntity.notFound().build();
-//        }
-//
-//        Page<InterestEntity> page = this.interestRepository.findByAccount(account, pageable);
-//
-//        PagedResources<Resource> pagedResources = assembler.toResource(page,
-//                e -> new Resource(
-//                        interestMapper.entityToDtoForList(e),
-//                        getLinkOfCheck(accountNum, e.getReckonDate())
-//                ));
-//
-//        pagedResources.add(new Link("/docs/index.html#resources-trade-list").withRel("profile"));
-//        pagedResources.add(controllerLinkBuilder.slash(accountNum).withSelfRel());
-//        pagedResources.add(getLinkOfList(accountNum));
-//        pagedResources.add(getLinkOfCheck(accountNum, OBDateUtils.getToday()));
-//
-//        return ResponseEntity.ok(pagedResources);
-//    }
+
+    @PostMapping("/{accountNum}")
+    public ResponseEntity payInterest(@PathVariable String accountNum,
+                                          @CurrentUser MemberEntity memberEntity) {
+
+        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+
+        //Request Data Validation
+        if ( account == null ) {
+            return ResponseEntity.notFound().build();
+        }
+
+        TradeEntity resultTrade = accountService.payInterest(accountNum, OBDateUtils.getYesterday(), OBDateUtils.getToday());
+
+        //set response data
+        TradeDto.Response response = tradeMapper.entityToResponse(resultTrade);
+
+        //HATEOAS REST API
+        Resource resource = new Resource(response,
+                controllerLinkBuilder.slash(accountNum).withSelfRel(),
+                getLinkOfIndex(accountNum),
+                getLinkOfList(accountNum),
+                getLinkOfDetail(accountNum, resultTrade.getInterestEntity().getId()),
+                getLinkOfProfile("#resources-interest-pay")
+        );
+
+        return ResponseEntity.ok().body(resource);
+    }
 
     @GetMapping("/{accountNum}")
     public ResponseEntity indexInterest(@PathVariable String accountNum,

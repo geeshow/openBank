@@ -9,6 +9,7 @@ import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.domain.enums.PeriodType;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
+import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.dto.AccountDto;
 import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.dto.TradeDto;
@@ -21,6 +22,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.hypermedia.LinkDescriptor;
 import org.springframework.restdocs.hypermedia.LinksSnippet;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -35,7 +37,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -180,6 +182,85 @@ public class InterestControllerTest extends BaseControllerTest {
                 ));
     }
 
+    @Test
+    @TestDescription("지정일 이자계산 후 이자 지급 처리 정상 테스트")
+    public void payInterest() throws Exception {
+        //given
+        AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
+                .productCode(PRODUCT_CODE)
+                .regDate("20170101")
+                .taxationCode(TaxationCode.REGULAR)
+                .build();
+        Long accountId = accountService.openRegularAccount(accountRequestOpen);
+        String accountNum = accountRepository.findById(accountId).get().getAccountNum();
+
+        String untilDate = "20200101";
+        long trnAmt1 = 1000000;
+        long trnAmt2 = 30000;
+        long trnAmt3 = 500000;
+        TradeDto.RequestDeposit request1 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20170101")
+                .amount(trnAmt1)
+                .build();
+        TradeDto.RequestDeposit request2 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20180101")
+                .amount(trnAmt2)
+                .build();
+        TradeDto.RequestDeposit request3 = TradeDto.RequestDeposit.builder()
+                .tradeDate("20190101")
+                .amount(trnAmt3)
+                .build();
+
+        accountService.deposit(accountNum, request1);
+        accountService.deposit(accountNum, request2);
+        accountService.deposit(accountNum, request3);
+
+        //when & then
+        mockMvc.perform(post("/api/interest/{accountNum}", accountNum, untilDate)
+                        .header(HttpHeaders.AUTHORIZATION, this.getBearerToken())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaTypes.HAL_JSON)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("srno").exists())
+                .andExpect(jsonPath("tradeDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("bzDate").value(OBDateUtils.getToday()))
+                .andExpect(jsonPath("amount").exists())
+                .andExpect(jsonPath("blncBefore").value(1530000))
+                .andExpect(jsonPath("blncAfter").exists())
+                .andExpect(jsonPath("tradeCd").value(TradeCd.INTEREST.toString()))
+                .andDo(document("account-interest",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("interest-index").description("이자계산 기본 링크."),
+                                linkWithRel("interest-detail").description("이자 원가 상세 내역 링크"),
+                                linkWithRel("interest-list").description("이자 원가 내역"),
+                                linkWithRelAsProfile())
+                        ,
+                        requestHeaders(
+                                headerWithName(HttpHeaders.AUTHORIZATION).description("Authorization header")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("HAL/JSON type content type")
+                        ),
+                        responseFields(
+                                fieldWithPath("srno").description("serial number of trade"),
+                                fieldWithPath("tradeDate").description("기산일. 해당일을 기준으로 거래를 발생."),
+                                fieldWithPath("bzDate").description("실제 거래를 시도한 날짜"),
+                                fieldWithPath("amount").description("지급한 이자 금액"),
+                                fieldWithPath("blncBefore").description("거래 전 잔액"),
+                                fieldWithPath("blncAfter").description("거래 후 잔액"),
+                                fieldWithPath("tradeCd").description("거래 코드"),
+                                fieldWithPath("_links.self.href").description("link to self."),
+                                fieldWithPath("_links.interest-index.href").description("이자계산 기본 링크."),
+                                fieldWithPath("_links.interest-detail.href").description("이자 원가 상세 내역 링크."),
+                                fieldWithPath("_links.interest-list.href").description("link to received interest list."),
+                                fieldWithPath("_links.profile.href").description("link to self.")
+                        )
+                ));
+    }
 
     @Test
     @TestDescription("지정일 이자계산 후 예상 이자 조회 정상 테스트")
@@ -218,8 +299,8 @@ public class InterestControllerTest extends BaseControllerTest {
 
         //when & then
         mockMvc.perform(get("/api/interest/{accountNum}/{until}", accountNum, untilDate)
-                        .header(HttpHeaders.AUTHORIZATION, getBearerToken())
-                )
+                .header(HttpHeaders.AUTHORIZATION, getBearerToken())
+        )
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_UTF8_VALUE))

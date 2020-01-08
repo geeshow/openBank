@@ -42,6 +42,11 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     @JoinColumn(name = "account_id")
     private AccountEntity account;
 
+    @JsonIgnore
+    @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "trade_id")
+    private TradeEntity trade;
+
     @Transient
     private List<TradeEntity> tradeListForInterest; //이자계산용 거래내역
 
@@ -156,6 +161,11 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
     public TradeEntity payInterest(String reckonDate) {
         this.reckonDate = reckonDate;
         this.account.setReckonDt(reckonDate);
-        return this.account.payInterest(this);
+        TradeEntity tradeEntity = this.account.payInterest(this);
+
+        //연관관계설정
+        tradeEntity.setInterestEntity(this);
+
+        return tradeEntity;
     }
 }

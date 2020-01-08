@@ -30,6 +30,11 @@ public class TradeEntity extends BaseEntity<TradeEntity> {
     @JoinColumn(name = "account_id")
     private AccountEntity account;
 
+    @JsonIgnore
+    @OneToOne(mappedBy = "trade")
+    @JoinColumn(name = "interest_id")
+    private InterestEntity interestEntity;
+
     @Override
     public int compareTo(TradeEntity tradeEntity) {
         return Long.compare(this.getSrno(), tradeEntity.getSrno());
