@@ -1,16 +1,8 @@
 package com.ken207.openbank.dto;
 
-import com.ken207.openbank.domain.AccountEntity;
-import com.ken207.openbank.domain.InterestDetailEntity;
-import com.ken207.openbank.domain.enums.AccountStatusCode;
+import com.ken207.openbank.domain.InterestDetail;
 import com.ken207.openbank.domain.enums.PeriodType;
-import com.ken207.openbank.domain.enums.SubjectCode;
-import com.ken207.openbank.domain.enums.TaxationCode;
 import lombok.*;
-
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class InterestDto {
 
@@ -26,7 +18,7 @@ public class InterestDto {
         private String fromDate;
         private String toDate;
         private double basicRate;
-        private long expectedInterest;
+        private long expectedInterestAmount;
         private PeriodType periodType;
         private java.util.List<InterestDetailDto> details;
     }
@@ -42,9 +34,9 @@ public class InterestDto {
         private String fromDate;
         private String toDate;
         private double basicRate;
-        private long interest;
+        private long interestAmount;
         private PeriodType periodType;
-        private java.util.List<InterestDetailEntity> details;
+        private java.util.List<InterestDetail> details;
     }
 
     @Builder
@@ -57,7 +49,7 @@ public class InterestDto {
         private String fromDate;
         private String toDate;
         private double basicRate;
-        private long interest;
+        private long interestAmount;
         private PeriodType periodType;
     }
 

@@ -2,9 +2,9 @@ package com.ken207.openbank.repository;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.domain.AccountEntity;
-import com.ken207.openbank.domain.ProductEntity;
-import com.ken207.openbank.domain.TradeEntity;
+import com.ken207.openbank.domain.Account;
+import com.ken207.openbank.domain.Product;
+import com.ken207.openbank.domain.Trade;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
 import com.ken207.openbank.dto.AccountDto;
@@ -54,7 +54,7 @@ public class TradeRepositoryTest {
         String regDate = "20191214";
         SubjectCode subjectCode = SubjectCode.REGULAR;
 
-        ProductEntity product = productRepository.findByProductCode(PRODUCT_CODE);
+        Product product = productRepository.findByProductCode(PRODUCT_CODE);
 
         if ( product == null ) {
             ProductDto.Create createProductDto = ProductDto.Create.builder()
@@ -76,8 +76,8 @@ public class TradeRepositoryTest {
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountEntity account = createAccount(tradeDate, taxation);
-        AccountEntity otherAccount = createAccount(tradeDate, taxation);
+        Account account = createAccount(tradeDate, taxation);
+        Account otherAccount = createAccount(tradeDate, taxation);
 
         IntStream.range(1,10).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e, account.getAccountNum());
@@ -87,11 +87,11 @@ public class TradeRepositoryTest {
         });
 
         //when
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), tradeDate);
-        List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), OBDateUtils.addDays(tradeDate, 1));
-        List<TradeEntity> tradeList3 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), OBDateUtils.addDays(OBDateUtils.getToday(), 1));
-        List<TradeEntity> tradeList4 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), OBDateUtils.getToday());
-        List<TradeEntity> tradeList2_1 = tradeRepository.findByAccountIdAndBzDateGreaterThan(otherAccount.getId(),tradeDate);
+        List<Trade> tradeList1 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), tradeDate);
+        List<Trade> tradeList2 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), OBDateUtils.addDays(tradeDate, 1));
+        List<Trade> tradeList3 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), OBDateUtils.addDays(OBDateUtils.getToday(), 1));
+        List<Trade> tradeList4 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), OBDateUtils.getToday());
+        List<Trade> tradeList2_1 = tradeRepository.findByAccountIdAndBzDateGreaterThan(otherAccount.getId(),tradeDate);
 
         //then
         assertEquals(10, tradeList1.size());
@@ -111,8 +111,8 @@ public class TradeRepositoryTest {
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountEntity account = createAccount(tradeDate, taxation);
-        AccountEntity otherAccount = createAccount(tradeDate, taxation);
+        Account account = createAccount(tradeDate, taxation);
+        Account otherAccount = createAccount(tradeDate, taxation);
 
         IntStream.range(1,10).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e, account.getAccountNum());
@@ -122,11 +122,11 @@ public class TradeRepositoryTest {
         });
 
         //when
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), tradeDate);
-        List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.addDays(tradeDate, -1));
-        List<TradeEntity> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.addDays(tradeDate, 1));
-        List<TradeEntity> tradeList4 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.getToday());
-        List<TradeEntity> tradeList2_1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(otherAccount.getId(),tradeDate);
+        List<Trade> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), tradeDate);
+        List<Trade> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.addDays(tradeDate, -1));
+        List<Trade> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.addDays(tradeDate, 1));
+        List<Trade> tradeList4 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.getToday());
+        List<Trade> tradeList2_1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(otherAccount.getId(),tradeDate);
 
         //then
         assertEquals(9, tradeList1.size());
@@ -140,7 +140,7 @@ public class TradeRepositoryTest {
         assertEquals(4, tradeList2_1.size());
     }
 
-    private AccountEntity createAccount(String tradeDate, TaxationCode taxation) {
+    private Account createAccount(String tradeDate, TaxationCode taxation) {
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .productCode(PRODUCT_CODE)
                 .regDate(tradeDate)

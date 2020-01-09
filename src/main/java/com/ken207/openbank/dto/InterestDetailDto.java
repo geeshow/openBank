@@ -15,6 +15,6 @@ public class InterestDetailDto {
     private long balance;
     private int months;
     private int days;
-    private double interest;
+    private double interestAmount;
     private double tax;
 }

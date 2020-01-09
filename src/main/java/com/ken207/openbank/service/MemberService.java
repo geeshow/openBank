@@ -1,6 +1,6 @@
 package com.ken207.openbank.service;
 
-import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.domain.Member;
 import com.ken207.openbank.repository.MemberRepository;
 import com.ken207.openbank.user.MemberAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +23,11 @@ public class MemberService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        MemberEntity member = memberRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new UsernameNotFoundException(email));
+        Member member = memberRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new UsernameNotFoundException(email));
         return new MemberAdapter(member);
     }
 
-    public MemberEntity createUser(MemberEntity user) {
+    public Member createUser(Member user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return memberRepository.save(user);
     }

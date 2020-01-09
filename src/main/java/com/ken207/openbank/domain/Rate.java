@@ -14,7 +14,7 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @Table(name="Rate")
 @AttributeOverride(name = "id",column = @Column(name = "rate_id"))
-public class RateEntity extends BaseEntity<ProductEntity> {
+public class Rate extends BaseEntity<Product> {
 
     private String name;
     private String startDate;

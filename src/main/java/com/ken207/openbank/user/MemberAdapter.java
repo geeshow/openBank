@@ -1,6 +1,6 @@
 package com.ken207.openbank.user;
 
-import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.domain.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 
 public class MemberAdapter extends User {
 
-    private MemberEntity memberEntity;
+    private Member member;
 
-    public MemberAdapter(MemberEntity memberEntity) {
-        super(memberEntity.getEmail(), memberEntity.getPassword(), authorities(memberEntity.getRoles()));
-        this.memberEntity = memberEntity;
+    public MemberAdapter(Member member) {
+        super(member.getEmail(), member.getPassword(), authorities(member.getRoles()));
+        this.member = member;
     }
 
     private static Collection<? extends GrantedAuthority> authorities(Set<MemberRole> roles) {
@@ -24,7 +24,7 @@ public class MemberAdapter extends User {
                 .collect(Collectors.toSet());
     }
 
-    public MemberEntity getMemberEntity() {
-        return memberEntity;
+    public Member getMember() {
+        return member;
     }
 }

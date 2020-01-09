@@ -10,7 +10,7 @@ import java.util.Set;
 @Table(name = "Member")
 @Getter @Setter @EqualsAndHashCode(of = "id")
 @Builder @NoArgsConstructor @AllArgsConstructor
-public class MemberEntity {
+public class Member {
 
     @Id @GeneratedValue
     public Integer id;

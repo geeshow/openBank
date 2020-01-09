@@ -2,16 +2,12 @@ package com.ken207.openbank.domain;
 
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.ProductDto;
-import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-
-import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -20,7 +16,7 @@ import static javax.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @Table(name="Product")
 @AttributeOverride(name = "id",column = @Column(name = "product_id"))
-public class ProductEntity extends BaseEntity<ProductEntity> {
+public class Product extends BaseEntity<Product> {
 
     private String name;
     private String productCode;
@@ -33,22 +29,22 @@ public class ProductEntity extends BaseEntity<ProductEntity> {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "rate_id")
-    private RateEntity basicRate;
+    private Rate basicRate;
 
-    public static ProductEntity createProduct(ProductDto.Create productCreateDto) {
+    public static Product createProduct(ProductDto.Create productCreateDto) {
 
         if ( productCreateDto.getEndDate() == null ) {
             productCreateDto.setEndDate("99991231");
         }
 
-        RateEntity basicRate = RateEntity.builder()
+        Rate basicRate = Rate.builder()
                 .name("기본이율")
                 .rate(productCreateDto.getBasicRate())
                 .startDate(productCreateDto.getStartDate())
                 .endDate(productCreateDto.getEndDate())
                 .build();
 
-        ProductEntity product = ProductEntity.builder()
+        Product product = Product.builder()
                 .name(productCreateDto.getName())
                 .productCode(productCreateDto.getProductCode())
                 .subjectCode(productCreateDto.getSubjectCode())

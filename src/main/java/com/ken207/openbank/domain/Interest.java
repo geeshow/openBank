@@ -22,45 +22,45 @@ import static javax.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @Table(name="Interest")
 @AttributeOverride(name = "id",column = @Column(name = "interest_id"))
-public class InterestEntity extends BaseEntity<InterestEntity> {
+public class Interest extends BaseEntity<Interest> {
 
     private String reckonDate;
     private String fromDate;
     private String toDate;
     private double basicRate;
-    private long interest;
+    private long interestAmount;
 
     @Enumerated(EnumType.STRING)
     private PeriodType periodType;
 
     @Builder.Default
-    @OneToMany(mappedBy = "interestEntity", cascade = CascadeType.ALL)
-    private List<InterestDetailEntity> interestDetails = new ArrayList<>();
+    @OneToMany(mappedBy = "interest", cascade = CascadeType.ALL)
+    private List<InterestDetail> interestDetails = new ArrayList<>();
 
     @JsonIgnore
     @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id")
-    private AccountEntity account;
+    private Account account;
 
     @JsonIgnore
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "trade_id")
-    private TradeEntity trade;
+    private Trade trade;
 
     @Transient
-    private List<TradeEntity> tradeListForInterest; //이자계산용 거래내역
+    private List<Trade> tradeListForInterest; //이자계산용 거래내역
 
     @Transient
     private boolean isSorted = false;
 
     //==연관관계 메서드==//
-    public void setAccount(AccountEntity account) {
+    public void setAccount(Account account) {
         this.account = account;
         this.account.getInterestEntities().add(this);
     }
 
-    public static InterestEntity createInterest(AccountEntity account) {
-        InterestEntity interest = InterestEntity.builder()
+    public static Interest createInterest(Account account) {
+        Interest interest = Interest.builder()
                 .basicRate(account.getBasicRate().getRate())
                 .build();
 
@@ -75,7 +75,7 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
         this.periodType = periodType;
     }
 
-    public void setTradeListForInterest(List<TradeEntity> tradeListForInterest) {
+    public void setTradeListForInterest(List<Trade> tradeListForInterest) {
         this.tradeListForInterest = tradeListForInterest;
     }
 
@@ -98,10 +98,10 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
         }
 
         String flagTradeDate = this.toDate;
-        for (TradeEntity trade: tradeListForInterest) {
+        for (Trade trade: tradeListForInterest) {
 
-            InterestDetailEntity interestDetail = InterestDetailEntity.builder()
-                    .interestEntity(this)
+            InterestDetail interestDetail = InterestDetail.builder()
+                    .interest(this)
                     .interestRate(this.basicRate)
                     .balance(trade.getBlncAfter())
                     .fromDate(trade.getTradeDate())
@@ -126,8 +126,8 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
                 o.calculateByMonths();
             });
         }
-        Double interestSum = interestDetails.stream().collect(Collectors.summingDouble(InterestDetailEntity::getInterest));
-        this.interest = Double.valueOf(Math.ceil(interestSum)).longValue();
+        Double interestSum = interestDetails.stream().collect(Collectors.summingDouble(InterestDetail::getInterestAmount));
+        this.interestAmount = Double.valueOf(Math.ceil(interestSum)).longValue();
     }
 
     /**
@@ -158,14 +158,14 @@ public class InterestEntity extends BaseEntity<InterestEntity> {
                 .collect(Collectors.toList());
     }
 
-    public TradeEntity payInterest(String reckonDate) {
+    public Trade payInterest(String reckonDate) {
         this.reckonDate = reckonDate;
         this.account.setReckonDt(reckonDate);
-        TradeEntity tradeEntity = this.account.payInterest(this);
+        Trade trade = this.account.payInterest(this);
 
         //연관관계설정
-        tradeEntity.setInterestEntity(this);
+        trade.setInterest(this);
 
-        return tradeEntity;
+        return trade;
     }
 }

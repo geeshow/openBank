@@ -1,13 +1,8 @@
 package com.ken207.openbank.dto;
 
-import com.ken207.openbank.domain.RateEntity;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.sun.istack.NotNull;
 import lombok.*;
-
-import javax.persistence.*;
-
-import static javax.persistence.FetchType.LAZY;
 
 public class ProductDto {
 

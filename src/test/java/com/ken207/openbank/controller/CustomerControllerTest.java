@@ -1,15 +1,11 @@
 package com.ken207.openbank.controller;
 
-import com.ken207.openbank.domain.enums.BranchType;
-import com.ken207.openbank.user.MemberRole;
 import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.common.TestDescription;
 import com.ken207.openbank.consts.ConstEmployee;
-import com.ken207.openbank.controller.BaseControllerTest;
-import com.ken207.openbank.domain.CustomerEntity;
-import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.domain.Customer;
+import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.dto.request.CustomerRequest;
-import com.ken207.openbank.domain.EmployeeEntity;
 import com.ken207.openbank.repository.CustomerRepository;
 import com.ken207.openbank.repository.EmployeeRepository;
 import com.ken207.openbank.repository.MemberRepository;
@@ -21,16 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -40,7 +28,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -55,7 +42,7 @@ public class CustomerControllerTest extends BaseControllerTest  {
     @Autowired
     EmployeeRepository employeeRepository;
 
-    private EmployeeEntity employeeEntity;
+    private Employee employee;
 
     @Autowired
     MemberService memberService;
@@ -69,7 +56,7 @@ public class CustomerControllerTest extends BaseControllerTest  {
     /** init 은 Test 전 항상 수행 */
     @Before
     public void init() throws Exception {
-        employeeEntity = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
+        employee = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
     }
 
     @Test
@@ -303,8 +290,8 @@ public class CustomerControllerTest extends BaseControllerTest  {
     }
 
     private Long generateCustomer(int index) {
-        CustomerEntity customerEntity = new CustomerEntity("고객 " + index, "customer" + index + "@gmail.com", "KOREA");
-        return customerService.createCustomer(customerEntity, employeeEntity.getId());
+        Customer customer = new Customer("고객 " + index, "customer" + index + "@gmail.com", "KOREA");
+        return customerService.createCustomer(customer, employee.getId());
     }
 
     @Test

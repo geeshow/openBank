@@ -2,7 +2,7 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.domain.ProductEntity;
+import com.ken207.openbank.domain.Product;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
@@ -60,7 +60,7 @@ public class AccountRegularControllerTest extends BaseControllerTest {
         String regDate = "20191214";
         SubjectCode subjectCode = SubjectCode.REGULAR;
 
-        ProductEntity product = productRepository.findByProductCode(PRODUCT_CODE);
+        Product product = productRepository.findByProductCode(PRODUCT_CODE);
 
         if ( product == null ) {
             ProductDto.Create createProductDto = ProductDto.Create.builder()

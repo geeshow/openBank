@@ -3,8 +3,8 @@ package com.ken207.openbank.init;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.consts.ConstEmployee;
 import com.ken207.openbank.controller.CustomerController;
-import com.ken207.openbank.domain.BranchEntity;
-import com.ken207.openbank.domain.EmployeeEntity;
+import com.ken207.openbank.domain.Branch;
+import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.domain.enums.EmployeeType;
@@ -35,9 +35,9 @@ public class DefaultDataInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         //기본 처리자 생성
-        BranchEntity branchEntity = new BranchEntity("인터넷뱅킹", "555-12-3456", "000", "1588-1234", BranchType.인터넷);
-        EmployeeEntity employeeEntity = new EmployeeEntity(ConstEmployee.INTERNET, "인터넷사용자", EmployeeType.인터넷뱅킹, branchEntity);
-        employeeRepository.save(employeeEntity);
+        Branch branch = new Branch("인터넷뱅킹", "555-12-3456", "000", "1588-1234", BranchType.인터넷);
+        Employee employee = new Employee(ConstEmployee.INTERNET, "인터넷사용자", EmployeeType.인터넷뱅킹, branch);
+        employeeRepository.save(employee);
 
         //기본 보통예금 상품 생성
         ProductDto.Create regularProductDto = ProductDto.Create.builder()
