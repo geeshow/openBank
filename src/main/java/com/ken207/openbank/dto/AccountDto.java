@@ -1,4 +1,5 @@
-package com.ken207.openbank.dto;
+﻿package com.ken207.openbank.dto;
+
 
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
