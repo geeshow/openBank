@@ -1,6 +1,6 @@
 package com.ken207.openbank.service;
 
-import com.ken207.openbank.domain.Customer;
+import com.ken207.openbank.domain.CustomerEntity;
 import com.ken207.openbank.repository.CustomerRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Transactional
-public class CustomerServiceTest {
+public class CustomerEntityServiceTest {
 
     @Autowired CustomerService customerService;
     @Autowired CustomerRepository customerRepository;
@@ -23,18 +23,18 @@ public class CustomerServiceTest {
     @Test
     public void createCustomerServiceTest() throws Exception {
         //given
-        Customer customer = new Customer("박규태", "test@korea.com", "KOR");
+        CustomerEntity customerEntity = new CustomerEntity("박규태", "test@korea.com", "KOR");
 
         //when
-        Long customer_id = customerService.createCustomer(customer);
-        Customer findCustomer = customerRepository.findById(customer_id).get();
+        Long customer_id = customerService.createCustomer(customerEntity);
+        CustomerEntity findCustomerEntity = customerRepository.findById(customer_id).get();
 
         //then
-        assertEquals("박규태", findCustomer.getName());
-        assertNull(findCustomer.getRegBranch());
-        assertNull(findCustomer.getMngBranch());
-        assertNull(findCustomer.getRegEmployee());
-        assertNull(findCustomer.getRegEmployee());
+        assertEquals("박규태", findCustomerEntity.getName());
+        assertNull(findCustomerEntity.getRegBranchEntity());
+        assertNull(findCustomerEntity.getMngBranchEntity());
+        assertNull(findCustomerEntity.getRegEmployeeEntity());
+        assertNull(findCustomerEntity.getRegEmployeeEntity());
     }
 
 

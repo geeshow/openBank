@@ -2,7 +2,7 @@ package com.ken207.openbank.service;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.domain.Product;
+import com.ken207.openbank.domain.ProductEntity;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.exception.BizRuntimeException;
@@ -49,7 +49,7 @@ public class ProductServiceTest {
 
         //when
         Long productId = productService.createProduct(productRequestDto);
-        Product newProduct = productRepository.findById(productId).get();
+        ProductEntity newProduct = productRepository.findById(productId).get();
 
         //then
         assertEquals(name, newProduct.getName());

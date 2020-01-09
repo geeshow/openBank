@@ -2,7 +2,7 @@ package com.ken207.openbank.security;
 
 import com.ken207.openbank.user.MemberRole;
 import com.ken207.openbank.common.AppSecurityProperties;
-import com.ken207.openbank.domain.Member;
+import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.service.MemberService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +43,7 @@ public class OAuth2ServerConfigTests {
         // Given
         String password = "pass";
         String email = "test@email.com";
-        Member member = Member.builder()
+        MemberEntity member = MemberEntity.builder()
                 .email(email)
                 .password(password)
                 .roles(Set.of(MemberRole.USER))

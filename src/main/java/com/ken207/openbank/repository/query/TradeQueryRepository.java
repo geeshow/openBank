@@ -1,6 +1,6 @@
 package com.ken207.openbank.repository.query;
 
-import com.ken207.openbank.domain.Trade;
+import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.repository.TradeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -18,8 +18,8 @@ public class TradeQueryRepository {
     private final TradeRepository tradeRepository;
 
     public Map<String, Long> getDailyBalanceFrom(Long accountId, String lastInterestPayDate) {
-        List<Trade> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(accountId, lastInterestPayDate);
+        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(accountId, lastInterestPayDate);
 
-        return tradeListForInterest.stream().collect(Collectors.toMap(Trade::getBzDate, Trade::getBlncAfter));
+        return tradeListForInterest.stream().collect(Collectors.toMap(TradeEntity::getBzDate, TradeEntity::getBlncAfter));
     }
 }

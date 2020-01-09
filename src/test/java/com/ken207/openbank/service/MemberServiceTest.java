@@ -2,7 +2,7 @@ package com.ken207.openbank.service;
 
 import com.ken207.openbank.user.MemberRole;
 import com.ken207.openbank.controller.BaseControllerTest;
-import com.ken207.openbank.domain.Member;
+import com.ken207.openbank.domain.MemberEntity;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class MemberServiceTest extends BaseControllerTest {
 
         String password = "2484";
         String username = "ken2484@email.com";
-        Member user = Member.builder()
+        MemberEntity user = MemberEntity.builder()
                 .email(username)
                 .password(password)
                 .roles(roles)

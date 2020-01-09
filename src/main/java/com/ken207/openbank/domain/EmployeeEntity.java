@@ -15,7 +15,7 @@ import static javax.persistence.FetchType.LAZY;
 @Builder @NoArgsConstructor @AllArgsConstructor
 @Table(name="Employee")
 @AttributeOverride(name = "id",column = @Column(name = "employee_id"))
-public class Employee extends BaseEntity<Employee> {
+public class EmployeeEntity extends BaseEntity<EmployeeEntity> {
 
     private String employeeCode;
     private String name;
@@ -32,19 +32,19 @@ public class Employee extends BaseEntity<Employee> {
 
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "branch_id")
-    private Branch belongBranch;
+    private BranchEntity belongBranchEntity;
 
-    public Employee(String employeeCode, String name, EmployeeType employeeType, Branch belongBranch) {
+    public EmployeeEntity(String employeeCode, String name, EmployeeType employeeType, BranchEntity belongBranchEntity) {
         this.employeeCode = employeeCode;
         this.name = name;
         this.employeeType = employeeType;
         this.userStat = EmployeeStatus.근무;
         this.position = Position.사원;
         this.regDate = LocalDateTime.now();
-        setBelongBranch(belongBranch);
+        setBelongBranchEntity(belongBranchEntity);
     }
 
-    public void setBelongBranch(Branch belongBranch) {
-        this.belongBranch = belongBranch;
+    public void setBelongBranchEntity(BranchEntity belongBranchEntity) {
+        this.belongBranchEntity = belongBranchEntity;
     }
 }

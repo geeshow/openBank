@@ -2,11 +2,14 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.*;
 import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.dto.InterestDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.mapper.AccountMapper;
+import com.ken207.openbank.mapper.InterestMapper;
 import com.ken207.openbank.mapper.TradeMapper;
 import com.ken207.openbank.repository.AccountRepository;
 import com.ken207.openbank.repository.ProductRepository;
@@ -48,7 +51,7 @@ public class AccountRegularController {
 
     @PostMapping
     public ResponseEntity createAccount(@RequestBody @Valid AccountDto.RequestOpen accountRequestOpen, Errors errors,
-                                        @CurrentUser Member currentMember) {
+                                        @CurrentUser MemberEntity currentMember) {
 
         //Request Data Validation
         HttpStatus httpStatus = RequestValidator.createAccount(accountRequestOpen, errors, currentMember);
@@ -56,11 +59,11 @@ public class AccountRegularController {
             return new ResponseEntity(new ErrorsResource(errors), httpStatus);
         }
 
-        Product product = productRepository.findByProductCode(accountRequestOpen.getProductCode());
+        ProductEntity productEntity = productRepository.findByProductCode(accountRequestOpen.getProductCode());
 
         //Create Entity and save to database
         Long accountId = accountService.openRegularAccount(accountRequestOpen);
-        Account account = accountRepository.findById(accountId).get();
+        AccountEntity account = accountRepository.findById(accountId).get();
 
         //Set response data
         AccountDto.Response newAccount = accountMapper.accountForResponse(account);
@@ -82,9 +85,9 @@ public class AccountRegularController {
 
 
     @GetMapping
-    public ResponseEntity queryAccounts(Pageable pageable, PagedResourcesAssembler<Account> assembler,
-                                        @CurrentUser Member member) {
-        Page<Account> page = this.accountRepository.findAll(pageable);
+    public ResponseEntity queryAccounts(Pageable pageable, PagedResourcesAssembler<AccountEntity> assembler,
+                                        @CurrentUser MemberEntity memberEntity) {
+        Page<AccountEntity> page = this.accountRepository.findAll(pageable);
         //Page<AccountEntity> page = this.accountService.getAccountList(pageable);
         PagedResources<Resource> pagedResources = assembler.toResource(page,
                 e -> new Resource(accountMapper.accountForResponse(e),
@@ -92,7 +95,7 @@ public class AccountRegularController {
                 ));
 
         pagedResources.add(getLinkOfProfile("#resources-accounts-list"));
-        if ( member != null ) {
+        if ( memberEntity != null ) {
             pagedResources.add(controllerLinkBuilder.withRel("create-account"));
         }
         return ResponseEntity.ok(pagedResources);
@@ -102,7 +105,7 @@ public class AccountRegularController {
     public ResponseEntity getAccount(@PathVariable String accountNum) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Account account = this.accountRepository.findByAccountNum(accountNum);
+        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
 
         //Request Data Validation
         if ( account == null ) {
@@ -129,10 +132,10 @@ public class AccountRegularController {
     public ResponseEntity accountDeposit(@PathVariable String accountNum,
                                   @RequestBody @Valid TradeDto.RequestDeposit requestDeposit,
                                   Errors errors,
-                                  @CurrentUser Member currentMember) {
+                                  @CurrentUser MemberEntity currentMember) {
 
         //update for deposit
-        Trade resultTrade = this.accountService.deposit(accountNum, requestDeposit);
+        TradeEntity resultTrade = this.accountService.deposit(accountNum, requestDeposit);
 
         //set response data
         TradeDto.Response response = tradeMapper.entityToResponse(resultTrade);
@@ -155,10 +158,10 @@ public class AccountRegularController {
     public ResponseEntity accountWithdraw(@PathVariable String accountNum,
                                          @RequestBody @Valid TradeDto.RequestDeposit requestDeposit,
                                          Errors errors,
-                                         @CurrentUser Member currentMember) {
+                                         @CurrentUser MemberEntity currentMember) {
 
         //update for deposit
-        Trade resultTrade = this.accountService.withdraw(accountNum, requestDeposit);
+        TradeEntity resultTrade = this.accountService.withdraw(accountNum, requestDeposit);
 
         //set response data
         TradeDto.Response response = tradeMapper.entityToResponse(resultTrade);
@@ -180,10 +183,10 @@ public class AccountRegularController {
     public ResponseEntity accountClose(@PathVariable String accountNum,
                                           @RequestBody @Valid TradeDto.RequestDeposit requestDeposit,
                                           Errors errors,
-                                          @CurrentUser Member currentMember) {
+                                          @CurrentUser MemberEntity currentMember) {
 
         //update for deposit
-        Trade resultTrade = this.accountService.withdraw(accountNum, requestDeposit);
+        TradeEntity resultTrade = this.accountService.withdraw(accountNum, requestDeposit);
 
         //set response data
         TradeDto.Response response = tradeMapper.entityToResponse(resultTrade);
@@ -203,17 +206,17 @@ public class AccountRegularController {
 
 
     @GetMapping("/{accountNum}/trade")
-    public ResponseEntity getTradeList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<Trade> assembler,
-                                       @CurrentUser Member member) {
+    public ResponseEntity getTradeList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<TradeEntity> assembler,
+                                       @CurrentUser MemberEntity memberEntity) {
 
-        Account account = this.accountRepository.findByAccountNum(accountNum);
+        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
 
         //Request Data Validation
         if ( account == null ) {
             return ResponseEntity.notFound().build();
         }
 
-        Page<Trade> page = this.tradeRepository.findByAccount(account, pageable);
+        Page<TradeEntity> page = this.tradeRepository.findByAccount(account, pageable);
         PagedResources<Resource> pagedResources = assembler.toResource(page,
                 e -> new Resource(
                         tradeMapper.entityToResponse(e)
@@ -221,7 +224,7 @@ public class AccountRegularController {
 
         pagedResources.add(new Link("/docs/index.html#resources-trade-list").withRel("profile"));
 
-        if ( member != null ) {
+        if ( memberEntity != null ) {
             pagedResources.add(getLinkOfDeposit(accountNum));
             pagedResources.add(getLinkOfWithdraw(accountNum));
             pagedResources.add(getLinkOfClose(accountNum));

@@ -12,7 +12,7 @@ import static javax.persistence.FetchType.LAZY;
 @NoArgsConstructor @AllArgsConstructor
 @Table(name="Customer")
 @AttributeOverride(name = "id",column = @Column(name = "customer_id"))
-public class Customer extends BaseEntity<Customer> {
+public class CustomerEntity extends BaseEntity<CustomerEntity> {
 
     private String name;
     private String email;
@@ -21,26 +21,26 @@ public class Customer extends BaseEntity<Customer> {
 
     @ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(referencedColumnName = "branch_id", name="reg_branch_id")
-    private Branch regBranch;
+    private BranchEntity regBranchEntity;
 
     @ManyToOne(fetch = LAZY, cascade = CascadeType.MERGE)
     @JoinColumn(referencedColumnName = "branch_id", name="mng_branch_id")
-    private Branch mngBranch;
+    private BranchEntity mngBranchEntity;
 
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")
-    private Employee regEmployee;
+    private EmployeeEntity regEmployeeEntity;
 
-    public Customer(String name, String email, String nation) {
+    public CustomerEntity(String name, String email, String nation) {
         this.name = name;
         this.email = email;
         this.nation = nation;
         this.regDateTime = LocalDateTime.now();
     }
 
-    public void setRegEmployee(Employee regEmployee) {
-        this.regBranch = regEmployee.getBelongBranch();
-        this.mngBranch = regEmployee.getBelongBranch();
-        this.regEmployee = regEmployee;
+    public void setRegEmployeeEntity(EmployeeEntity regEmployeeEntity) {
+        this.regBranchEntity = regEmployeeEntity.getBelongBranchEntity();
+        this.mngBranchEntity = regEmployeeEntity.getBelongBranchEntity();
+        this.regEmployeeEntity = regEmployeeEntity;
     }
 }

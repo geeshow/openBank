@@ -1,6 +1,7 @@
 package com.ken207.openbank.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.TradeCd;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import static javax.persistence.FetchType.LAZY;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name="Trade")
 @AttributeOverride(name = "id",column = @Column(name = "trade_id"))
-public class Trade extends BaseEntity<Trade> {
+public class TradeEntity extends BaseEntity<TradeEntity> {
 
     private long srno;
     private String tradeDate; // reckon date, request date
@@ -27,15 +28,15 @@ public class Trade extends BaseEntity<Trade> {
     @JsonIgnore
     @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "account_id")
-    private Account account;
+    private AccountEntity account;
 
     @JsonIgnore
     @OneToOne(mappedBy = "trade")
     @JoinColumn(name = "interest_id")
-    private Interest interest;
+    private InterestEntity interestEntity;
 
     @Override
-    public int compareTo(Trade trade) {
-        return Long.compare(this.getSrno(), trade.getSrno());
+    public int compareTo(TradeEntity tradeEntity) {
+        return Long.compare(this.getSrno(), tradeEntity.getSrno());
     }
 }

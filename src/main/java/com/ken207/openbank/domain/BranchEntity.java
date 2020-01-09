@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder @NoArgsConstructor @AllArgsConstructor
 @Table(name="Branch")
 @AttributeOverride(name = "id",column = @Column(name = "branch_id"))
-public class Branch extends BaseEntity<Branch> {
+public class BranchEntity extends BaseEntity<BranchEntity> {
 
     private String name;
     private String businessNumber;
@@ -24,9 +24,9 @@ public class Branch extends BaseEntity<Branch> {
     private BranchType branchType;
 
     @ManyToOne
-    private Member manager;
+    private MemberEntity manager;
 
-    public Branch(String name, String businessNumber, String taxOfficeCode, String telNumber, BranchType branchType) {
+    public BranchEntity(String name, String businessNumber, String taxOfficeCode, String telNumber, BranchType branchType) {
         this.name = name;
         this.businessNumber = businessNumber;
         this.taxOfficeCode = taxOfficeCode;

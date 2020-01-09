@@ -2,6 +2,7 @@ package com.ken207.openbank.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ken207.openbank.common.OBDateUtils;
+import com.ken207.openbank.domain.enums.PeriodType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +22,7 @@ import static javax.persistence.FetchType.LAZY;
 @AllArgsConstructor
 @Table(name="InterestDetail")
 @AttributeOverride(name = "id",column = @Column(name = "interest_detail_id"))
-public class InterestDetail extends BaseEntity<InterestDetail> {
+public class InterestDetailEntity extends BaseEntity<InterestDetailEntity> {
     private String fromDate;
     private String toDate;
     private double interestRate;
@@ -29,13 +30,13 @@ public class InterestDetail extends BaseEntity<InterestDetail> {
     private long balance;
     private int months;
     private int days;
-    private double interestAmount;
+    private double interest;
     private double tax;
 
     @JsonIgnore
     @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "interest_id")
-    private Interest interest;
+    private InterestEntity interestEntity;
 
     /**
      * 일수이자계산
@@ -50,8 +51,8 @@ public class InterestDetail extends BaseEntity<InterestDetail> {
         BigDecimal number100ForRate = new BigDecimal(100);
         BigDecimal daysOfYear = new BigDecimal(365);
         BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate, MathContext.DECIMAL64).multiply(daysBig).divide(daysOfYear, MathContext.DECIMAL64);
-        this.interestAmount = interestBig.setScale(3, RoundingMode.DOWN).doubleValue();
-        return this.interestAmount;
+        this.interest = interestBig.setScale(3, RoundingMode.DOWN).doubleValue();
+        return this.interest;
     }
 
     public void setDays() {
@@ -69,7 +70,7 @@ public class InterestDetail extends BaseEntity<InterestDetail> {
         BigDecimal number100ForRate = new BigDecimal(100);
         BigDecimal monthsOfYear = new BigDecimal(12);
         BigDecimal interestBig = balanceBig.multiply(interestRateBig).divide(number100ForRate, MathContext.DECIMAL64).multiply(monthsBig).divide(monthsOfYear, MathContext.DECIMAL64);
-        this.interestAmount = interestBig.doubleValue();
-        return this.interestAmount;
+        this.interest = interestBig.doubleValue();
+        return this.interest;
     }
 }

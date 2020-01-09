@@ -2,10 +2,10 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.domain.Account;
-import com.ken207.openbank.domain.Interest;
-import com.ken207.openbank.domain.Product;
-import com.ken207.openbank.domain.Trade;
+import com.ken207.openbank.domain.AccountEntity;
+import com.ken207.openbank.domain.InterestEntity;
+import com.ken207.openbank.domain.ProductEntity;
+import com.ken207.openbank.domain.TradeEntity;
 import com.ken207.openbank.domain.enums.PeriodType;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
@@ -26,6 +26,9 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.hypermedia.LinkDescriptor;
 import org.springframework.restdocs.hypermedia.LinksSnippet;
 import org.springframework.restdocs.payload.FieldDescriptor;
+
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -61,7 +64,7 @@ public class InterestControllerTest extends BaseControllerTest {
         String regDate = "20191214";
         SubjectCode subjectCode = SubjectCode.REGULAR;
 
-        Product product = productRepository.findByProductCode(PRODUCT_CODE);
+        ProductEntity product = productRepository.findByProductCode(PRODUCT_CODE);
 
         if ( product == null ) {
             ProductDto.Create createProductDto = ProductDto.Create.builder()
@@ -111,7 +114,7 @@ public class InterestControllerTest extends BaseControllerTest {
         accountService.deposit(accountNum, request2);
         accountService.deposit(accountNum, request3);
 
-        Account account = accountRepository.findById(accountId).get();
+        AccountEntity account = accountRepository.findById(accountId).get();
 
         //when & then
         mockMvc.perform(get("/api/interest/{accountNum}", accountNum)
@@ -126,7 +129,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("fromDate").value(OBDateUtils.addDays(account.getLastIntsDt(),1)))
                 .andExpect(jsonPath("toDate").value(OBDateUtils.addDays(untilDate,-1)))
                 .andExpect(jsonPath("basicRate").value(account.getBasicRate().getRate()))
-                .andExpect(jsonPath("expectedInterestAmount").exists())
+                .andExpect(jsonPath("expectedInterest").exists())
                 .andExpect(jsonPath("periodType").value(PeriodType.DAILY.toString()))
                 .andExpect(jsonPath("details[0].id").doesNotExist())
                 .andExpect(jsonPath("details[0].fromDate").value("20190101"))
@@ -136,7 +139,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("details[0].balance").value(1530000))
                 .andExpect(jsonPath("details[0].months").value(0))
                 .andExpect(jsonPath("details[0].days").exists())
-                .andExpect(jsonPath("details[0].interestAmount").exists())
+                .andExpect(jsonPath("details[0].interest").exists())
                 .andExpect(jsonPath("details[0].tax").exists())
                 .andDo(document("interest-index",
                         links(
@@ -159,7 +162,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("toDate").description("end date of interest to calculate."),
                                 fieldWithPath("basicRate").description("interest rate of this account."),
-                                fieldWithPath("expectedInterestAmount").description("result of interest."),
+                                fieldWithPath("expectedInterest").description("result of interest."),
                                 fieldWithPath("periodType").description("method of calculate about period, such as daily, monthly"),
                                 fieldWithPath("details[0].fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("details[0].toDate").description("end date of interest to calculate."),
@@ -168,7 +171,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("details[0].balance").description("balance of account at the time"),
                                 fieldWithPath("details[0].months").description("calculate period in month"),
                                 fieldWithPath("details[0].days").description("calculate period in day"),
-                                fieldWithPath("details[0].interestAmount").description("result of interest in this period."),
+                                fieldWithPath("details[0].interest").description("result of interest in this period."),
                                 fieldWithPath("details[0].tax").description("result of tax in this period."),
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.interest-calculate.href").description("link to check how much the interest is."),
@@ -292,7 +295,7 @@ public class InterestControllerTest extends BaseControllerTest {
         accountService.deposit(accountNum, request2);
         accountService.deposit(accountNum, request3);
 
-        Account account = accountRepository.findById(accountId).get();
+        AccountEntity account = accountRepository.findById(accountId).get();
 
         //when & then
         mockMvc.perform(get("/api/interest/{accountNum}/{until}", accountNum, untilDate)
@@ -307,7 +310,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("fromDate").value(OBDateUtils.addDays(account.getLastIntsDt(),1)))
                 .andExpect(jsonPath("toDate").value(OBDateUtils.addDays(untilDate,-1)))
                 .andExpect(jsonPath("basicRate").value(account.getBasicRate().getRate()))
-                .andExpect(jsonPath("expectedInterestAmount").value(42720))
+                .andExpect(jsonPath("expectedInterest").value(42720))
                 .andExpect(jsonPath("periodType").value(PeriodType.DAILY.toString()))
                 .andExpect(jsonPath("details[0].id").doesNotExist())
                 .andExpect(jsonPath("details[0].fromDate").value("20190101"))
@@ -317,7 +320,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("details[0].balance").value(1530000))
                 .andExpect(jsonPath("details[0].months").value(0))
                 .andExpect(jsonPath("details[0].days").value(365))
-                .andExpect(jsonPath("details[0].interestAmount").value(18360))
+                .andExpect(jsonPath("details[0].interest").value(18360))
                 .andExpect(jsonPath("details[0].tax").value(0))
                 .andDo(document("interest-calculate",
                         getLinksOfInterest(),
@@ -334,7 +337,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("toDate").description("end date of interest to calculate."),
                                 fieldWithPath("basicRate").description("interest rate of this account."),
-                                fieldWithPath("expectedInterestAmount").description("이자 계산으로 계산된 예상 지급 이자."),
+                                fieldWithPath("expectedInterest").description("이자 계산으로 계산된 예상 지급 이자."),
                                 fieldWithPath("periodType").description("method of calculate about period, such as daily, monthly"),
                                 fieldWithPath("details[0].fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("details[0].toDate").description("end date of interest to calculate."),
@@ -343,7 +346,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("details[0].balance").description("balance of account at the time"),
                                 fieldWithPath("details[0].months").description("calculate period in month"),
                                 fieldWithPath("details[0].days").description("calculate period in day"),
-                                fieldWithPath("details[0].interestAmount").description("result of interest in this period."),
+                                fieldWithPath("details[0].interest").description("result of interest in this period."),
                                 fieldWithPath("details[0].tax").description("result of tax in this period."),
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.interest-index.href").description("이자계산 기본 링크."),
@@ -388,12 +391,12 @@ public class InterestControllerTest extends BaseControllerTest {
         accountService.payInterest(accountNum, "20171231", "20180101");
         accountService.deposit(accountNum, request2);
         accountService.payInterest(accountNum, "20180630", "20180701");
-        Trade trade = accountService.payInterest(accountNum, "20191231", "20190101");
-        Interest interest = trade.getAccount().getInterestEntities().get(0);
+        TradeEntity tradeEntity = accountService.payInterest(accountNum, "20191231", "20190101");
+        InterestEntity interestEntity = tradeEntity.getAccount().getInterestEntities().get(0);
 
 
         //when & then
-        mockMvc.perform(get("/api/interest/{accountNum}/log/{detailId}", accountNum, interest.getId())
+        mockMvc.perform(get("/api/interest/{accountNum}/log/{detailId}", accountNum, interestEntity.getId())
                             .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                 )
                 .andDo(print())
@@ -404,7 +407,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("fromDate").value("20170101"))
                 .andExpect(jsonPath("toDate").value("20170630"))
                 .andExpect(jsonPath("basicRate").value(1.2))
-                .andExpect(jsonPath("interestAmount").value(5951))
+                .andExpect(jsonPath("interest").value(5951))
                 .andExpect(jsonPath("periodType").value(PeriodType.DAILY.toString()))
                 .andExpect(jsonPath("details[0].id").exists())
                 .andExpect(jsonPath("details[0].fromDate").value("20170101"))
@@ -414,7 +417,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("details[0].balance").value(1000000))
                 .andExpect(jsonPath("details[0].months").value(0))
                 .andExpect(jsonPath("details[0].days").value(181))
-                .andExpect(jsonPath("details[0].interestAmount").value(5950.684))
+                .andExpect(jsonPath("details[0].interest").value(5950.684))
                 .andExpect(jsonPath("details[0].tax").value(0))
                 .andDo(document("interest-detail",
                         links(
@@ -435,7 +438,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("toDate").description("end date of interest to calculate."),
                                 fieldWithPath("basicRate").description("interest rate of this account."),
-                                fieldWithPath("interestAmount").description("결산 후 지급된 이자."),
+                                fieldWithPath("interest").description("결산 후 지급된 이자."),
                                 fieldWithPath("periodType").description("method of calculate about period, such as daily, monthly"),
                                 fieldWithPath("details[0].id").description("이자계산 상세 데이터 기본키."),
                                 fieldWithPath("details[0].fromDate").description("start date of interest to calculate."),
@@ -445,7 +448,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("details[0].balance").description("balance of account at the time"),
                                 fieldWithPath("details[0].months").description("calculate period in month"),
                                 fieldWithPath("details[0].days").description("calculate period in day"),
-                                fieldWithPath("details[0].interestAmount").description("result of interest in this period."),
+                                fieldWithPath("details[0].interest").description("result of interest in this period."),
                                 fieldWithPath("details[0].tax").description("result of tax in this period."),
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.interest-index.href").description("이자계산 기본 링크 주소."),
@@ -500,7 +503,7 @@ public class InterestControllerTest extends BaseControllerTest {
         accountService.payInterest(accountNum, "20220630", "20220701");
         accountService.payInterest(accountNum, "20231231", "20230101");
 
-        Account account = accountRepository.findById(accountId).get();
+        AccountEntity account = accountRepository.findById(accountId).get();
 
         //when & then
         mockMvc.perform(get("/api/interest/{accountNum}/log", accountNum)
@@ -517,7 +520,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("_embedded.dtoList[0].fromDate").value("20190701"))
                 .andExpect(jsonPath("_embedded.dtoList[0].toDate").value("20201231"))
                 .andExpect(jsonPath("_embedded.dtoList[0].basicRate").value(1.2))
-                .andExpect(jsonPath("_embedded.dtoList[0].interestAmount").value(28338))
+                .andExpect(jsonPath("_embedded.dtoList[0].interest").value(28338))
                 .andExpect(jsonPath("_embedded.dtoList[0].periodType").value(PeriodType.DAILY.toString()))
                 .andExpect(jsonPath("_embedded.dtoList[0]._links.interest-detail.href").exists())
                 .andDo(document("interest-list",
@@ -552,7 +555,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("_embedded.dtoList[0].fromDate").description("이자계산 시작일자."),
                                 fieldWithPath("_embedded.dtoList[0].toDate").description("이자계산 종료일자."),
                                 fieldWithPath("_embedded.dtoList[0].basicRate").description("계좌의 기본 이율."),
-                                fieldWithPath("_embedded.dtoList[0].interestAmount").description("계산 결과 이자."),
+                                fieldWithPath("_embedded.dtoList[0].interest").description("계산 결과 이자."),
                                 fieldWithPath("_embedded.dtoList[0].periodType").description("이자계산의 기간 산정 방법. 일수, 월수, 일/월수"),
                                 fieldWithPath("_embedded.dtoList[0]._links.interest-detail.href").description("이자계산결과의 상세 정보 링크"),
                                 fieldWithPath("_links.self.href").description("link to self."),

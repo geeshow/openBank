@@ -3,7 +3,9 @@ package com.ken207.openbank.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.common.RestDocsConfiguration;
+import com.ken207.openbank.domain.MemberEntity;
 import com.ken207.openbank.service.MemberService;
+import com.ken207.openbank.user.MemberRole;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import java.util.Set;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
