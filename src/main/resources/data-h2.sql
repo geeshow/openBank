@@ -8,4 +8,5 @@ delete from TRADE;
 delete from ACCOUNT;
 delete from PRODUCT;
 delete from RATE;
+delete from MEMBER_ENTITY_ROLES ;
 delete from MEMBER;
