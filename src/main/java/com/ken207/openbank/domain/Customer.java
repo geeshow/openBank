@@ -13,7 +13,7 @@ import static javax.persistence.FetchType.LAZY;
 @Table(name="Customer")
 @AttributeOverride(name = "id",column = @Column(name = "customer_id"))
 public class Customer extends BaseEntity<Customer> {
-
+ 
     private String name;
     private String email;
     private String nation;
