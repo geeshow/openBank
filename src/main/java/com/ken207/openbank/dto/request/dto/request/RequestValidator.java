@@ -1,6 +1,7 @@
 package com.ken207.openbank.dto.request.dto.request;
 
-import com.ken207.openbank.domain.Member;
+import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.dto.request.dto.AccountDto;
 import com.ken207.openbank.dto.request.dto.ProductDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
@@ -33,7 +34,7 @@ public class RequestValidator {
      * @param currentMember
      * @return
      */
-    public static HttpStatus createBranch(BranchRequest branchRequest, Errors errors, Member currentMember) {
+    public static HttpStatus createBranch(BranchRequest branchRequest, Errors errors, MemberEntity currentMember) {
         if ( errors.hasErrors()) {
             return HttpStatus.BAD_REQUEST;
         }
@@ -52,7 +53,7 @@ public class RequestValidator {
      * @param currentMember
      * @return
      */
-    public static HttpStatus createAccount(AccountDto.RequestOpen accountRequestOpen, Errors errors, Member currentMember) {
+    public static HttpStatus createAccount(AccountDto.RequestOpen accountRequestOpen, Errors errors, MemberEntity currentMember) {
         //check data validation
         if (StringUtils.isEmpty(accountRequestOpen.getRegDate())) {
             errors.rejectValue("regDate", "wrongValue", "regDate must not be empty.");
@@ -65,7 +66,7 @@ public class RequestValidator {
         return HttpStatus.CREATED;
     }
 
-    public static HttpStatus createProduct(ProductDto.Create createProductDto, Errors errors, Member currentMember) {
+    public static HttpStatus createProduct(ProductDto.Create createProductDto, Errors errors, MemberEntity currentMember) {
 
         //check data validation
         if (errors.hasErrors()) {

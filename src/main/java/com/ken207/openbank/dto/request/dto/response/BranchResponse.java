@@ -1,6 +1,6 @@
 package com.ken207.openbank.dto.request.dto.response;
 
-import com.ken207.openbank.domain.Branch;
+import com.ken207.openbank.domain.BranchEntity;
 import com.ken207.openbank.domain.enums.BranchType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +32,7 @@ public class BranchResponse implements BaseResponse {
     @Enumerated(EnumType.STRING)
     private BranchType branchType;
 
-    public static BranchResponse transform(Branch branch) {
+    public static BranchResponse transform(BranchEntity branch) {
 
         return BranchResponse.builder()
                 .id(branch.getId())
