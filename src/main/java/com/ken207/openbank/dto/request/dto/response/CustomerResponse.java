@@ -1,6 +1,6 @@
 package com.ken207.openbank.dto.request.dto.response;
 
-import com.ken207.openbank.domain.Customer;
+import com.ken207.openbank.domain.CustomerEntity;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,16 +29,16 @@ public class CustomerResponse implements BaseResponse {
     @NotEmpty
     private LocalDateTime regDateTime;
 
-    public static CustomerResponse transform(Customer customer) {
+    public static CustomerResponse transform(CustomerEntity customer) {
 
         return CustomerResponse.builder()
                     .id(customer.getId())
                     .name(customer.getName())
                     .email(customer.getEmail())
                     .nation(customer.getNation())
-                    .regBranchName(customer.getRegBranch().getName())
-                    .mngBranchName(customer.getMngBranch().getName())
-                    .regEmployeeName(customer.getRegEmployee().getName())
+                    .regBranchName(customer.getRegBranchEntity().getName())
+                    .mngBranchName(customer.getMngBranchEntity().getName())
+                    .regEmployeeName(customer.getRegEmployeeEntity().getName())
                     .regDateTime(customer.getRegDateTime())
                     .build();
 

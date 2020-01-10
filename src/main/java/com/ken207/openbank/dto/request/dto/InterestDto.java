@@ -1,6 +1,6 @@
 package com.ken207.openbank.dto.request.dto;
 
-import com.ken207.openbank.domain.InterestDetail;
+import com.ken207.openbank.domain.InterestDetailEntity;
 import com.ken207.openbank.domain.enums.PeriodType;
 import lombok.*;
 
@@ -36,7 +36,7 @@ public class InterestDto {
         private double basicRate;
         private long interestAmount;
         private PeriodType periodType;
-        private java.util.List<InterestDetail> details;
+        private java.util.List<InterestDetailEntity> details;
     }
 
     @Builder
