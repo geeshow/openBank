@@ -7,11 +7,11 @@ spring:
     password:
     driver-class-name: org.h2.Driver
     data: classpath:data-h2.sql
-    
+
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         #      show_sql: true
