@@ -1,7 +1,8 @@
-package com.ken207.openbank.dto;
+package com.ken207.openbank.dto.request.dto;
 
 import com.ken207.openbank.domain.InterestDetail;
 import com.ken207.openbank.domain.enums.PeriodType;
+import com.ken207.openbank.dto.InterestDetailDto;
 import lombok.*;
 
 public class InterestDto {
@@ -18,7 +19,7 @@ public class InterestDto {
         private String fromDate;
         private String toDate;
         private double basicRate;
-        private long expectedInterest;
+        private long expectedInterestAmount;
         private PeriodType periodType;
         private java.util.List<InterestDetailDto> details;
     }

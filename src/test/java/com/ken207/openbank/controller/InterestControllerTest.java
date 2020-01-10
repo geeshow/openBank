@@ -126,7 +126,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("fromDate").value(OBDateUtils.addDays(account.getLastIntsDt(),1)))
                 .andExpect(jsonPath("toDate").value(OBDateUtils.addDays(untilDate,-1)))
                 .andExpect(jsonPath("basicRate").value(account.getBasicRate().getRate()))
-                .andExpect(jsonPath("expectedInterestAmount").exists())
+                .andExpect(jsonPath("expectedInterest").exists())
                 .andExpect(jsonPath("periodType").value(PeriodType.DAILY.toString()))
                 .andExpect(jsonPath("details[0].id").doesNotExist())
                 .andExpect(jsonPath("details[0].fromDate").value("20190101"))
@@ -159,7 +159,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("toDate").description("end date of interest to calculate."),
                                 fieldWithPath("basicRate").description("interest rate of this account."),
-                                fieldWithPath("expectedInterestAmount").description("result of interest."),
+                                fieldWithPath("expectedInterest").description("result of interest."),
                                 fieldWithPath("periodType").description("method of calculate about period, such as daily, monthly"),
                                 fieldWithPath("details[0].fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("details[0].toDate").description("end date of interest to calculate."),
@@ -307,7 +307,7 @@ public class InterestControllerTest extends BaseControllerTest {
                 .andExpect(jsonPath("fromDate").value(OBDateUtils.addDays(account.getLastIntsDt(),1)))
                 .andExpect(jsonPath("toDate").value(OBDateUtils.addDays(untilDate,-1)))
                 .andExpect(jsonPath("basicRate").value(account.getBasicRate().getRate()))
-                .andExpect(jsonPath("expectedInterestAmount").value(42720))
+                .andExpect(jsonPath("expectedInterest").value(42720))
                 .andExpect(jsonPath("periodType").value(PeriodType.DAILY.toString()))
                 .andExpect(jsonPath("details[0].id").doesNotExist())
                 .andExpect(jsonPath("details[0].fromDate").value("20190101"))
@@ -334,7 +334,7 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("toDate").description("end date of interest to calculate."),
                                 fieldWithPath("basicRate").description("interest rate of this account."),
-                                fieldWithPath("expectedInterestAmount").description("이자 계산으로 계산된 예상 지급 이자."),
+                                fieldWithPath("expectedInterest").description("이자 계산으로 계산된 예상 지급 이자."),
                                 fieldWithPath("periodType").description("method of calculate about period, such as daily, monthly"),
                                 fieldWithPath("details[0].fromDate").description("start date of interest to calculate."),
                                 fieldWithPath("details[0].toDate").description("end date of interest to calculate."),

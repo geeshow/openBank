@@ -96,14 +96,14 @@ public class CustomerController {
 
     @GetMapping("/{customerId}")
     public ResponseEntity getCustomer(@PathVariable Long customerId) {
-        Optional<Customer> customer = this.customerRepository.findById(customerId);
+        Optional<Customer> customerEntity = this.customerRepository.findById(customerId);
 
-        if ( !customer.isPresent() ) {
+        if ( !customerEntity.isPresent() ) {
             return ResponseEntity.notFound().build();
         }
 
         //Set response data
-        CustomerDto.Response response = customerMapper.entityToDto(customer.get());
+        CustomerDto.Response response = customerMapper.entityToDto(customerEntity.get());
 
         //HATEOAS REST API
         Resource resource = new Resource(response,

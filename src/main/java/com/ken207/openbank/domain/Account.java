@@ -4,10 +4,8 @@ import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.*;
 import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.*;
-import lombok.Builder.Default;
 
 import javax.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +27,7 @@ public class Account extends BaseEntity<Account> {
     private String lastTradeDate; //최종거래일자
 
     @Enumerated(EnumType.STRING)
-    @Default
+    @Builder.Default
     private YesNo loanYn = YesNo.N; //대출계좌여부
 
     @Enumerated(EnumType.STRING)
@@ -49,11 +47,11 @@ public class Account extends BaseEntity<Account> {
     @JoinColumn(name = "rate_id")
     private Rate basicRate;
 
-    @Default
+    @Builder.Default
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-    private List<Trade> tradeList = new ArrayList<>();
+    private List<Trade> tradeEntities = new ArrayList<>();
 
-    @Default
+    @Builder.Default
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Interest> interestEntities = new ArrayList<>();
 
@@ -186,7 +184,7 @@ public class Account extends BaseEntity<Account> {
                 .build();
 
         this.lastTradeDate = this.getReckonDt();
-        this.tradeList.add(trade);
+        this.tradeEntities.add(trade);
         return trade;
     }
 

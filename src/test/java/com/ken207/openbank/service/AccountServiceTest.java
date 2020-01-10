@@ -183,20 +183,20 @@ public class AccountServiceTest {
         assertEquals(trnAmt1+trnAmt2, result2.getBlncAfter());
         assertEquals(trnAmt1+trnAmt2+trnAmt3, result3.getBlncAfter());
         assertEquals(trnAmt1+trnAmt2+trnAmt3, account.getBalance());
-        assertEquals(4, account.getTradeList().size());
+        assertEquals(4, account.getTradeEntities().size());
 
-        assertEquals(0, account.getTradeList().get(1).getBlncBefore());
-        assertEquals(trnAmt1, account.getTradeList().get(1).getBlncAfter());
-        assertEquals(trnAmt1, account.getTradeList().get(1).getAmount());
-        assertEquals(TradeCd.DEPOSIT, account.getTradeList().get(1).getTradeCd());
+        assertEquals(0, account.getTradeEntities().get(1).getBlncBefore());
+        assertEquals(trnAmt1, account.getTradeEntities().get(1).getBlncAfter());
+        assertEquals(trnAmt1, account.getTradeEntities().get(1).getAmount());
+        assertEquals(TradeCd.DEPOSIT, account.getTradeEntities().get(1).getTradeCd());
 
-        assertEquals(trnAmt1, account.getTradeList().get(2).getBlncBefore());
-        assertEquals(trnAmt1+trnAmt2, account.getTradeList().get(2).getBlncAfter());
-        assertEquals(trnAmt2, account.getTradeList().get(2).getAmount());
+        assertEquals(trnAmt1, account.getTradeEntities().get(2).getBlncBefore());
+        assertEquals(trnAmt1+trnAmt2, account.getTradeEntities().get(2).getBlncAfter());
+        assertEquals(trnAmt2, account.getTradeEntities().get(2).getAmount());
 
-        assertEquals(trnAmt1+trnAmt2, account.getTradeList().get(3).getBlncBefore());
-        assertEquals(trnAmt1+trnAmt2+trnAmt3, account.getTradeList().get(3).getBlncAfter());
-        assertEquals(trnAmt3, account.getTradeList().get(3).getAmount());
+        assertEquals(trnAmt1+trnAmt2, account.getTradeEntities().get(3).getBlncBefore());
+        assertEquals(trnAmt1+trnAmt2+trnAmt3, account.getTradeEntities().get(3).getBlncAfter());
+        assertEquals(trnAmt3, account.getTradeEntities().get(3).getAmount());
 
     }
 
@@ -239,20 +239,20 @@ public class AccountServiceTest {
         assertEquals(trnAmt1-trnAmt2, result2.getBlncAfter());
         assertEquals(trnAmt1-trnAmt2-trnAmt3, result3.getBlncAfter());
         assertEquals(trnAmt1-trnAmt2-trnAmt3, account.getBalance());
-        assertEquals(4, account.getTradeList().size());
+        assertEquals(4, account.getTradeEntities().size());
 
-        assertEquals(0, account.getTradeList().get(1).getBlncBefore());
-        assertEquals(trnAmt1, account.getTradeList().get(1).getBlncAfter());
-        assertEquals(trnAmt1, account.getTradeList().get(1).getAmount());
-        assertEquals(TradeCd.DEPOSIT, account.getTradeList().get(1).getTradeCd());
+        assertEquals(0, account.getTradeEntities().get(1).getBlncBefore());
+        assertEquals(trnAmt1, account.getTradeEntities().get(1).getBlncAfter());
+        assertEquals(trnAmt1, account.getTradeEntities().get(1).getAmount());
+        assertEquals(TradeCd.DEPOSIT, account.getTradeEntities().get(1).getTradeCd());
 
-        assertEquals(trnAmt1, account.getTradeList().get(2).getBlncBefore());
-        assertEquals(trnAmt1-trnAmt2, account.getTradeList().get(2).getBlncAfter());
-        assertEquals(trnAmt2, account.getTradeList().get(2).getAmount());
+        assertEquals(trnAmt1, account.getTradeEntities().get(2).getBlncBefore());
+        assertEquals(trnAmt1-trnAmt2, account.getTradeEntities().get(2).getBlncAfter());
+        assertEquals(trnAmt2, account.getTradeEntities().get(2).getAmount());
 
-        assertEquals(trnAmt1-trnAmt2, account.getTradeList().get(3).getBlncBefore());
-        assertEquals(trnAmt1-trnAmt2-trnAmt3, account.getTradeList().get(3).getBlncAfter());
-        assertEquals(trnAmt3, account.getTradeList().get(3).getAmount());
+        assertEquals(trnAmt1-trnAmt2, account.getTradeEntities().get(3).getBlncBefore());
+        assertEquals(trnAmt1-trnAmt2-trnAmt3, account.getTradeEntities().get(3).getBlncAfter());
+        assertEquals(trnAmt3, account.getTradeEntities().get(3).getAmount());
     }
 
     @Test(expected = BizRuntimeException.class)

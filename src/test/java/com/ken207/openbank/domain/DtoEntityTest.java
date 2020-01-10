@@ -335,7 +335,7 @@ public class DtoEntityTest {
 
         Trade resultTrade = interest1.payInterest(OBDateUtils.getToday());
 
-        Trade trade = account.getTradeList().get(account.getTradeList().size() - 1);
+        Trade trade = account.getTradeEntities().get(account.getTradeEntities().size() - 1);
 
         //then
         assertEquals(trade, resultTrade);

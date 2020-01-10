@@ -1,0 +1,12 @@
+delete from CUSTOMER;
+delete from EMPLOYEE;
+delete from INTEREST_DETAIL;
+delete from MEMBER_ROLES;
+delete from BRANCH;
+delete from INTEREST;
+delete from TRADE;
+delete from ACCOUNT;
+delete from PRODUCT;
+delete from RATE;
+delete from MEMBER_ENTITY_ROLES;
+delete from MEMBER;
