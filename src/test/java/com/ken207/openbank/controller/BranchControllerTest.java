@@ -1,28 +1,17 @@
 package com.ken207.openbank.controller;
 
-import com.ken207.openbank.user.MemberRole;
-import com.ken207.openbank.common.AppSecurityProperties;
 import com.ken207.openbank.common.TestDescription;
-import com.ken207.openbank.controller.BaseControllerTest;
-import com.ken207.openbank.domain.BranchEntity;
-import com.ken207.openbank.domain.MemberEntity;
+import com.ken207.openbank.domain.Branch;
 import com.ken207.openbank.domain.enums.BranchType;
 import com.ken207.openbank.dto.request.BranchRequest;
 import com.ken207.openbank.repository.BranchRepository;
 import com.ken207.openbank.repository.MemberRepository;
-import com.ken207.openbank.service.MemberService;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -32,7 +21,6 @@ import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.docu
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -243,10 +231,10 @@ public class BranchControllerTest extends BaseControllerTest {
     public void getBranch() throws Exception {
         //given
         int index = 200;
-        BranchEntity branchEntity = generateBranch(index);
+        Branch branch = generateBranch(index);
 
         //when & then
-        this.mockMvc.perform(get("/api/branch/{id}", branchEntity.getId()))
+        this.mockMvc.perform(get("/api/branch/{id}", branch.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("_links.self").hasJsonPath())
@@ -282,21 +270,21 @@ public class BranchControllerTest extends BaseControllerTest {
     @TestDescription("지점 수정의 정상처리 확인")
     public void updateBranch() throws Exception {
         //given
-        BranchEntity branchEntity = this.generateBranch(333);
+        Branch branch = this.generateBranch(333);
 
         String branchName = "수정된지점명";
 
         BranchRequest branchRequest = BranchRequest.builder()
-                .name(branchEntity.getName())
+                .name(branch.getName())
                 .businessNumber("123")
                 .taxOfficeCode("222222")
-                .telNumber(branchEntity.getTelNumber())
+                .telNumber(branch.getTelNumber())
                 .build();
 
         branchRequest.setName(branchName);
 
         //when & then
-        this.mockMvc.perform(put("/api/branch/{id}", branchEntity.getId())
+        this.mockMvc.perform(put("/api/branch/{id}", branch.getId())
                         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(this.objectMapper.writeValueAsString(branchRequest))
@@ -312,14 +300,14 @@ public class BranchControllerTest extends BaseControllerTest {
     @TestDescription("ID값이 없는 경우 오류 발생")
     public void updateBranch405_withoutId() throws Exception {
         //given
-        BranchEntity branchEntity = this.generateBranch(230);
+        Branch branch = this.generateBranch(230);
 
         String branchName = "수정된지점명";
         BranchRequest branchRequest = BranchRequest.builder()
-                .name(branchEntity.getName())
-                .businessNumber(branchEntity.getBusinessNumber())
-                .taxOfficeCode(branchEntity.getTaxOfficeCode())
-                .telNumber(branchEntity.getTelNumber())
+                .name(branch.getName())
+                .businessNumber(branch.getBusinessNumber())
+                .taxOfficeCode(branch.getTaxOfficeCode())
+                .telNumber(branch.getTelNumber())
                 .build();
 
         branchRequest.setName(branchName);
@@ -338,14 +326,14 @@ public class BranchControllerTest extends BaseControllerTest {
     @TestDescription("존재하지 않는 지점의 수정인 경우 오류 발생")
     public void updateBranch404() throws Exception {
         //given
-        BranchEntity branchEntity = this.generateBranch(230);
+        Branch branch = this.generateBranch(230);
 
         String branchName = "수정된지점명";
         BranchRequest branchRequest = BranchRequest.builder()
-                .name(branchEntity.getName())
-                .businessNumber(branchEntity.getBusinessNumber())
-                .taxOfficeCode(branchEntity.getTaxOfficeCode())
-                .telNumber(branchEntity.getTelNumber())
+                .name(branch.getName())
+                .businessNumber(branch.getBusinessNumber())
+                .taxOfficeCode(branch.getTaxOfficeCode())
+                .telNumber(branch.getTelNumber())
                 .build();
 
         //when & then
@@ -362,13 +350,13 @@ public class BranchControllerTest extends BaseControllerTest {
     @TestDescription("입력값이 비어있는 경우 수정 실패")
     public void updateBranch400() throws Exception {
         //given
-        BranchEntity branchEntity = this.generateBranch(230);
+        Branch branch = this.generateBranch(230);
 
         BranchRequest branchRequest = BranchRequest.builder()
                 .build();
 
         //when & then
-        this.mockMvc.perform(put("/api/branch/{id}", branchEntity.getId())
+        this.mockMvc.perform(put("/api/branch/{id}", branch.getId())
                         .header(HttpHeaders.AUTHORIZATION, getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .content(this.objectMapper.writeValueAsString(branchRequest)))
@@ -378,9 +366,9 @@ public class BranchControllerTest extends BaseControllerTest {
         ;
     }
 
-    private BranchEntity generateBranch(int index) {
-        BranchEntity branchEntity = new BranchEntity("지점이름" + index, "bzNum" + index, "00" + index, "02-1234-1234", BranchType.지점);
-        return branchRepository.save(branchEntity);
+    private Branch generateBranch(int index) {
+        Branch branch = new Branch("지점이름" + index, "bzNum" + index, "00" + index, "02-1234-1234", BranchType.지점);
+        return branchRepository.save(branch);
     }
 
 }

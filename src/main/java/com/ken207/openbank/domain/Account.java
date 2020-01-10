@@ -4,7 +4,6 @@ import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.*;
 import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.*;
-import net.bytebuddy.implementation.bind.annotation.Default;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -15,7 +14,7 @@ import java.util.List;
 @Builder @NoArgsConstructor @AllArgsConstructor
 @Table(name="Account")
 @AttributeOverride(name = "id",column = @Column(name = "account_id"))
-public class AccountEntity extends BaseEntity<AccountEntity> {
+public class Account extends BaseEntity<Account> {
 
     private String accountNum; //계좌번호
     private String password; //비밀번호
@@ -42,19 +41,19 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
 
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private ProductEntity product;
+    private Product product;
 
     @ManyToOne
     @JoinColumn(name = "rate_id")
-    private RateEntity basicRate;
+    private Rate basicRate;
 
     @Builder.Default
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-    private List<TradeEntity> tradeEntities = new ArrayList<>();
+    private List<Trade> tradeEntities = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
-    private List<InterestEntity> interestEntities = new ArrayList<>();
+    private List<Interest> interestEntities = new ArrayList<>();
 
     @Transient
     private String reckonDt; //기산일자
@@ -68,8 +67,8 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
      * 신규
      * @return
      */
-    public static AccountEntity openAccount(ProductEntity productEntity, String accountNum, String regDate, TaxationCode taxationCode) {
-        AccountEntity account = AccountEntity.builder()
+    public static Account openAccount(Product product, String accountNum, String regDate, TaxationCode taxationCode) {
+        Account account = Account.builder()
                 .accountNum(accountNum) //계좌번호
                 .regDate(regDate) //신규일자
                 .reckonDt(regDate) //최종거래일자
@@ -81,8 +80,8 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .balance(0)
                 .blncBefore(0)
                 .tradeAmount(0)
-                .product(productEntity)
-                .basicRate(productEntity.getBasicRate())
+                .product(product)
+                .basicRate(product.getBasicRate())
                 .build();
 
         account.addTradeLog(TradeCd.OPEN);
@@ -97,7 +96,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 입금
      */
-    public TradeEntity deposit(long tradeAmount) {
+    public Trade deposit(long tradeAmount) {
 
         if ( OBDateUtils.compareDate(lastTradeDate, getReckonDt()) > 0 ) {
             throw new BizRuntimeException("지정일 이 후 거래가 존재. 기산일 거래를 요청해야 함.");
@@ -113,7 +112,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 출금
      */
-    public TradeEntity withdraw(long tradeAmount) {
+    public Trade withdraw(long tradeAmount) {
 
         if ( OBDateUtils.compareDate(lastTradeDate, getReckonDt()) > 0 ) {
             throw new BizRuntimeException("지정일 이 후 거래가 존재. 기산일 거래를 요청해야 함.");
@@ -141,10 +140,10 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 이자지급
      */
-    public TradeEntity payInterest(InterestEntity interest) {
+    public Trade payInterest(Interest interest) {
 
         this.lastIntsDt = interest.getToDate();
-        this.tradeAmount = interest.getInterest();
+        this.tradeAmount = interest.getInterestAmount();
         this.blncBefore = this.balance;
         this.balance += this.tradeAmount;
 
@@ -154,7 +153,7 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     /**
      * 해지
      */
-    public TradeEntity closeAccount(InterestEntity interest) {
+    public Trade closeAccount(Interest interest) {
         if ( this.balance != 0 ) {
             throw new BizRuntimeException("계좌의 잔액이 존재 함.");
         }
@@ -171,9 +170,9 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
         return addTradeLog(TradeCd.CLOSE);
     }
 
-    private TradeEntity addTradeLog(TradeCd tradeCd) {
+    private Trade addTradeLog(TradeCd tradeCd) {
 
-        TradeEntity tradeEntity = TradeEntity.builder()
+        Trade trade = Trade.builder()
                 .srno(++this.lastTrnSrno)
                 .amount(this.tradeAmount)
                 .blncBefore(this.blncBefore)
@@ -185,8 +184,8 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
                 .build();
 
         this.lastTradeDate = this.getReckonDt();
-        this.tradeEntities.add(tradeEntity);
-        return tradeEntity;
+        this.tradeEntities.add(trade);
+        return trade;
     }
 
     public void setReckonDt(String reckonDt) {

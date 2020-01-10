@@ -3,9 +3,8 @@ package com.ken207.openbank.controller;
 import com.ken207.openbank.common.ErrorsResource;
 import com.ken207.openbank.common.ResponseResource;
 import com.ken207.openbank.consts.ConstEmployee;
-import com.ken207.openbank.domain.CustomerEntity;
-import com.ken207.openbank.domain.EmployeeEntity;
-import com.ken207.openbank.dto.AccountDto;
+import com.ken207.openbank.domain.Customer;
+import com.ken207.openbank.domain.Employee;
 import com.ken207.openbank.dto.CustomerDto;
 import com.ken207.openbank.dto.request.CustomerRequest;
 import com.ken207.openbank.dto.request.RequestValidator;
@@ -45,10 +44,10 @@ public class CustomerController {
 
     private final ControllerLinkBuilder controllerLinkBuilder = linkTo(CustomerController.class);
 
-    private EmployeeEntity employeeEntity;
+    private Employee employee;
 
     public void start() {
-        employeeEntity = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
+        employee = employeeRepository.findByEmployeeCode(ConstEmployee.INTERNET);
     }
 
     @PostMapping
@@ -61,17 +60,17 @@ public class CustomerController {
         }
 
         //Data Save
-        CustomerEntity customerEntity = new CustomerEntity(customerRequest.getName(), customerRequest.getEmail(), customerRequest.getNation());
-        Long customerId = customerService.createCustomer(customerEntity, employeeEntity.getId());
+        Customer customer = new Customer(customerRequest.getName(), customerRequest.getEmail(), customerRequest.getNation());
+        Long customerId = customerService.createCustomer(customer, employee.getId());
 
         //Set response data
-        CustomerEntity newCustomerEntity = customerRepository.findById(customerId).get();
-        CustomerDto.Response customerResponse = customerMapper.entityToDto(newCustomerEntity);
+        Customer newCustomer = customerRepository.findById(customerId).get();
+        CustomerDto.Response customerResponse = customerMapper.entityToDto(newCustomer);
 
         //HATEOAS REST API
         Resource responseResource = new Resource(customerResponse,
-                controllerLinkBuilder.slash(newCustomerEntity.getId()).withSelfRel(),
-                getLinkForUpdate(newCustomerEntity.getId()),
+                controllerLinkBuilder.slash(newCustomer.getId()).withSelfRel(),
+                getLinkForUpdate(newCustomer.getId()),
                 getLinkOfList(),
                 new Link("/docs/index.html#resources-customers-create").withRel("profile")
         );
@@ -84,8 +83,8 @@ public class CustomerController {
 
 
     @GetMapping
-    public ResponseEntity queryCustomers(Pageable pageable, PagedResourcesAssembler<CustomerEntity> assembler) {
-        Page<CustomerEntity> page = this.customerRepository.findAll(pageable);
+    public ResponseEntity queryCustomers(Pageable pageable, PagedResourcesAssembler<Customer> assembler) {
+        Page<Customer> page = this.customerRepository.findAll(pageable);
         PagedResources<ResponseResource> pagedResources = assembler.toResource(page,
                 e -> new ResponseResource(
                         CustomerResponse.transform(e),
@@ -97,7 +96,7 @@ public class CustomerController {
 
     @GetMapping("/{customerId}")
     public ResponseEntity getCustomer(@PathVariable Long customerId) {
-        Optional<CustomerEntity> customerEntity = this.customerRepository.findById(customerId);
+        Optional<Customer> customerEntity = this.customerRepository.findById(customerId);
 
         if ( !customerEntity.isPresent() ) {
             return ResponseEntity.notFound().build();

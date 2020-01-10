@@ -1,10 +1,10 @@
 package com.ken207.openbank.service;
 
 import com.ken207.openbank.common.OBDateUtils;
-import com.ken207.openbank.domain.AccountEntity;
-import com.ken207.openbank.domain.InterestEntity;
-import com.ken207.openbank.domain.ProductEntity;
-import com.ken207.openbank.domain.TradeEntity;
+import com.ken207.openbank.domain.Account;
+import com.ken207.openbank.domain.Interest;
+import com.ken207.openbank.domain.Product;
+import com.ken207.openbank.domain.Trade;
 import com.ken207.openbank.domain.enums.PeriodType;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
@@ -38,77 +38,77 @@ public class AccountService {
     @Transactional
     public Long openRegularAccount(AccountDto.RequestOpen accountRequestOpen) {
 
-        ProductEntity productEntity = productRepository.findByProductCode(accountRequestOpen.getProductCode());
+        Product product = productRepository.findByProductCode(accountRequestOpen.getProductCode());
 
-        if ( productEntity == null ) {
+        if ( product == null ) {
             throw new BizRuntimeException("존재하지 않는 상품 코드 입니다. 상품코드:"+accountRequestOpen.getProductCode());
         }
 
         String accountNum = codeGeneratorService.createAccountNumber(SubjectCode.REGULAR.getSubjectCode());
 
-        AccountEntity accountEntity = AccountEntity.openAccount(productEntity, accountNum, accountRequestOpen.getRegDate(), accountRequestOpen.getTaxationCode());
+        Account account = Account.openAccount(product, accountNum, accountRequestOpen.getRegDate(), accountRequestOpen.getTaxationCode());
 
-        AccountEntity saveAccount = accountRepository.save(accountEntity);
+        Account saveAccount = accountRepository.save(account);
 
         return saveAccount.getId();
     }
 
     @Transactional
     public void setPassword(String accountNum, String newPassword) {
-        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+        Account account = accountRepository.findByAccountNum(accountNum);
         account.setPassword(newPassword);
     }
 
     @Transactional
-    public TradeEntity deposit(String accountNum, TradeDto.RequestDeposit requestDeposit) {
-        AccountEntity account = getAccountEntity(accountNum);
+    public Trade deposit(String accountNum, TradeDto.RequestDeposit requestDeposit) {
+        Account account = getAccountEntity(accountNum);
 
         if ( OBDateUtils.compareDate(account.getLastTradeDate(), requestDeposit.getTradeDate()) > 0 ) {
             throw new BizRuntimeException("지정일 이 후 거래가 존재. 기산일 거래를 요청해야 함.");
         }
 
         account.setReckonDt(requestDeposit.getTradeDate());
-        TradeEntity deposit = account.deposit(requestDeposit.getAmount());
+        Trade deposit = account.deposit(requestDeposit.getAmount());
         return tradeRepository.save(deposit);
     }
 
     @Transactional
-    public TradeEntity withdraw(String accountNum, TradeDto.RequestDeposit requestWithdraw) {
-        AccountEntity account = getAccountEntity(accountNum);
+    public Trade withdraw(String accountNum, TradeDto.RequestDeposit requestWithdraw) {
+        Account account = getAccountEntity(accountNum);
 
 
         account.setReckonDt(requestWithdraw.getTradeDate());
-        TradeEntity withdraw = account.withdraw(requestWithdraw.getAmount());
+        Trade withdraw = account.withdraw(requestWithdraw.getAmount());
         return tradeRepository.save(withdraw);
     }
 
-    private AccountEntity getAccountEntity(String accountNum) {
-        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+    private Account getAccountEntity(String accountNum) {
+        Account account = accountRepository.findByAccountNum(accountNum);
         if (account == null) {
             throw new EntityNotFoundException("존재하지 않는 계좌번호 입니다.");
         }
         return account;
     }
 
-    public Page<AccountEntity> getAccountList(Pageable pageable) {
-        Page<AccountEntity> page = this.accountRepository.findAll(pageable);
+    public Page<Account> getAccountList(Pageable pageable) {
+        Page<Account> page = this.accountRepository.findAll(pageable);
         page.stream().forEach(o -> o.getProduct().getName());
         return page;
     }
 
     @Transactional(readOnly = true)
-    public InterestEntity getInterest(String accountNum, String untilDate) {
+    public Interest getInterest(String accountNum, String untilDate) {
 
         //원장조회
-        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+        Account account = accountRepository.findByAccountNum(accountNum);
 
         //이자계산용 거래내역 조회
         //최종이자계산일 기준으로 이후 거래내역을 모두 조회
         //원가시 거래내역을 항상 insert함 0원 포함.
-        List<TradeEntity> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), account.getLastIntsDt());
+        List<Trade> tradeListForInterest = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), account.getLastIntsDt());
 
         //InterestEntity 생성, AccountEntity 연관관계설정
-        InterestEntity interest = InterestEntity.createInterest(account);
+        Interest interest = Interest.createInterest(account);
 
         //이자계산 대상 거래내역 등록
         interest.setTradeListForInterest(tradeListForInterest);
@@ -132,21 +132,21 @@ public class AccountService {
     }
 
     @Transactional
-    public TradeEntity payInterest(String accountNum, String untilDate, String reckonDate) {
+    public Trade payInterest(String accountNum, String untilDate, String reckonDate) {
 
-        InterestEntity interest = this.getInterest(accountNum, untilDate);
-        TradeEntity tradeEntity = interest.payInterest(reckonDate);
-        accountRepository.save(tradeEntity.getAccount());
-        return tradeEntity;
+        Interest interest = this.getInterest(accountNum, untilDate);
+        Trade trade = interest.payInterest(reckonDate);
+        accountRepository.save(trade.getAccount());
+        return trade;
     }
 
     @Transactional
-    public TradeEntity closeAccount(String accountNum, String reckonDate) {
+    public Trade closeAccount(String accountNum, String reckonDate) {
 
-        AccountEntity account = accountRepository.findByAccountNum(accountNum);
+        Account account = accountRepository.findByAccountNum(accountNum);
         Map<String, Long> dailyBalance = tradeQueryRepository.getDailyBalanceFrom(account.getId(), account.getLastIntsDt());
 
-        InterestEntity interest = InterestEntity.builder()
+        Interest interest = Interest.builder()
                 .account(account)
                 .basicRate(account.getBasicRate().getRate())
                 .reckonDate(reckonDate)

@@ -57,7 +57,7 @@ public class DtoEntityTest {
         String regDate = "20191214";
         SubjectCode subjectCode = SubjectCode.REGULAR;
 
-        ProductEntity product = productRepository.findByProductCode(PRODUCT_CODE);
+        Product product = productRepository.findByProductCode(PRODUCT_CODE);
 
         if ( product == null ) {
             ProductDto.Create createProductDto = ProductDto.Create.builder()
@@ -86,15 +86,15 @@ public class DtoEntityTest {
     @TestDescription("Interest Entity 생성 테스트")
     public void createInterest() throws Exception {
         //given
-        AccountEntity accountEntity = accountRepository.findById(ACCOUNT_ID).get();
+        Account account = accountRepository.findById(ACCOUNT_ID).get();
 
         //when
-        InterestEntity interest = InterestEntity.createInterest(accountEntity);
+        Interest interest = Interest.createInterest(account);
 
         //then
-        assertEquals(1, accountEntity.getInterestEntities().size());
-        assertEquals(interest, accountEntity.getInterestEntities().get(0));
-        assertEquals(interest.getAccount(), accountEntity);
+        assertEquals(1, account.getInterestEntities().size());
+        assertEquals(interest, account.getInterestEntities().get(0));
+        assertEquals(interest.getAccount(), account);
     }
 
     @Test
@@ -104,14 +104,14 @@ public class DtoEntityTest {
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountEntity account = createAccount(tradeDate, taxation);
+        Account account = createAccount(tradeDate, taxation);
 
         IntStream.range(1,10).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e, account.getAccountNum());
         });
 
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), tradeDate);
-        InterestEntity interest = InterestEntity.createInterest(account);
+        List<Trade> tradeList1 = tradeRepository.findByAccountIdAndBzDateGreaterThan(account.getId(), tradeDate);
+        Interest interest = Interest.createInterest(account);
         interest.setTradeListForInterest(tradeList1);
 
         //when
@@ -120,7 +120,7 @@ public class DtoEntityTest {
         assertEquals(10, tradeList1.get(tradeList1.size()-1).getSrno());
         Assert.assertFalse(interest.isSorted());
         interest.sortedTradeList();
-        List<TradeEntity> tradeList2 = interest.getTradeListForInterest();
+        List<Trade> tradeList2 = interest.getTradeListForInterest();
 
         //then
         assertEquals(10, tradeList2.size());
@@ -138,19 +138,19 @@ public class DtoEntityTest {
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountEntity account = createAccount(tradeDate, taxation);
+        Account account = createAccount(tradeDate, taxation);
 
         IntStream.range(1,10).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e, account.getAccountNum());
             deposit(OBDateUtils.addDays(tradeDate, e), e, account.getAccountNum());
         });
 
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        List<TradeEntity> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        InterestEntity interest1 = InterestEntity.createInterest(account);
-        InterestEntity interest2 = InterestEntity.createInterest(account);
-        InterestEntity interest3 = InterestEntity.createInterest(account);
+        List<Trade> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        List<Trade> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        List<Trade> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        Interest interest1 = Interest.createInterest(account);
+        Interest interest2 = Interest.createInterest(account);
+        Interest interest3 = Interest.createInterest(account);
 
         interest1.setTradeListForInterest(tradeList1);
         interest2.setTradeListForInterest(tradeList2);
@@ -164,9 +164,9 @@ public class DtoEntityTest {
         interest1.remainLastTradeOfDays();
         interest2.remainLastTradeOfDays();
         interest3.remainLastTradeOfDays();
-        List<TradeEntity> tradeEntityList1 = interest1.getTradeListForInterest();
-        List<TradeEntity> tradeEntityList2 = interest2.getTradeListForInterest();
-        List<TradeEntity> tradeEntityList3 = interest3.getTradeListForInterest();
+        List<Trade> tradeEntityList1 = interest1.getTradeListForInterest();
+        List<Trade> tradeEntityList2 = interest2.getTradeListForInterest();
+        List<Trade> tradeEntityList3 = interest3.getTradeListForInterest();
 
         //then
         assertEquals(6, tradeEntityList1.size());
@@ -187,19 +187,19 @@ public class DtoEntityTest {
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountEntity account = createAccount(tradeDate, taxation);
+        Account account = createAccount(tradeDate, taxation);
 
         IntStream.range(1,10).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e, account.getAccountNum());
             deposit(OBDateUtils.addDays(tradeDate, e), e, account.getAccountNum());
         });
 
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        List<TradeEntity> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        InterestEntity interest1 = InterestEntity.createInterest(account);
-        InterestEntity interest2 = InterestEntity.createInterest(account);
-        InterestEntity interest3 = InterestEntity.createInterest(account);
+        List<Trade> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        List<Trade> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        List<Trade> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        Interest interest1 = Interest.createInterest(account);
+        Interest interest2 = Interest.createInterest(account);
+        Interest interest3 = Interest.createInterest(account);
 
         //when
         interest1.setTradeListForInterest(tradeList1);
@@ -218,9 +218,9 @@ public class DtoEntityTest {
         interest2.makeInterestDetail();
         interest3.makeInterestDetail();
 
-        List<InterestDetailEntity> interestDetails1 = interest1.getInterestDetails();
-        List<InterestDetailEntity> interestDetails2 = interest2.getInterestDetails();
-        List<InterestDetailEntity> interestDetails3 = interest3.getInterestDetails();
+        List<InterestDetail> interestDetails1 = interest1.getInterestDetails();
+        List<InterestDetail> interestDetails2 = interest2.getInterestDetails();
+        List<InterestDetail> interestDetails3 = interest3.getInterestDetails();
 
         //then
         assertEquals(6, interestDetails1.size());
@@ -246,19 +246,19 @@ public class DtoEntityTest {
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountEntity account = createAccount(tradeDate, taxation);
+        Account account = createAccount(tradeDate, taxation);
 
         IntStream.range(1,10).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e*1000, account.getAccountNum());
             deposit(OBDateUtils.addDays(tradeDate, e), e*10000, account.getAccountNum());
         });
 
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        List<TradeEntity> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        List<TradeEntity> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        InterestEntity interest1 = InterestEntity.createInterest(account);
-        InterestEntity interest2 = InterestEntity.createInterest(account);
-        InterestEntity interest3 = InterestEntity.createInterest(account);
+        List<Trade> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        List<Trade> tradeList2 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        List<Trade> tradeList3 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        Interest interest1 = Interest.createInterest(account);
+        Interest interest2 = Interest.createInterest(account);
+        Interest interest3 = Interest.createInterest(account);
 
         //when
         interest1.setTradeListForInterest(tradeList1);
@@ -281,25 +281,25 @@ public class DtoEntityTest {
         interest2.calculate();
         interest3.calculate();
 
-        List<InterestDetailEntity> interestDetails1 = interest1.getInterestDetails();
-        List<InterestDetailEntity> interestDetails2 = interest2.getInterestDetails();
-        List<InterestDetailEntity> interestDetails3 = interest3.getInterestDetails();
+        List<InterestDetail> interestDetails1 = interest1.getInterestDetails();
+        List<InterestDetail> interestDetails2 = interest2.getInterestDetails();
+        List<InterestDetail> interestDetails3 = interest3.getInterestDetails();
 
         //then
         assertEquals(6, interestDetails1.size());
         assertEquals(1, interestDetails1.get(0).getDays());
         assertEquals(165000, interestDetails1.get(0).getBalance());
-        assertEquals(5.42, interestDetails1.get(0).getInterest(), 0.01);
+        assertEquals(5.42, interestDetails1.get(0).getInterestAmount(), 0.01);
         assertEquals(1, interestDetails1.get(1).getDays());
         assertEquals(1, interestDetails1.get(2).getDays());
         assertEquals(1, interestDetails2.get(0).getDays());
         assertEquals(165000, interestDetails2.get(0).getBalance());
-        assertEquals(5.42, interestDetails2.get(0).getInterest(), 0.01);
+        assertEquals(5.42, interestDetails2.get(0).getInterestAmount(), 0.01);
         assertEquals(12, interestDetails3.get(0).getDays());
         assertEquals("20191024", interestDetails3.get(0).getFromDate());
         assertEquals("20191104", interestDetails3.get(0).getToDate());
         assertEquals(495000, interestDetails3.get(0).getBalance());
-        assertEquals(195.28, interestDetails3.get(0).getInterest(), 0.01);
+        assertEquals(195.28, interestDetails3.get(0).getInterestAmount(), 0.01);
     }
 
 
@@ -310,15 +310,15 @@ public class DtoEntityTest {
         String tradeDate = "20191015";
         TaxationCode taxation = TaxationCode.REGULAR;
 
-        AccountEntity account = createAccount(tradeDate, taxation);
+        Account account = createAccount(tradeDate, taxation);
 
         IntStream.range(1,10).forEach(e -> {
             deposit(OBDateUtils.addDays(tradeDate, e), e*1000, account.getAccountNum());
             deposit(OBDateUtils.addDays(tradeDate, e), e*10000, account.getAccountNum());
         });
 
-        List<TradeEntity> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
-        InterestEntity interest1 = InterestEntity.createInterest(account);
+        List<Trade> tradeList1 = tradeRepository.findByAccountIdAndTradeDateGreaterThanOrderBySrnoDesc(account.getId(), OBDateUtils.MIN_DATE);
+        Interest interest1 = Interest.createInterest(account);
 
         //when
         interest1.setTradeListForInterest(tradeList1);
@@ -331,24 +331,24 @@ public class DtoEntityTest {
 
         interest1.calculate();
 
-        long interestSum1 = interest1.getInterest();
+        long interestSum1 = interest1.getInterestAmount();
 
-        TradeEntity resultTrade = interest1.payInterest(OBDateUtils.getToday());
+        Trade resultTrade = interest1.payInterest(OBDateUtils.getToday());
 
-        TradeEntity tradeEntity = account.getTradeEntities().get(account.getTradeEntities().size() - 1);
+        Trade trade = account.getTradeEntities().get(account.getTradeEntities().size() - 1);
 
         //then
-        assertEquals(tradeEntity, resultTrade);
+        assertEquals(trade, resultTrade);
         assertEquals(239, interestSum1);
         assertEquals("20191104", account.getLastIntsDt());
         assertEquals(OBDateUtils.getToday(), account.getLastTradeDate());
         assertEquals(495239, account.getBalance());
-        assertEquals(239, tradeEntity.getAmount());
-        assertEquals(495000, tradeEntity.getBlncBefore());
-        assertEquals(TradeCd.INTEREST, tradeEntity.getTradeCd());
+        assertEquals(239, trade.getAmount());
+        assertEquals(495000, trade.getBlncBefore());
+        assertEquals(TradeCd.INTEREST, trade.getTradeCd());
     }
 
-    private AccountEntity createAccount(String tradeDate, TaxationCode taxation) {
+    private Account createAccount(String tradeDate, TaxationCode taxation) {
         AccountDto.RequestOpen accountRequestOpen = AccountDto.RequestOpen.builder()
                 .productCode(PRODUCT_CODE)
                 .regDate(tradeDate)

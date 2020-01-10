@@ -2,8 +2,8 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.ErrorsResource;
-import com.ken207.openbank.domain.MemberEntity;
-import com.ken207.openbank.domain.ProductEntity;
+import com.ken207.openbank.domain.Member;
+import com.ken207.openbank.domain.Product;
 import com.ken207.openbank.dto.ProductDto;
 import com.ken207.openbank.dto.request.RequestValidator;
 import com.ken207.openbank.mapper.ProductMapper;
@@ -39,7 +39,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity createProduct(@RequestBody @Valid ProductDto.Create createProductDto, Errors errors,
-                                        @CurrentUser MemberEntity currentMember) {
+                                        @CurrentUser Member currentMember) {
 
 
         //Request Data Validation
@@ -50,7 +50,7 @@ public class ProductController {
 
         //Create Entity and save to database
         Long productId = productService.createProduct(createProductDto);
-        ProductEntity newProduct = productRepository.findById(productId).get();
+        Product newProduct = productRepository.findById(productId).get();
 
         //Set response data
         ProductDto.Create response = productMapper.entityToDto(newProduct);

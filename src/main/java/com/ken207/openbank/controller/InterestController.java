@@ -2,10 +2,10 @@ package com.ken207.openbank.controller;
 
 import com.ken207.openbank.annotation.CurrentUser;
 import com.ken207.openbank.common.OBDateUtils;
-import com.ken207.openbank.domain.AccountEntity;
-import com.ken207.openbank.domain.InterestEntity;
-import com.ken207.openbank.domain.MemberEntity;
-import com.ken207.openbank.domain.TradeEntity;
+import com.ken207.openbank.domain.Account;
+import com.ken207.openbank.domain.Interest;
+import com.ken207.openbank.domain.Member;
+import com.ken207.openbank.domain.Trade;
 import com.ken207.openbank.dto.InterestDto;
 import com.ken207.openbank.dto.TradeDto;
 import com.ken207.openbank.mapper.InterestMapper;
@@ -25,8 +25,6 @@ import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 @RestController
@@ -42,17 +40,17 @@ public class InterestController {
     private final TradeMapper tradeMapper = TradeMapper.INSTANCE;
 
     @GetMapping("/{accountNum}/log")
-    public ResponseEntity getInterestList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<InterestEntity> assembler,
-                                       @CurrentUser MemberEntity currentMember) {
+    public ResponseEntity getInterestList(@PathVariable String accountNum, Pageable pageable, PagedResourcesAssembler<Interest> assembler,
+                                       @CurrentUser Member currentMember) {
 
-        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+        Account account = this.accountRepository.findByAccountNum(accountNum);
 
         //Request Data Validation
         if ( account == null ) {
             return ResponseEntity.notFound().build();
         }
 
-        Page<InterestEntity> page = this.interestRepository.findByAccount(account, pageable);
+        Page<Interest> page = this.interestRepository.findByAccount(account, pageable);
 
         PagedResources<Resource> pagedResources = assembler.toResource(page,
                 e -> new Resource(
@@ -70,22 +68,22 @@ public class InterestController {
     @GetMapping("/{accountNum}/log/{detailId}")
     public ResponseEntity getInterestDetail(@PathVariable String accountNum,
                                             @PathVariable Long detailId,
-                                          @CurrentUser MemberEntity currentMember) {
+                                          @CurrentUser Member currentMember) {
 
-        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+        Account account = this.accountRepository.findByAccountNum(accountNum);
 
         //Request Data Validation
         if ( account == null ) {
             return ResponseEntity.notFound().build();
         }
 
-        InterestEntity interestEntity = this.interestRepository.findById(detailId).get();
+        Interest interest = this.interestRepository.findById(detailId).get();
 
-        InterestDto.ResponseDetail responseDetail = interestMapper.entityToDetail(interestEntity);
+        InterestDto.ResponseDetail responseDetail = interestMapper.entityToDetail(interest);
 
         //HATEOAS REST API
         Resource resource = new Resource(responseDetail,
-                controllerLinkBuilder.slash(accountNum).slash("log").slash(interestEntity.getId()).withSelfRel(),
+                controllerLinkBuilder.slash(accountNum).slash("log").slash(interest.getId()).withSelfRel(),
                 getLinkOfIndex(accountNum),
                 getLinkOfList(accountNum),
                 getLinkOfProfile("#resources-interest-detail")
@@ -96,16 +94,16 @@ public class InterestController {
 
     @PostMapping("/{accountNum}")
     public ResponseEntity payInterest(@PathVariable String accountNum,
-                                          @CurrentUser MemberEntity memberEntity) {
+                                          @CurrentUser Member member) {
 
-        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+        Account account = this.accountRepository.findByAccountNum(accountNum);
 
         //Request Data Validation
         if ( account == null ) {
             return ResponseEntity.notFound().build();
         }
 
-        TradeEntity resultTrade = accountService.payInterest(accountNum, OBDateUtils.getYesterday(), OBDateUtils.getToday());
+        Trade resultTrade = accountService.payInterest(accountNum, OBDateUtils.getYesterday(), OBDateUtils.getToday());
 
         //set response data
         TradeDto.Response response = tradeMapper.entityToResponse(resultTrade);
@@ -115,7 +113,7 @@ public class InterestController {
                 controllerLinkBuilder.slash(accountNum).withSelfRel(),
                 getLinkOfIndex(accountNum),
                 getLinkOfList(accountNum),
-                getLinkOfDetail(accountNum, resultTrade.getInterestEntity().getId()),
+                getLinkOfDetail(accountNum, resultTrade.getInterest().getId()),
                 getLinkOfProfile("#resources-interest-pay")
         );
 
@@ -124,9 +122,9 @@ public class InterestController {
 
     @GetMapping("/{accountNum}")
     public ResponseEntity indexInterest(@PathVariable String accountNum,
-                                      @CurrentUser MemberEntity memberEntity) {
+                                      @CurrentUser Member member) {
 
-        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+        Account account = this.accountRepository.findByAccountNum(accountNum);
 
         //Request Data Validation
         if ( account == null ) {
@@ -136,7 +134,7 @@ public class InterestController {
         //Calculate interest
         //이자계산은 지급이나 해지 당일은 해당되지 않기 때문에 한편(until -> -1)으로 계산함.
         String calculateInterestToDate = OBDateUtils.addDays(OBDateUtils.getToday(), -1);
-        InterestEntity interest = accountService.getInterest(accountNum, calculateInterestToDate);
+        Interest interest = accountService.getInterest(accountNum, calculateInterestToDate);
 
         //Set response data
         InterestDto.Response response = interestMapper.entityToDto(interest);
@@ -157,9 +155,9 @@ public class InterestController {
     @GetMapping("/{accountNum}/{until}")
     public ResponseEntity checkInterest(@PathVariable String accountNum,
                                         @PathVariable String until,
-                                        @CurrentUser MemberEntity memberEntity) {
+                                        @CurrentUser Member member) {
 
-        AccountEntity account = this.accountRepository.findByAccountNum(accountNum);
+        Account account = this.accountRepository.findByAccountNum(accountNum);
 
         //Request Data Validation
         if ( account == null ) {
@@ -169,7 +167,7 @@ public class InterestController {
         //Calculate interest
         //이자계산은 지급이나 해지 당일은 해당되지 않기 때문에 한편(until -> -1)으로 계산함.
         String calculateInterestToDate = OBDateUtils.addDays(until, -1);
-        InterestEntity interest = accountService.getInterest(accountNum, calculateInterestToDate);
+        Interest interest = accountService.getInterest(accountNum, calculateInterestToDate);
 
         //Set response data
         InterestDto.Response response = interestMapper.entityToDto(interest);

@@ -1,6 +1,6 @@
 package com.ken207.openbank.mapper;
 
-import com.ken207.openbank.domain.InterestEntity;
+import com.ken207.openbank.domain.Interest;
 import com.ken207.openbank.dto.InterestDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,14 +13,14 @@ public interface InterestMapper {
     @Mapping(source = "account.accountNum", target="accountNum")
     @Mapping(source = "account.lastIntsDt", target="lastIntsDt")
     @Mapping(source = "account.balance", target="balance")
-    @Mapping(source = "interest", target="expectedInterest")
+    @Mapping(source = "interestAmount", target="expectedInterest")
     @Mapping(source = "interestDetails", target="details")
-    InterestDto.Response entityToDto(InterestEntity interestEntity);
+    InterestDto.Response entityToDto(Interest interest);
 
     @Mapping(source = "account.accountNum", target="accountNum")
     @Mapping(source = "interestDetails", target="details")
-    InterestDto.ResponseDetail entityToDetail(InterestEntity interestEntity);
+    InterestDto.ResponseDetail entityToDetail(Interest interest);
 
     @Mapping(source = "account.accountNum", target="accountNum")
-    InterestDto.Dto entityToDtoForList(InterestEntity interestEntity);
+    InterestDto.Dto entityToDtoForList(Interest interest);
 }
