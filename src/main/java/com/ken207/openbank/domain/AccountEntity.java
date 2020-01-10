@@ -49,11 +49,11 @@ public class AccountEntity extends BaseEntity<AccountEntity> {
     private RateEntity basicRate;
 
     @Builder.Default
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<TradeEntity> tradeEntities = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "account")
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<InterestEntity> interestEntities = new ArrayList<>();
 
     @Transient

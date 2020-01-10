@@ -1,7 +1,5 @@
 package com.ken207.openbank.dto;
 
-
-import com.ken207.openbank.domain.AccountEntity;
 import com.ken207.openbank.domain.enums.AccountStatusCode;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.domain.enums.TaxationCode;
