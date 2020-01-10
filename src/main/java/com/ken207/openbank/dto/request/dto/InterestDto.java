@@ -2,6 +2,7 @@ package com.ken207.openbank.dto.request.dto;
 
 import com.ken207.openbank.domain.InterestDetailEntity;
 import com.ken207.openbank.domain.enums.PeriodType;
+import com.ken207.openbank.dto.InterestDetailDto;
 import lombok.*;
 
 public class InterestDto {
