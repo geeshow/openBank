@@ -19,18 +19,19 @@ public abstract class BaseEntity<T extends BaseEntity<?>> implements Comparable<
 
     @Id
     @GeneratedValue
-
     private Long id;
 
-//    @JsonProperty(access = READ_ONLY)
-//    @Column(name="CREATED_DATE",nullable=false,updatable=false)
-//    @CreatedDate
-//    private LocalDateTime createdDate;
-//
-//    @JsonProperty(access = READ_ONLY)
-//    @Column(name="UPDATED_DATE",nullable=false)
-//    @LastModifiedDate
-//    private LocalDateTime modifiedDate;
+    @JsonProperty(access = READ_ONLY)
+    @Column(name="CREATED_DATE",nullable=false,updatable=false)
+    @CreatedDate
+    @Builder.Default
+    private LocalDateTime createdDate = LocalDateTime.now();
+
+    @JsonProperty(access = READ_ONLY)
+    @Column(name="UPDATED_DATE",nullable=false)
+    @LastModifiedDate
+    @Builder.Default
+    private LocalDateTime modifiedDate = LocalDateTime.now();
 
     @Override
     public int compareTo(T o) {
