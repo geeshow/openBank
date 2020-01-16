@@ -2,11 +2,9 @@ spring:
   jackson:
     deserialization.fail-on-unknown-properties: true
   datasource:
-    url: jdbc:h2:tcp://localhost/~/openbank
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    data: classpath:data-h2.sql
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: pass
 
   jpa:
     open-in-view: false

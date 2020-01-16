@@ -6,6 +6,8 @@ import com.ken207.openbank.exception.BizRuntimeException;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.persistence.Table;
+import javax.persistence.Column;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,7 @@ public class Account extends BaseEntity<Account> {
 
     @Enumerated(EnumType.STRING)
     private ChnlDvcd regChnlDvcd;
+
 
     @ManyToOne
     @JoinColumn(name = "product_id")
