@@ -1,0 +1,39 @@
+spring:
+  jackson:
+    deserialization.fail-on-unknown-properties: true
+  datasource:
+    url: jdbc:h2:tcp://localhost/~/openbank
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        #      show_sql: true
+        format_sql: true
+        default_batch_fetch_size: 100
+        enable_lazy_load_no_trans: true
+
+logging:
+  level:
+    org:
+      hibernate.SQL: debug
+      hibernate.type: trace
+      springframework.security: debug
+
+    springframework:
+      data:
+        repository: DEBUG
+        
+app-security:
+  default-client-id: myApp
+  default-client-secret: secret
+  admin-username: admin@email.com
+  admin-password: admin
+  user-username: user@email.com
+  user-password: user
+
