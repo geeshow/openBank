@@ -447,6 +447,8 @@ public class InterestControllerTest extends BaseControllerTest {
                                 fieldWithPath("details[0].days").description("calculate period in day"),
                                 fieldWithPath("details[0].interestAmount").description("result of interest in this period."),
                                 fieldWithPath("details[0].tax").description("result of tax in this period."),
+                                fieldWithPath("details[0].createdDate").description("데이터 생성 날짜"),
+                                fieldWithPath("details[0].modifiedDate").description("데이터 수정 날짜."),
                                 fieldWithPath("_links.self.href").description("link to self."),
                                 fieldWithPath("_links.interest-index.href").description("이자계산 기본 링크 주소."),
                                 fieldWithPath("_links.interest-list.href").description("link to received interest list."),
