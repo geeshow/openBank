@@ -1,10 +1,7 @@
 package com.ken207.openbank.service;
 
 import com.ken207.openbank.common.OBDateUtils;
-import com.ken207.openbank.domain.Account;
-import com.ken207.openbank.domain.Interest;
-import com.ken207.openbank.domain.Product;
-import com.ken207.openbank.domain.Trade;
+import com.ken207.openbank.domain.*;
 import com.ken207.openbank.domain.enums.PeriodType;
 import com.ken207.openbank.domain.enums.SubjectCode;
 import com.ken207.openbank.dto.AccountDto;
@@ -69,6 +66,7 @@ public class AccountService {
 
         account.setReckonDt(requestDeposit.getTradeDate());
         Trade deposit = account.deposit(requestDeposit.getAmount());
+
         return tradeRepository.save(deposit);
     }
 
