@@ -22,4 +22,11 @@ public class CodeGeneratorService {
         return newAcnoCode.createAccountNumber(prefixCode);
     }
 
+    public String createTradeUniqueNumber() {
+        CodeGenerator code = CodeGenerator.builder()
+                .build();
+        CodeGenerator newCode = codeGeneratorRepository.save(code);
+
+        return newCode.createTradeUniqueNumber();
+    }
 }
