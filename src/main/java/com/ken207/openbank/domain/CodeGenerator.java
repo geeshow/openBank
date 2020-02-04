@@ -1,6 +1,7 @@
 package com.ken207.openbank.domain;
 
 import com.ken207.openbank.common.OBDateUtils;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import javax.persistence.Id;
 @Getter
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class CodeGenerator {
     @Id @GeneratedValue
     private Long id;

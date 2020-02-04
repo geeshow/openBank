@@ -9,7 +9,7 @@ public class OBDateUtilsTest {
 
     @Test
     @TestDescription("날짜 비교 테스트")
-    public void dateCompare() throws Exception {
+    public void dateCompare테스트() throws Exception {
         //given
         String date1 = "20191010";
         String date2 = "20201211";

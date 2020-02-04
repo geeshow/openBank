@@ -68,7 +68,7 @@ public class AccountService {
         Trade deposit = account.deposit(requestDeposit.getAmount());
 
         String tradeUniqueNumber = codeGeneratorService.createTradeUniqueNumber();
-        
+
         return tradeRepository.save(deposit);
     }
 

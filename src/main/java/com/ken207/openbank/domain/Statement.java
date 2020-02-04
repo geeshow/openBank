@@ -4,6 +4,7 @@ import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.InOutCd;
 import com.ken207.openbank.domain.enums.TradeCd;
 import com.ken207.openbank.domain.enums.YesNo;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Statement extends BaseEntity<Statement> {
 
     private LocalDateTime tradeDate;

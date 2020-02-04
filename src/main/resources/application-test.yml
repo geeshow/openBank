@@ -35,4 +35,6 @@ app-security:
   admin-password: admin
   user-username: user@email.com
   user-password: user
-
+server:
+  compression:
+    enabled: true
