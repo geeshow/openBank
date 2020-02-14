@@ -1,5 +1,6 @@
 package com.ken207.openbank.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.InOutCd;
 import com.ken207.openbank.domain.enums.TradeCd;
@@ -8,10 +9,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 @Builder
@@ -30,6 +31,10 @@ public class Statement extends BaseEntity<Statement> {
 
     @Enumerated(EnumType.STRING)
     private InOutCd inOutCd;
+
+    @ManyToOne(fetch = LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "trade_id")
+    private Trade trade;
 
     public static Statement makeStatement(String tradeId, Long tradeAmount, InOutCd inOutCd, String accountSubjectCode) {
         return Statement.builder()

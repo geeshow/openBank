@@ -6,6 +6,9 @@ import lombok.*;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.persistence.FetchType.LAZY;
 
 @Entity
@@ -33,6 +36,10 @@ public class Trade extends BaseEntity<Trade> {
     @OneToOne(mappedBy = "trade")
     @JoinColumn(name = "interest_id")
     private Interest interest;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL)
+    private List<Statement> statements = new ArrayList();
 
     @Override
     public int compareTo(Trade trade) {

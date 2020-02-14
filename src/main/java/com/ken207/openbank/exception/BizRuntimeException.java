@@ -2,6 +2,7 @@ package com.ken207.openbank.exception;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -28,5 +29,6 @@ public class BizRuntimeException extends RuntimeException {
 
     protected BizRuntimeException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+        MessageSource
     }
 }
