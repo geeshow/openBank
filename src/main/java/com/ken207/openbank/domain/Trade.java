@@ -1,6 +1,7 @@
 package com.ken207.openbank.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ken207.openbank.common.OBDateUtils;
 import com.ken207.openbank.domain.enums.TradeCd;
 import lombok.*;
 
@@ -40,6 +41,11 @@ public class Trade extends BaseEntity<Trade> {
     @Builder.Default
     @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL)
     private List<Statement> statements = new ArrayList();
+
+    public Statement createStatement() {
+
+        return Statement.makeStatement(this);
+    }
 
     @Override
     public int compareTo(Trade trade) {

@@ -186,6 +186,8 @@ public class Account extends BaseEntity<Account> {
                 .account(this)
                 .build();
 
+        trade.createStatement();
+
         this.lastTradeDate = this.getReckonDt();
         this.tradeEntities.add(trade);
         return trade;

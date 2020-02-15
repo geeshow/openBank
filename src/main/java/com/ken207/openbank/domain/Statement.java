@@ -21,7 +21,6 @@ import static javax.persistence.FetchType.LAZY;
 public class Statement extends BaseEntity<Statement> {
 
     private LocalDateTime tradeDate;
-    private String tradeId;
     private int subSrno;
     private String accountSubjectCode;
     private Long tradeAmount;
@@ -36,15 +35,15 @@ public class Statement extends BaseEntity<Statement> {
     @JoinColumn(name = "trade_id")
     private Trade trade;
 
-    public static Statement makeStatement(String tradeId, Long tradeAmount, InOutCd inOutCd, String accountSubjectCode) {
+    public static Statement makeStatement(Trade trade) {
         return Statement.builder()
+                .trade(trade)
                 .tradeDate(LocalDateTime.now())
-                .tradeId(tradeId)
                 .subSrno(0)
-                .accountSubjectCode(accountSubjectCode)
-                .tradeAmount(tradeAmount)
+                .accountSubjectCode("13")
+                .tradeAmount(trade.getAmount())
                 .isCancel(YesNo.N)
-                .inOutCd(inOutCd)
+                .inOutCd(InOutCd.PAID)
                 .build();
     }
 }
