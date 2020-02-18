@@ -36,6 +36,12 @@ public class Statement extends BaseEntity<Statement> {
     private Trade trade;
 
     public static Statement makeStatement(Trade trade) {
+        // OPEN, DEPOSIT, WITHDRAW, CLOSE, INTEREST
+        InOutCd ioCd = InOutCd.PAID;
+
+        if ( TradeCd.OPEN == trade.getTradeCd()) {
+            ioCd = InOutCd.RECEVIED;
+        }
         return Statement.builder()
                 .trade(trade)
                 .tradeDate(LocalDateTime.now())
@@ -43,7 +49,7 @@ public class Statement extends BaseEntity<Statement> {
                 .accountSubjectCode("13")
                 .tradeAmount(trade.getAmount())
                 .isCancel(YesNo.N)
-                .inOutCd(InOutCd.PAID)
+                .inOutCd(ioCd)
                 .build();
     }
 }

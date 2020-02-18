@@ -186,6 +186,7 @@ public class Account extends BaseEntity<Account> {
                 .account(this)
                 .build();
 
+        // 전표 생성
         trade.createStatement();
 
         this.lastTradeDate = this.getReckonDt();

@@ -47,6 +47,8 @@ public class Trade extends BaseEntity<Trade> {
         return Statement.makeStatement(this);
     }
 
+
+
     @Override
     public int compareTo(Trade trade) {
         return Long.compare(this.getSrno(), trade.getSrno());
