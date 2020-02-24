@@ -36,10 +36,11 @@ public class Statement extends BaseEntity<Statement> {
     private Trade trade;
 
     public static Statement makeStatement(Trade trade) {
-        // OPEN, DEPOSIT, WITHDRAW, CLOSE, INTEREST
         InOutCd ioCd = InOutCd.PAID;
 
-        if ( TradeCd.OPEN == trade.getTradeCd()) {
+        // in = OPEN, DEPOSIT, INTEREST
+        // out = WITHDRAW, CLOSE
+        if ( TradeCd.IO.in.contains(trade.getTradeCd()) ) {
             ioCd = InOutCd.RECEVIED;
         }
         return Statement.builder()
